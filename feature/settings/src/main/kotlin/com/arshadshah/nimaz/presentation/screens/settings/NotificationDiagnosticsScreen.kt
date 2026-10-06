@@ -50,6 +50,8 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuItem
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.viewmodel.settings.SettingsEvent
 import com.arshadshah.nimaz.presentation.viewmodel.settings.SettingsViewModel
+import com.arshadshah.nimaz.presentation.components.molecules.NimazScrollbarBox
+import androidx.compose.foundation.lazy.rememberLazyListState
 
 /**
  * Diagnostics: what the OS is currently allowing, and the three actions that fix it.
@@ -84,113 +86,119 @@ fun NotificationDiagnosticsScreen(
             )
         }
     ) { padding ->
-        LazyColumn(
+        val scrollbarState = rememberLazyListState()
+        NimazScrollbarBox(
+            state = scrollbarState,
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
-                .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .padding(padding),
         ) {
-            item { Spacer(Modifier.height(4.dp)) }
+            LazyColumn(
+                state = scrollbarState,
+                modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                item { Spacer(Modifier.height(4.dp)) }
 
-            item { NimazSectionHeader(title = stringResource(R.string.notif_diag_status_section)) }
-            item {
-                NimazMenuGroup {
-                    DiagnosticRow(
-                        title = stringResource(R.string.notif_diag_permission),
-                        ok = diagnostics.notificationsPermitted,
-                        okLabel = stringResource(R.string.notif_diag_granted),
-                        problemLabel = stringResource(R.string.notif_diag_blocked),
-                        icon = Icons.Default.NotificationsActive,
-                        onOpenSystemSettings = {
-                            context.startActivity(
-                                Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
-                                    .putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
-                            )
-                        }
-                    )
-                    NimazMenuDivider()
-                    DiagnosticRow(
-                        title = stringResource(R.string.notif_diag_exact_alarms),
-                        ok = diagnostics.exactAlarmsAllowed,
-                        okLabel = stringResource(R.string.notif_diag_allowed),
-                        problemLabel = stringResource(R.string.notif_diag_not_allowed),
-                        icon = Icons.Default.Schedule,
-                        onOpenSystemSettings = {
-                            context.startActivity(
-                                Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)
-                            )
-                        }
-                    )
-                    NimazMenuDivider()
-                    DiagnosticRow(
-                        title = stringResource(R.string.notif_diag_battery),
-                        ok = diagnostics.batteryUnrestricted,
-                        okLabel = stringResource(R.string.notif_diag_unrestricted),
-                        problemLabel = stringResource(R.string.notif_diag_restricted),
-                        icon = Icons.Default.BatteryAlert,
-                        onOpenSystemSettings = {
-                            context.startActivity(
-                                Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)
-                            )
-                        }
-                    )
-                }
-            }
-
-            item { NimazSectionHeader(title = stringResource(R.string.notif_diag_actions_section)) }
-            item {
-                val testSentMsg = stringResource(R.string.notification_settings_test_sent)
-                val testAllSentMsg = stringResource(R.string.notification_settings_test_all_sent)
-                NimazMenuGroup {
-                    Column(
-                        modifier = Modifier.padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        NimazButton(
-                            text = stringResource(R.string.notification_settings_test),
-                            onClick = {
-                                viewModel.onEvent(SettingsEvent.TestNotification)
-                                Toast.makeText(context, testSentMsg, Toast.LENGTH_SHORT).show()
-                            },
-                            variant = NimazButtonVariant.FILLED,
-                            leadingIcon = Icons.Default.Notifications,
-                            fullWidth = true
+                item { NimazSectionHeader(title = stringResource(R.string.notif_diag_status_section)) }
+                item {
+                    NimazMenuGroup {
+                        DiagnosticRow(
+                            title = stringResource(R.string.notif_diag_permission),
+                            ok = diagnostics.notificationsPermitted,
+                            okLabel = stringResource(R.string.notif_diag_granted),
+                            problemLabel = stringResource(R.string.notif_diag_blocked),
+                            icon = Icons.Default.NotificationsActive,
+                            onOpenSystemSettings = {
+                                context.startActivity(
+                                    Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+                                        .putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+                                )
+                            }
                         )
-                        NimazButton(
-                            text = stringResource(R.string.notification_settings_test_all),
-                            onClick = {
-                                viewModel.onEvent(SettingsEvent.TestAllNotifications)
-                                Toast.makeText(context, testAllSentMsg, Toast.LENGTH_SHORT).show()
-                            },
-                            variant = NimazButtonVariant.TONAL,
-                            leadingIcon = Icons.Default.Notifications,
-                            fullWidth = true
+                        NimazMenuDivider()
+                        DiagnosticRow(
+                            title = stringResource(R.string.notif_diag_exact_alarms),
+                            ok = diagnostics.exactAlarmsAllowed,
+                            okLabel = stringResource(R.string.notif_diag_allowed),
+                            problemLabel = stringResource(R.string.notif_diag_not_allowed),
+                            icon = Icons.Default.Schedule,
+                            onOpenSystemSettings = {
+                                context.startActivity(
+                                    Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)
+                                )
+                            }
                         )
-                        NimazButton(
-                            text = stringResource(R.string.notification_settings_reset),
-                            // Reset cancels and rebuilds every armed alarm, so it carries
-                            // the destructive colour and asks before doing it.
-                            onClick = { confirmingReset = true },
-                            variant = NimazButtonVariant.DESTRUCTIVE,
-                            leadingIcon = Icons.Default.Refresh,
-                            fullWidth = true
+                        NimazMenuDivider()
+                        DiagnosticRow(
+                            title = stringResource(R.string.notif_diag_battery),
+                            ok = diagnostics.batteryUnrestricted,
+                            okLabel = stringResource(R.string.notif_diag_unrestricted),
+                            problemLabel = stringResource(R.string.notif_diag_restricted),
+                            icon = Icons.Default.BatteryAlert,
+                            onOpenSystemSettings = {
+                                context.startActivity(
+                                    Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)
+                                )
+                            }
                         )
                     }
                 }
-            }
 
-            // Why battery optimisation matters, as a banner rather than loose grey text —
-            // it is guidance about the checks above, so it should read as one.
-            item {
-                NimazBanner(
-                    title = stringResource(R.string.notification_settings_battery_explanation),
-                    variant = NimazBannerVariant.INFO,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
+                item { NimazSectionHeader(title = stringResource(R.string.notif_diag_actions_section)) }
+                item {
+                    val testSentMsg = stringResource(R.string.notification_settings_test_sent)
+                    val testAllSentMsg = stringResource(R.string.notification_settings_test_all_sent)
+                    NimazMenuGroup {
+                        Column(
+                            modifier = Modifier.padding(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            NimazButton(
+                                text = stringResource(R.string.notification_settings_test),
+                                onClick = {
+                                    viewModel.onEvent(SettingsEvent.TestNotification)
+                                    Toast.makeText(context, testSentMsg, Toast.LENGTH_SHORT).show()
+                                },
+                                variant = NimazButtonVariant.FILLED,
+                                leadingIcon = Icons.Default.Notifications,
+                                fullWidth = true
+                            )
+                            NimazButton(
+                                text = stringResource(R.string.notification_settings_test_all),
+                                onClick = {
+                                    viewModel.onEvent(SettingsEvent.TestAllNotifications)
+                                    Toast.makeText(context, testAllSentMsg, Toast.LENGTH_SHORT).show()
+                                },
+                                variant = NimazButtonVariant.TONAL,
+                                leadingIcon = Icons.Default.Notifications,
+                                fullWidth = true
+                            )
+                            NimazButton(
+                                text = stringResource(R.string.notification_settings_reset),
+                                // Reset cancels and rebuilds every armed alarm, so it carries
+                                // the destructive colour and asks before doing it.
+                                onClick = { confirmingReset = true },
+                                variant = NimazButtonVariant.DESTRUCTIVE,
+                                leadingIcon = Icons.Default.Refresh,
+                                fullWidth = true
+                            )
+                        }
+                    }
+                }
 
-            item { Spacer(Modifier.height(16.dp)) }
+                // Why battery optimisation matters, as a banner rather than loose grey text —
+                // it is guidance about the checks above, so it should read as one.
+                item {
+                    NimazBanner(
+                        title = stringResource(R.string.notification_settings_battery_explanation),
+                        variant = NimazBannerVariant.INFO,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+
+                item { Spacer(Modifier.height(16.dp)) }
+            }
         }
     }
 

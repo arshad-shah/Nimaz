@@ -95,6 +95,7 @@ import com.arshadshah.nimaz.presentation.components.molecules.parseColor
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.theme.ThemeMode
 import com.arshadshah.nimaz.presentation.theme.asTranslationText
+import com.arshadshah.nimaz.presentation.components.molecules.NimazScrollbarBox
 
 /**
  * What the highlight editor sheet is currently working on: a brand-new highlight
@@ -204,162 +205,166 @@ fun TafseerPageContent(
 
         // ── Scrollable Content ──
         Box(modifier = Modifier.weight(1f)) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
-                    .padding(bottom = 16.dp)
+            val scrollbarScrollState = rememberScrollState()
+            NimazScrollbarBox(
+                state = scrollbarScrollState,
+                modifier = Modifier.fillMaxSize(),
             ) {
-                Spacer(modifier = Modifier.height(8.dp))
-
                 Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 12.dp)
+                    modifier = Modifier.fillMaxSize().verticalScroll(scrollbarScrollState)
+                        .padding(bottom = 16.dp)
                 ) {
-                    Column(modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp)) {
-                        // Arabic ayah text on first content page
-                        if (safeContentPage == 0) {
-                            ArabicText(
-                                text = ayah.textArabic,
-                                size = ArabicTextSize.LARGE,
-                                color = MaterialTheme.colorScheme.onSurface,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 12.dp)
-                            )
-                            QuranOrnamentalDivider()
+                    Spacer(modifier = Modifier.height(8.dp))
 
-                            val translation = ayah.translation
-                            if (!translation.isNullOrBlank()) {
-                                Text(
-                                    text = translation,
-                                    style = MaterialTheme.typography.bodyMedium
-                                        .asTranslationText(translationLanguage),
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 12.dp)
+                    ) {
+                        Column(modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp)) {
+                            // Arabic ayah text on first content page
+                            if (safeContentPage == 0) {
+                                ArabicText(
+                                    text = ayah.textArabic,
+                                    size = ArabicTextSize.LARGE,
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    textAlign = TextAlign.Center,
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(vertical = 8.dp)
+                                        .padding(vertical = 12.dp)
                                 )
                                 QuranOrnamentalDivider()
+
+                                val translation = ayah.translation
+                                if (!translation.isNullOrBlank()) {
+                                    Text(
+                                        text = translation,
+                                        style = MaterialTheme.typography.bodyMedium
+                                            .asTranslationText(translationLanguage),
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(vertical = 8.dp)
+                                    )
+                                    QuranOrnamentalDivider()
+                                }
+
+                                if (topics.isNotEmpty()) {
+                                    AyahTopicChips(
+                                        topics = topics,
+                                        onTopicClick = onTopicClick,
+                                        modifier = Modifier.padding(bottom = 8.dp)
+                                    )
+                                }
                             }
 
-                            if (topics.isNotEmpty()) {
-                                AyahTopicChips(
-                                    topics = topics,
-                                    onTopicClick = onTopicClick,
-                                    modifier = Modifier.padding(bottom = 8.dp)
+                            if (safeContentPage > 0 && topics.isNotEmpty()) {
+                                var expanded by remember { mutableStateOf(false) }
+                                NimazButton(
+                                    text = stringResource(R.string.quran_ayah_topics),
+                                    onClick = { expanded = !expanded },
+                                    variant = NimazButtonVariant.TEXT,
                                 )
+                                if (expanded) AyahTopicChips(topics, onTopicClick)
                             }
-                        }
 
-                        if (safeContentPage > 0 && topics.isNotEmpty()) {
-                            var expanded by remember { mutableStateOf(false) }
-                            NimazButton(
-                                text = stringResource(R.string.quran_ayah_topics),
-                                onClick = { expanded = !expanded },
-                                variant = NimazButtonVariant.TEXT,
-                            )
-                            if (expanded) AyahTopicChips(topics, onTopicClick)
-                        }
-
-                        // Tafseer text
-                        if (tafseerPages.isNotEmpty() && tafseer != null) {
-                            Spacer(modifier = Modifier.height(4.dp))
-                            // Says what it's showing: a block covers a contiguous ayah
-                            // range, not just the ayah currently on screen (#329).
-                            Text(
-                                text = if (tafseer.ayahStart == tafseer.ayahEnd) {
-                                    stringResource(
-                                        R.string.tafseer_commentary_range_single,
-                                        tafseer.surahNumber,
-                                        tafseer.ayahStart
-                                    )
-                                } else {
-                                    stringResource(
-                                        R.string.tafseer_commentary_range_span,
-                                        tafseer.surahNumber,
-                                        tafseer.ayahStart,
-                                        tafseer.ayahEnd
-                                    )
-                                },
-                                style = MaterialTheme.typography.labelMedium,
-                                fontWeight = FontWeight.SemiBold,
-                                color = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.padding(bottom = 6.dp)
-                            )
-                            AnimatedContent(
-                                targetState = safeContentPage,
-                                transitionSpec = {
-                                    if (targetState > initialState) {
-                                        androidx.compose.animation.slideInHorizontally { it } togetherWith
-                                                androidx.compose.animation.slideOutHorizontally { -it }
+                            // Tafseer text
+                            if (tafseerPages.isNotEmpty() && tafseer != null) {
+                                Spacer(modifier = Modifier.height(4.dp))
+                                // Says what it's showing: a block covers a contiguous ayah
+                                // range, not just the ayah currently on screen (#329).
+                                Text(
+                                    text = if (tafseer.ayahStart == tafseer.ayahEnd) {
+                                        stringResource(
+                                            R.string.tafseer_commentary_range_single,
+                                            tafseer.surahNumber,
+                                            tafseer.ayahStart
+                                        )
                                     } else {
-                                        androidx.compose.animation.slideInHorizontally { -it } togetherWith
-                                                androidx.compose.animation.slideOutHorizontally { it }
-                                    }
-                                },
-                                label = "tafseer_page"
-                            ) { pageIndex ->
-                                val animPage =
-                                    tafseerPages[pageIndex.coerceIn(0, tafseerPages.lastIndex)]
-                                val animHighlights = highlightsForPage(highlights, animPage)
-
-                                TafseerHighlightableText(
-                                    text = animPage.text,
-                                    highlights = animHighlights,
-                                    onSelectionChange = { start, end ->
-                                        if (start < 0) {
-                                            selStart = -1; selEnd = -1
-                                        } else {
-                                            selStart = start; selEnd = end
-                                        }
-                                    },
-                                    onHighlightTapped = { tapped ->
-                                        // Remapped to page-local; resolve the full highlight by id.
-                                        val full = highlights.find { it.id == tapped.id }
-                                        if (full != null) {
-                                            val s =
-                                                full.startOffset.coerceIn(0, tafseerFullText.length)
-                                            val e =
-                                                full.endOffset.coerceIn(s, tafseerFullText.length)
-                                            editorTarget = EditorTarget.Existing(
-                                                highlight = full,
-                                                snippet = tafseerFullText.substring(s, e)
-                                            )
-                                            clearSelection()
-                                        }
-                                    },
-                                    clearSelectionToken = clearSelectionToken,
-                                    textSize = textSize,
-                                    onHighlightSelection = { start, end ->
-                                        val s = start.coerceIn(0, animPage.text.length)
-                                        val e = end.coerceIn(s, animPage.text.length)
-                                        if (s < e) editorTarget = EditorTarget.New(
-                                            animPage.globalStartOffset + s,
-                                            animPage.globalStartOffset + e,
-                                            animPage.text.substring(s, e),
+                                        stringResource(
+                                            R.string.tafseer_commentary_range_span,
+                                            tafseer.surahNumber,
+                                            tafseer.ayahStart,
+                                            tafseer.ayahEnd
                                         )
                                     },
+                                    style = MaterialTheme.typography.labelMedium,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.padding(bottom = 6.dp)
+                                )
+                                AnimatedContent(
+                                    targetState = safeContentPage,
+                                    transitionSpec = {
+                                        if (targetState > initialState) {
+                                            androidx.compose.animation.slideInHorizontally { it } togetherWith
+                                                    androidx.compose.animation.slideOutHorizontally { -it }
+                                        } else {
+                                            androidx.compose.animation.slideInHorizontally { -it } togetherWith
+                                                    androidx.compose.animation.slideOutHorizontally { it }
+                                        }
+                                    },
+                                    label = "tafseer_page"
+                                ) { pageIndex ->
+                                    val animPage =
+                                        tafseerPages[pageIndex.coerceIn(0, tafseerPages.lastIndex)]
+                                    val animHighlights = highlightsForPage(highlights, animPage)
+
+                                    TafseerHighlightableText(
+                                        text = animPage.text,
+                                        highlights = animHighlights,
+                                        onSelectionChange = { start, end ->
+                                            if (start < 0) {
+                                                selStart = -1; selEnd = -1
+                                            } else {
+                                                selStart = start; selEnd = end
+                                            }
+                                        },
+                                        onHighlightTapped = { tapped ->
+                                            // Remapped to page-local; resolve the full highlight by id.
+                                            val full = highlights.find { it.id == tapped.id }
+                                            if (full != null) {
+                                                val s =
+                                                    full.startOffset.coerceIn(0, tafseerFullText.length)
+                                                val e =
+                                                    full.endOffset.coerceIn(s, tafseerFullText.length)
+                                                editorTarget = EditorTarget.Existing(
+                                                    highlight = full,
+                                                    snippet = tafseerFullText.substring(s, e)
+                                                )
+                                                clearSelection()
+                                            }
+                                        },
+                                        clearSelectionToken = clearSelectionToken,
+                                        textSize = textSize,
+                                        onHighlightSelection = { start, end ->
+                                            val s = start.coerceIn(0, animPage.text.length)
+                                            val e = end.coerceIn(s, animPage.text.length)
+                                            if (s < e) editorTarget = EditorTarget.New(
+                                                animPage.globalStartOffset + s,
+                                                animPage.globalStartOffset + e,
+                                                animPage.text.substring(s, e),
+                                            )
+                                        },
+                                    )
+                                }
+                            } else {
+                                TafseerEmptyState(
+                                    selectedSource = selectedSource,
+                                    availableSources = availableSources,
+                                    onSourceSwitch = onSourceSwitch
                                 )
                             }
-                        } else {
-                            TafseerEmptyState(
-                                selectedSource = selectedSource,
-                                availableSources = availableSources,
-                                onSourceSwitch = onSourceSwitch
-                            )
-                        }
 
-                        // Discoverability hint for the long-press gesture.
-                        if (tafseerPages.isNotEmpty() && highlights.isEmpty() && !hasSelection) {
-                            TafseerHighlightHint()
+                            // Discoverability hint for the long-press gesture.
+                            if (tafseerPages.isNotEmpty() && highlights.isEmpty() && !hasSelection) {
+                                TafseerHighlightHint()
+                            }
                         }
                     }
-                }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
             }
         }
 

@@ -20,6 +20,8 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazLoadingState
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.theme.NimazSpacing
 import com.arshadshah.nimaz.presentation.viewmodel.content.CatalogDetailState
+import com.arshadshah.nimaz.presentation.components.molecules.NimazScrollbarBox
+import androidx.compose.foundation.lazy.rememberLazyListState
 
 /**
  * One catalog item: a calligraphic header, a favourite button, and the prose sections that
@@ -67,28 +69,35 @@ fun <T : Any> CatalogDetailScreen(
         if (state.isLoading || entry == null) {
             NimazLoadingState(modifier = Modifier.padding(paddingValues))
         } else {
-            LazyColumn(
+            val scrollbarState = rememberLazyListState()
+            NimazScrollbarBox(
+                state = scrollbarState,
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues),
-                contentPadding = PaddingValues(
-                    horizontal = NimazSpacing.Large,
-                    vertical = NimazSpacing.Small
-                ),
-                verticalArrangement = Arrangement.spacedBy(NimazSpacing.Medium)
             ) {
-                item {
-                    NameDetailHeader(
-                        arabicName = header.arabicName(entry),
-                        accent = accent,
-                        number = header.number(entry),
-                        primaryLabel = header.primaryLabel(entry),
-                        secondaryLabel = header.secondaryLabel(entry),
-                    )
+                LazyColumn(
+                    state = scrollbarState,
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(
+                        horizontal = NimazSpacing.Large,
+                        vertical = NimazSpacing.Small
+                    ),
+                    verticalArrangement = Arrangement.spacedBy(NimazSpacing.Medium)
+                ) {
+                    item {
+                        NameDetailHeader(
+                            arabicName = header.arabicName(entry),
+                            accent = accent,
+                            number = header.number(entry),
+                            primaryLabel = header.primaryLabel(entry),
+                            secondaryLabel = header.secondaryLabel(entry),
+                        )
+                    }
+                    sections(entry)
+                    // Clearance for the favourite FAB, which floats over the last section.
+                    item { Spacer(modifier = Modifier.height(72.dp)) }
                 }
-                sections(entry)
-                // Clearance for the favourite FAB, which floats over the last section.
-                item { Spacer(modifier = Modifier.height(72.dp)) }
             }
         }
     }

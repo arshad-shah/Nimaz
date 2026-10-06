@@ -71,6 +71,8 @@ import com.arshadshah.nimaz.presentation.components.organisms.NimazSearchBar
 import com.arshadshah.nimaz.presentation.viewmodel.location.CurrentLocationState
 import com.arshadshah.nimaz.presentation.viewmodel.location.LocationEvent
 import com.arshadshah.nimaz.presentation.viewmodel.location.LocationViewModel
+import com.arshadshah.nimaz.presentation.components.molecules.NimazScrollbarBox
+import androidx.compose.foundation.lazy.rememberLazyListState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -123,107 +125,126 @@ fun LocationScreen(
             )
         }
     ) { paddingValues ->
-        LazyColumn(
+        val scrollbarState = rememberLazyListState()
+        NimazScrollbarBox(
+            state = scrollbarState,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues),
-            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            item {
-                NimazSearchBar(
-                    query = state.searchQuery,
-                    onQueryChange = { viewModel.onEvent(LocationEvent.UpdateSearchQuery(it)) },
-                    onSearch = {
-                        focusManager.clearFocus()
-                        viewModel.onEvent(LocationEvent.Search)
-                    },
-                    onClear = { viewModel.onEvent(LocationEvent.ClearSearch) },
-                    isLoading = state.isSearching,
-                    placeholder = stringResource(R.string.location_search_hint)
-                )
-            }
-
-            // Search Results
-            if (state.searchResults.isNotEmpty()) {
+            LazyColumn(
+                state = scrollbarState,
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
                 item {
-                    NimazSectionTitle(text = stringResource(R.string.location_search_results))
-                }
-                items(state.searchResults, key = { it.key }) { location ->
-                    LocationListItem(
-                        location = location,
-                        isSelected = isLocationSelected(state.currentLocation, location),
-                        onClick = { viewModel.onEvent(LocationEvent.SelectLocation(location)) }
+                    NimazSearchBar(
+                        query = state.searchQuery,
+                        onQueryChange = { viewModel.onEvent(LocationEvent.UpdateSearchQuery(it)) },
+                        onSearch = {
+                            focusManager.clearFocus()
+                            viewModel.onEvent(LocationEvent.Search)
+                        },
+                        onClear = { viewModel.onEvent(LocationEvent.ClearSearch) },
+                        isLoading = state.isSearching,
+                        placeholder = stringResource(R.string.location_search_hint)
                     )
                 }
-                item { Spacer(modifier = Modifier.height(4.dp)) }
-            }
 
-            // Current Location Card
-            item {
-                CurrentLocationCard(currentLocation = state.currentLocation)
-            }
-
-            // Use Current Location Button
-            item {
-                UseCurrentLocationButton(
-                    isLoading = state.isLoadingGps,
-                    onClick = {
-                        if (hasLocationPermission()) {
-                            viewModel.onEvent(LocationEvent.UseCurrentGpsLocation)
-                        } else {
-                            pendingLocationDetection = true
-                            locationPermissionLauncher.launch(
-                                arrayOf(
-                                    Manifest.permission.ACCESS_FINE_LOCATION,
-                                    Manifest.permission.ACCESS_COARSE_LOCATION
-                                )
-                            )
-                        }
+                // Search Results
+                if (state.searchResults.isNotEmpty()) {
+                    item {
+                        NimazSectionTitle(text = stringResource(R.string.location_search_results))
                     }
-                )
-            }
-
-            // Recent Locations
-            if (state.recentLocations.isNotEmpty()) {
-                item {
-                    NimazSectionTitle(text = stringResource(R.string.location_recent))
-                }
-                items(state.recentLocations, key = { it.key }) { location ->
-                    LocationListItem(
-                        location = location,
-                        isSelected = isLocationSelected(state.currentLocation, location),
-                        onClick = { viewModel.onEvent(LocationEvent.SelectLocation(location)) },
-                        showGlobeIcon = true
-                    )
-                }
-            }
-
-            // Browse by region (hidden while showing live search results)
-            if (state.searchResults.isEmpty()) {
-                item {
-                    NimazSectionTitle(text = stringResource(R.string.location_browse_by_region))
-                }
-                item {
-                    RegionFilterRow(
-                        selectedRegion = state.selectedRegion,
-                        onSelect = { viewModel.onEvent(LocationEvent.SelectRegion(it)) }
-                    )
+                    items(state.searchResults, key = { it.key }) { location ->
+                        LocationListItem(
+                            location = location,
+                            isSelected = isLocationSelected(state.currentLocation, location),
+                            onClick = { viewModel.onEvent(LocationEvent.SelectLocation(location)) }
+                        )
+                    }
+                    item { Spacer(modifier = Modifier.height(4.dp)) }
                 }
 
-                if (state.selectedRegion == null) {
-                    // "All" → grouped, with a region sub-header before each group
-                    groupCitiesByRegion(state.popularCities).forEach { (region, cities) ->
-                        item(key = "region-${region.name}") {
-                            Text(
-                                text = region.label,
-                                style = MaterialTheme.typography.labelMedium,
-                                fontWeight = FontWeight.SemiBold,
-                                color = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.padding(start = 6.dp, top = 8.dp, bottom = 2.dp)
-                            )
+                // Current Location Card
+                item {
+                    CurrentLocationCard(currentLocation = state.currentLocation)
+                }
+
+                // Use Current Location Button
+                item {
+                    UseCurrentLocationButton(
+                        isLoading = state.isLoadingGps,
+                        onClick = {
+                            if (hasLocationPermission()) {
+                                viewModel.onEvent(LocationEvent.UseCurrentGpsLocation)
+                            } else {
+                                pendingLocationDetection = true
+                                locationPermissionLauncher.launch(
+                                    arrayOf(
+                                        Manifest.permission.ACCESS_FINE_LOCATION,
+                                        Manifest.permission.ACCESS_COARSE_LOCATION
+                                    )
+                                )
+                            }
                         }
-                        items(cities, key = { "${it.name}-${it.country}" }) { location ->
+                    )
+                }
+
+                // Recent Locations
+                if (state.recentLocations.isNotEmpty()) {
+                    item {
+                        NimazSectionTitle(text = stringResource(R.string.location_recent))
+                    }
+                    items(state.recentLocations, key = { it.key }) { location ->
+                        LocationListItem(
+                            location = location,
+                            isSelected = isLocationSelected(state.currentLocation, location),
+                            onClick = { viewModel.onEvent(LocationEvent.SelectLocation(location)) },
+                            showGlobeIcon = true
+                        )
+                    }
+                }
+
+                // Browse by region (hidden while showing live search results)
+                if (state.searchResults.isEmpty()) {
+                    item {
+                        NimazSectionTitle(text = stringResource(R.string.location_browse_by_region))
+                    }
+                    item {
+                        RegionFilterRow(
+                            selectedRegion = state.selectedRegion,
+                            onSelect = { viewModel.onEvent(LocationEvent.SelectRegion(it)) }
+                        )
+                    }
+
+                    if (state.selectedRegion == null) {
+                        // "All" → grouped, with a region sub-header before each group
+                        groupCitiesByRegion(state.popularCities).forEach { (region, cities) ->
+                            item(key = "region-${region.name}") {
+                                Text(
+                                    text = region.label,
+                                    style = MaterialTheme.typography.labelMedium,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.padding(start = 6.dp, top = 8.dp, bottom = 2.dp)
+                                )
+                            }
+                            items(cities, key = { "${it.name}-${it.country}" }) { location ->
+                                LocationListItem(
+                                    location = location,
+                                    isSelected = isLocationSelected(state.currentLocation, location),
+                                    onClick = { viewModel.onEvent(LocationEvent.SelectLocation(location)) }
+                                )
+                            }
+                        }
+                    } else {
+                        // Single region → flat list
+                        items(
+                            citiesForRegion(state.popularCities, state.selectedRegion),
+                            key = { "${it.name}-${it.country}" }
+                        ) { location ->
                             LocationListItem(
                                 location = location,
                                 isSelected = isLocationSelected(state.currentLocation, location),
@@ -231,22 +252,10 @@ fun LocationScreen(
                             )
                         }
                     }
-                } else {
-                    // Single region → flat list
-                    items(
-                        citiesForRegion(state.popularCities, state.selectedRegion),
-                        key = { "${it.name}-${it.country}" }
-                    ) { location ->
-                        LocationListItem(
-                            location = location,
-                            isSelected = isLocationSelected(state.currentLocation, location),
-                            onClick = { viewModel.onEvent(LocationEvent.SelectLocation(location)) }
-                        )
-                    }
                 }
-            }
 
-            item { Spacer(modifier = Modifier.height(16.dp)) }
+                item { Spacer(modifier = Modifier.height(16.dp)) }
+            }
         }
     }
 }

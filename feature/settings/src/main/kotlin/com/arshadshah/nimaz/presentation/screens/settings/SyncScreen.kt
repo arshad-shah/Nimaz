@@ -72,6 +72,7 @@ import com.arshadshah.nimaz.presentation.viewmodel.settings.SyncEvent
 import com.arshadshah.nimaz.presentation.viewmodel.settings.SyncMode
 import com.arshadshah.nimaz.presentation.viewmodel.settings.SyncUiState
 import com.arshadshah.nimaz.presentation.viewmodel.settings.SyncViewModel
+import com.arshadshah.nimaz.presentation.components.molecules.NimazScrollbarBox
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -108,106 +109,108 @@ fun SyncScreen(
             )
         }
     ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(16.dp)
-                .verticalScroll(rememberScrollState()),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+        val scrollbarScrollState = rememberScrollState()
+        NimazScrollbarBox(
+            state = scrollbarScrollState,
+            modifier = Modifier.fillMaxSize().padding(paddingValues).padding(16.dp),
         ) {
-            // Role badge — shown whenever we have a mode selected and are not idle
-            if (state.mode != SyncMode.NONE && state.connectionState !is ConnectionState.Idle) {
-                RoleBadge(mode = state.mode)
-            }
-
-            when {
-                state.mode == SyncMode.NONE -> {
-                    ModeSelectionContent(
-                        onSendClick = {
-                            permissionLauncher.launch(nearbyPermissions.toTypedArray())
-                            viewModel.onEvent(SyncEvent.StartSend)
-                        },
-                        onReceiveClick = {
-                            permissionLauncher.launch(nearbyPermissions.toTypedArray())
-                            viewModel.onEvent(SyncEvent.StartReceive)
-                        }
-                    )
+            Column(
+                modifier = Modifier.fillMaxSize().verticalScroll(scrollbarScrollState),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                // Role badge — shown whenever we have a mode selected and are not idle
+                if (state.mode != SyncMode.NONE && state.connectionState !is ConnectionState.Idle) {
+                    RoleBadge(mode = state.mode)
                 }
 
-                state.connectionState is ConnectionState.Cancelled -> {
-                    val cancelled = state.connectionState as ConnectionState.Cancelled
-                    CancelledContent(
-                        reason = cancelled.reason,
-                        activityLog = state.activityLog,
-                        onTryAgain = { viewModel.onEvent(SyncEvent.Cancel) },
-                        onClose = {
-                            viewModel.onEvent(SyncEvent.Cancel)
-                            onNavigateBack()
-                        }
-                    )
-                }
+                when {
+                    state.mode == SyncMode.NONE -> {
+                        ModeSelectionContent(
+                            onSendClick = {
+                                permissionLauncher.launch(nearbyPermissions.toTypedArray())
+                                viewModel.onEvent(SyncEvent.StartSend)
+                            },
+                            onReceiveClick = {
+                                permissionLauncher.launch(nearbyPermissions.toTypedArray())
+                                viewModel.onEvent(SyncEvent.StartReceive)
+                            }
+                        )
+                    }
 
-                state.connectionState is ConnectionState.Connecting -> {
-                    val connecting = state.connectionState as ConnectionState.Connecting
-                    AuthTokenContent(
-                        endpointName = connecting.endpointName,
-                        authToken = connecting.authToken,
-                        mode = state.mode,
-                        onAccept = { viewModel.onEvent(SyncEvent.AcceptConnection(connecting.endpointId)) },
-                        onReject = { viewModel.onEvent(SyncEvent.RejectConnection(connecting.endpointId)) }
-                    )
-                }
-
-                state.connectionState is ConnectionState.WaitingForPartnerAccept -> {
-                    WaitingForPartnerContent(
-                        onCancel = { viewModel.onEvent(SyncEvent.Cancel) }
-                    )
-                }
-
-                state.error != null -> {
-                    val error = state.error!!
-                    NimazErrorState(
-                        title = stringResource(error.message),
-                        message = stringResource(R.string.sync_failed_body),
-                        kind = error.kind,
-                        details = error.details,
-                        primaryAction = NimazErrorDefaults.retry(
-                            onRetry = { viewModel.onEvent(SyncEvent.Cancel) },
-                            label = stringResource(R.string.try_again),
-                        ),
-                        secondaryAction = NimazErrorAction(
-                            label = stringResource(R.string.close),
-                            onClick = {
+                    state.connectionState is ConnectionState.Cancelled -> {
+                        val cancelled = state.connectionState as ConnectionState.Cancelled
+                        CancelledContent(
+                            reason = cancelled.reason,
+                            activityLog = state.activityLog,
+                            onTryAgain = { viewModel.onEvent(SyncEvent.Cancel) },
+                            onClose = {
                                 viewModel.onEvent(SyncEvent.Cancel)
                                 onNavigateBack()
-                            },
-                        ),
-                    )
-                    // The activity log stays: it is the transcript of what the two devices
-                    // managed before the failure, which is the one thing a reader can use
-                    // to work out whether to retry or start over.
-                    if (state.activityLog.isNotEmpty()) {
-                        ActivityLog(entries = state.activityLog)
+                            }
+                        )
                     }
-                }
 
-                state.connectionState is ConnectionState.Completed -> {
-                    CompletedContent(
-                        state = state,
-                        onDone = {
-                            viewModel.onEvent(SyncEvent.Cancel)
-                            onNavigateBack()
+                    state.connectionState is ConnectionState.Connecting -> {
+                        val connecting = state.connectionState as ConnectionState.Connecting
+                        AuthTokenContent(
+                            endpointName = connecting.endpointName,
+                            authToken = connecting.authToken,
+                            mode = state.mode,
+                            onAccept = { viewModel.onEvent(SyncEvent.AcceptConnection(connecting.endpointId)) },
+                            onReject = { viewModel.onEvent(SyncEvent.RejectConnection(connecting.endpointId)) }
+                        )
+                    }
+
+                    state.connectionState is ConnectionState.WaitingForPartnerAccept -> {
+                        WaitingForPartnerContent(
+                            onCancel = { viewModel.onEvent(SyncEvent.Cancel) }
+                        )
+                    }
+
+                    state.error != null -> {
+                        val error = state.error!!
+                        NimazErrorState(
+                            title = stringResource(error.message),
+                            message = stringResource(R.string.sync_failed_body),
+                            kind = error.kind,
+                            details = error.details,
+                            primaryAction = NimazErrorDefaults.retry(
+                                onRetry = { viewModel.onEvent(SyncEvent.Cancel) },
+                                label = stringResource(R.string.try_again),
+                            ),
+                            secondaryAction = NimazErrorAction(
+                                label = stringResource(R.string.close),
+                                onClick = {
+                                    viewModel.onEvent(SyncEvent.Cancel)
+                                    onNavigateBack()
+                                },
+                            ),
+                        )
+                        // The activity log stays: it is the transcript of what the two devices
+                        // managed before the failure, which is the one thing a reader can use
+                        // to work out whether to retry or start over.
+                        if (state.activityLog.isNotEmpty()) {
+                            ActivityLog(entries = state.activityLog)
                         }
-                    )
-                }
+                    }
 
-                else -> {
-                    ProgressContent(
-                        state = state,
-                        onCancel = { viewModel.onEvent(SyncEvent.Cancel) }
-                    )
+                    state.connectionState is ConnectionState.Completed -> {
+                        CompletedContent(
+                            state = state,
+                            onDone = {
+                                viewModel.onEvent(SyncEvent.Cancel)
+                                onNavigateBack()
+                            }
+                        )
+                    }
+
+                    else -> {
+                        ProgressContent(
+                            state = state,
+                            onCancel = { viewModel.onEvent(SyncEvent.Cancel) }
+                        )
+                    }
                 }
             }
         }

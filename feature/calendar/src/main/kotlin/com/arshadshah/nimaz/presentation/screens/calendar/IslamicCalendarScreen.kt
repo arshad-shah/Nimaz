@@ -55,6 +55,8 @@ import com.arshadshah.nimaz.presentation.viewmodel.calendar.CalendarUiState
 import com.arshadshah.nimaz.presentation.viewmodel.calendar.CalendarViewModel
 import com.arshadshah.nimaz.presentation.viewmodel.calendar.EventsUiState
 import java.time.YearMonth
+import com.arshadshah.nimaz.presentation.components.molecules.NimazScrollbarBox
+import androidx.compose.foundation.lazy.rememberLazyListState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -122,41 +124,48 @@ private fun CalendarCompactContent(
     viewModel: CalendarViewModel,
     modifier: Modifier = Modifier
 ) {
-    LazyColumn(
+    val scrollbarState = rememberLazyListState()
+    NimazScrollbarBox(
+        state = scrollbarState,
         modifier = modifier,
-        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        item {
-            CalendarSection(state = state, viewModel = viewModel)
-        }
-        if (eventsState.eventsForSelectedDate.isNotEmpty()) {
+        LazyColumn(
+            state = scrollbarState,
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
             item {
-                Text(
-                    text = stringResource(R.string.events),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onBackground
-                )
+                CalendarSection(state = state, viewModel = viewModel)
             }
-            items(eventsState.eventsForSelectedDate, key = { it.id }) { event ->
-                IslamicEventCard(event = event)
+            if (eventsState.eventsForSelectedDate.isNotEmpty()) {
+                item {
+                    Text(
+                        text = stringResource(R.string.events),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                }
+                items(eventsState.eventsForSelectedDate, key = { it.id }) { event ->
+                    IslamicEventCard(event = event)
+                }
             }
+            if (eventsState.upcomingEvents.isNotEmpty()) {
+                item {
+                    Text(
+                        text = stringResource(R.string.upcoming_events),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                }
+                items(eventsState.upcomingEvents.take(5), key = { it.id }) { event ->
+                    IslamicEventCard(event = event)
+                }
+            }
+            item { Spacer(modifier = Modifier.height(16.dp)) }
         }
-        if (eventsState.upcomingEvents.isNotEmpty()) {
-            item {
-                Text(
-                    text = stringResource(R.string.upcoming_events),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onBackground
-                )
-            }
-            items(eventsState.upcomingEvents.take(5), key = { it.id }) { event ->
-                IslamicEventCard(event = event)
-            }
-        }
-        item { Spacer(modifier = Modifier.height(16.dp)) }
     }
 }
 
@@ -181,48 +190,55 @@ private fun CalendarTabletContent(
         }
 
         // Right: Events
-        LazyColumn(
+        val scrollbarState = rememberLazyListState()
+        NimazScrollbarBox(
+            state = scrollbarState,
             modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            if (eventsState.eventsForSelectedDate.isNotEmpty()) {
-                item {
-                    Text(
-                        text = stringResource(R.string.events),
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onBackground
-                    )
+            LazyColumn(
+                state = scrollbarState,
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                if (eventsState.eventsForSelectedDate.isNotEmpty()) {
+                    item {
+                        Text(
+                            text = stringResource(R.string.events),
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
+                    }
+                    items(eventsState.eventsForSelectedDate, key = { it.id }) { event ->
+                        IslamicEventCard(event = event)
+                    }
                 }
-                items(eventsState.eventsForSelectedDate, key = { it.id }) { event ->
-                    IslamicEventCard(event = event)
+                if (eventsState.upcomingEvents.isNotEmpty()) {
+                    item {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = stringResource(R.string.upcoming_events),
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
+                    }
+                    items(eventsState.upcomingEvents.take(5), key = { it.id }) { event ->
+                        IslamicEventCard(event = event)
+                    }
                 }
+                if (eventsState.eventsForSelectedDate.isEmpty() && eventsState.upcomingEvents.isEmpty()) {
+                    item {
+                        Text(
+                            text = stringResource(R.string.events),
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
+                    }
+                }
+                item { Spacer(modifier = Modifier.height(16.dp)) }
             }
-            if (eventsState.upcomingEvents.isNotEmpty()) {
-                item {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = stringResource(R.string.upcoming_events),
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onBackground
-                    )
-                }
-                items(eventsState.upcomingEvents.take(5), key = { it.id }) { event ->
-                    IslamicEventCard(event = event)
-                }
-            }
-            if (eventsState.eventsForSelectedDate.isEmpty() && eventsState.upcomingEvents.isEmpty()) {
-                item {
-                    Text(
-                        text = stringResource(R.string.events),
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onBackground
-                    )
-                }
-            }
-            item { Spacer(modifier = Modifier.height(16.dp)) }
         }
     }
 }

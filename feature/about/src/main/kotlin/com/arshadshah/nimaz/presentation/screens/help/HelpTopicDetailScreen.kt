@@ -36,6 +36,8 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazLoadingState
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.viewmodel.help.HelpEvent
 import com.arshadshah.nimaz.presentation.viewmodel.help.HelpViewModel
+import com.arshadshah.nimaz.presentation.components.molecules.NimazScrollbarBox
+import androidx.compose.foundation.lazy.rememberLazyListState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -94,37 +96,44 @@ fun HelpTopicDetailScreen(
             }
 
             else -> {
-                LazyColumn(
+                val scrollbarState = rememberLazyListState()
+                NimazScrollbarBox(
+                    state = scrollbarState,
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(padding),
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(11.dp)
                 ) {
-                    item { HelpTopicHero(detail.topic) }
+                    LazyColumn(
+                        state = scrollbarState,
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(11.dp)
+                    ) {
+                        item { HelpTopicHero(detail.topic) }
 
-                    if (detail.questions.isNotEmpty()) {
-                        item { NimazSectionTitle(text = stringResource(R.string.help_common_questions)) }
-                        item {
-                            NimazCard(style = NimazCardStyle.OUTLINED) {
-                                detail.questions.forEachIndexed { index, q ->
-                                    HelpQuestionRow(question = q)
-                                    if (index != detail.questions.lastIndex) {
-                                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                        if (detail.questions.isNotEmpty()) {
+                            item { NimazSectionTitle(text = stringResource(R.string.help_common_questions)) }
+                            item {
+                                NimazCard(style = NimazCardStyle.OUTLINED) {
+                                    detail.questions.forEachIndexed { index, q ->
+                                        HelpQuestionRow(question = q)
+                                        if (index != detail.questions.lastIndex) {
+                                            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                                        }
                                     }
                                 }
                             }
                         }
-                    }
 
-                    if (detail.guides.isNotEmpty()) {
-                        item { NimazSectionTitle(text = stringResource(R.string.help_step_by_step)) }
-                        items(detail.guides, key = { it.id }) { guide ->
-                            HelpGuideRow(
-                                guide = guide,
-                                tint = helpColor(detail.topic.colorKey),
-                                onClick = { onOpenGuide(guide.id) }
-                            )
+                        if (detail.guides.isNotEmpty()) {
+                            item { NimazSectionTitle(text = stringResource(R.string.help_step_by_step)) }
+                            items(detail.guides, key = { it.id }) { guide ->
+                                HelpGuideRow(
+                                    guide = guide,
+                                    tint = helpColor(detail.topic.colorKey),
+                                    onClick = { onOpenGuide(guide.id) }
+                                )
+                            }
                         }
                     }
                 }

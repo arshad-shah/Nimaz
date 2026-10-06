@@ -55,6 +55,9 @@ import com.arshadshah.nimaz.presentation.theme.LightStatusBarIcons
 import com.arshadshah.nimaz.presentation.model.PrayerFigure
 import com.arshadshah.nimaz.presentation.viewmodel.learnpray.*
 import kotlinx.coroutines.launch
+import com.arshadshah.nimaz.presentation.components.molecules.NimazScrollbarBox
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 
 @Composable
 fun LearnToPrayScreen(
@@ -137,52 +140,57 @@ internal fun LearnToPrayContent(
     ) { padding ->
         // Keying also resets the scroll and disclosures on each movement, including repeats.
         key(state.page) {
-            Column(
-                Modifier.fillMaxSize().padding(bottom = padding.calculateBottomPadding())
-                    .verticalScroll(rememberScrollState()),
-                horizontalAlignment = Alignment.CenterHorizontally,
+            val scrollbarScrollState = rememberScrollState()
+            NimazScrollbarBox(
+                state = scrollbarScrollState,
+                modifier = Modifier.fillMaxSize().padding(bottom = padding.calculateBottomPadding()),
             ) {
-                PostureStage(
-                    artwork = when {
-                        step != null -> step.artworkFor(state.figure)
-                        state.complete -> PrayerLesson.steps.last().artworkFor(state.figure)
-                        else -> PrayerLesson.steps[1].artworkFor(state.figure)
-                    },
-                    state = state,
-                    onEvent = onEvent,
-                    onNavigateBack = onNavigateBack,
-                )
                 Column(
-                    Modifier.widthIn(max = 700.dp).fillMaxWidth().padding(horizontal = inset, vertical = gap),
-                    verticalArrangement = Arrangement.spacedBy(gap),
+                    Modifier.fillMaxSize().verticalScroll(scrollbarScrollState),
+                    horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    when {
-                        state.preparing -> {
-                            LessonHeading(stringResource(R.string.learn_pray_prepare))
-                            Text(stringResource(R.string.learn_pray_prepare_body), style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            LessonNotice(stringResource(R.string.learn_pray_review))
-                            Text(stringResource(R.string.learn_pray_guide_language), style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            ClothingNotes(state.figure)
-                            SourceNotes(
-                                listOf("https://quran.com/5/6", "https://quran.com/2/144",
-                                    "https://quran.com/4/103", "https://sunnah.com/bukhari:1117",
-                                    "https://sunnah.com/bukhari:631", "https://sunnah.com/bukhari:365",
-                                    "https://sunnah.com/abudawud:641", "https://sunnah.com/abudawud:640"),
-                                openSource,
-                                onOpenReference,
-                            )
-                        }
-                        state.complete -> {
-                            LessonHeading(stringResource(R.string.learn_pray_complete))
-                            Text(stringResource(R.string.learn_pray_complete_body), style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        }
-                        step != null -> {
-                            LessonHeading(stringResource(step.title))
-                            Text(stringResource(step.instructionFor(state.figure)), style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    PostureStage(
+                        artwork = when {
+                            step != null -> step.artworkFor(state.figure)
+                            state.complete -> PrayerLesson.steps.last().artworkFor(state.figure)
+                            else -> PrayerLesson.steps[1].artworkFor(state.figure)
+                        },
+                        state = state,
+                        onEvent = onEvent,
+                        onNavigateBack = onNavigateBack,
+                    )
+                    Column(
+                        Modifier.widthIn(max = 700.dp).fillMaxWidth().padding(horizontal = inset, vertical = gap),
+                        verticalArrangement = Arrangement.spacedBy(gap),
+                    ) {
+                        when {
+                            state.preparing -> {
+                                LessonHeading(stringResource(R.string.learn_pray_prepare))
+                                Text(stringResource(R.string.learn_pray_prepare_body), style = MaterialTheme.typography.bodyLarge,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                LessonNotice(stringResource(R.string.learn_pray_review))
+                                Text(stringResource(R.string.learn_pray_guide_language), style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                ClothingNotes(state.figure)
+                                SourceNotes(
+                                    listOf("https://quran.com/5/6", "https://quran.com/2/144",
+                                        "https://quran.com/4/103", "https://sunnah.com/bukhari:1117",
+                                        "https://sunnah.com/bukhari:631", "https://sunnah.com/bukhari:365",
+                                        "https://sunnah.com/abudawud:641", "https://sunnah.com/abudawud:640"),
+                                    openSource,
+                                    onOpenReference,
+                                )
+                            }
+                            state.complete -> {
+                                LessonHeading(stringResource(R.string.learn_pray_complete))
+                                Text(stringResource(R.string.learn_pray_complete_body), style = MaterialTheme.typography.bodyLarge,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
+                            step != null -> {
+                                LessonHeading(stringResource(step.title))
+                                Text(stringResource(step.instructionFor(state.figure)), style = MaterialTheme.typography.bodyLarge,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
                         }
                     }
                 }

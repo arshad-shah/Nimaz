@@ -31,6 +31,7 @@ import com.arshadshah.nimaz.presentation.components.organisms.NimazSearchBar
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.viewmodel.quran.SurahThematicEvent
 import com.arshadshah.nimaz.presentation.viewmodel.quran.SurahThematicViewModel
+import com.arshadshah.nimaz.presentation.components.molecules.NimazScrollbarBox
 
 /**
  * The surah's table of contents — the mushaf's own division of it into subjects.
@@ -137,17 +138,22 @@ fun SurahPassagesScreen(
                 return@Column
             }
 
-            LazyColumn(
+            NimazScrollbarBox(
                 state = listState,
                 modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(start = 16.dp, top = 4.dp, bottom = 32.dp),
             ) {
-                items(passages, key = { "passage-${it.ayahFrom}" }) { passage ->
-                    PassageRow(
-                        passage = passage,
-                        isCurrent = currentAyah != null && passage.contains(currentAyah),
-                        onClick = { onOpenAyah(surahNumber, passage.ayahFrom) },
-                    )
+                LazyColumn(
+                    state = listState,
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(start = 16.dp, top = 4.dp, bottom = 32.dp),
+                ) {
+                    items(passages, key = { "passage-${it.ayahFrom}" }) { passage ->
+                        PassageRow(
+                            passage = passage,
+                            isCurrent = currentAyah != null && passage.contains(currentAyah),
+                            onClick = { onOpenAyah(surahNumber, passage.ayahFrom) },
+                        )
+                    }
                 }
             }
         }

@@ -74,6 +74,8 @@ import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.viewmodel.about.LicensesEvent
 import com.arshadshah.nimaz.presentation.viewmodel.about.LicensesViewModel
 import kotlinx.coroutines.launch
+import com.arshadshah.nimaz.presentation.components.molecules.NimazScrollbarBox
+import androidx.compose.foundation.lazy.rememberLazyListState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -127,30 +129,37 @@ private fun LibraryDetailContent(
     library: OpenSourceLibrary,
     modifier: Modifier = Modifier
 ) {
-    LazyColumn(
+    val scrollbarState = rememberLazyListState()
+    NimazScrollbarBox(
+        state = scrollbarState,
         modifier = modifier.fillMaxSize(),
-        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        item(key = "header") { LibraryHeaderCard(library) }
+        LazyColumn(
+            state = scrollbarState,
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            item(key = "header") { LibraryHeaderCard(library) }
 
-        // The summary is a string resource, so whether there is one can only be asked inside a
-        // composable — the item is always emitted and renders nothing for an unknown family.
-        item(key = "plain") {
-            PlainTermsCard(library)
-        }
+            // The summary is a string resource, so whether there is one can only be asked inside a
+            // composable — the item is always emitted and renders nothing for an unknown family.
+            item(key = "plain") {
+                PlainTermsCard(library)
+            }
 
-        library.licenses.forEach { license ->
-            item(key = "licence-${license.name}") { LicenseTextCard(license) }
-        }
+            library.licenses.forEach { license ->
+                item(key = "licence-${license.name}") { LicenseTextCard(license) }
+            }
 
-        item(key = "note") {
-            NimazBanner(
-                title = stringResource(R.string.license_detail_governs_note),
-                variant = NimazBannerVariant.INFO,
-            )
+            item(key = "note") {
+                NimazBanner(
+                    title = stringResource(R.string.license_detail_governs_note),
+                    variant = NimazBannerVariant.INFO,
+                )
+            }
+            item(key = "tail") { Spacer(modifier = Modifier.height(16.dp)) }
         }
-        item(key = "tail") { Spacer(modifier = Modifier.height(16.dp)) }
     }
 }
 

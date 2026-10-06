@@ -32,6 +32,8 @@ import com.arshadshah.nimaz.presentation.viewmodel.content.AsmaUlHusnaViewModel
 import com.arshadshah.nimaz.presentation.viewmodel.content.AsmaUnNabiViewModel
 import com.arshadshah.nimaz.presentation.viewmodel.content.CatalogEvent
 import com.arshadshah.nimaz.presentation.viewmodel.content.ProphetViewModel
+import com.arshadshah.nimaz.presentation.components.molecules.NimazScrollbarBox
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 
 /**
  * Everything the user has starred, in one place.
@@ -80,94 +82,101 @@ fun FavouritesScreen(
             )
         },
     ) { paddingValues ->
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(FavouritesGridColumns),
+        val scrollbarState = rememberLazyGridState()
+        NimazScrollbarBox(
+            state = scrollbarState,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues),
-            contentPadding = PaddingValues(
-                horizontal = NimazSpacing.Large,
-                vertical = NimazSpacing.Small,
-            ),
-            verticalArrangement = Arrangement.spacedBy(NimazSpacing.Small),
         ) {
-            if (isEmpty) {
-                // Spans both columns. Without this it lays out as a grid *cell* — a half-width
-                // empty state hugging the left edge with dead space beside it, which reads as a
-                // missing card rather than as "you have not starred anything".
-                item(span = { GridItemSpan(maxLineSpan) }) {
-                    NimazEmptyState(
-                        title = stringResource(R.string.no_favorites_yet),
-                        message = stringResource(R.string.favourites_empty_message),
-                        icon = Icons.Filled.FavoriteBorder,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 48.dp),
+            LazyVerticalGrid(
+                state = scrollbarState,
+                columns = GridCells.Fixed(FavouritesGridColumns),
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(
+                    horizontal = NimazSpacing.Large,
+                    vertical = NimazSpacing.Small,
+                ),
+                verticalArrangement = Arrangement.spacedBy(NimazSpacing.Small),
+            ) {
+                if (isEmpty) {
+                    // Spans both columns. Without this it lays out as a grid *cell* — a half-width
+                    // empty state hugging the left edge with dead space beside it, which reads as a
+                    // missing card rather than as "you have not starred anything".
+                    item(span = { GridItemSpan(maxLineSpan) }) {
+                        NimazEmptyState(
+                            title = stringResource(R.string.no_favorites_yet),
+                            message = stringResource(R.string.favourites_empty_message),
+                            icon = Icons.Filled.FavoriteBorder,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 48.dp),
+                        )
+                    }
+                    return@LazyVerticalGrid
+                }
+
+                favouriteSection(
+                    title = allahTitle,
+                    items = allah.favorites,
+                    key = { "allah:${it.id}" },
+                ) { name ->
+                    val accent = NamesAccents.allah()
+                    NameMedallionCard(
+                        number = name.id,
+                        arabicName = name.nameArabic,
+                        primaryLabel = name.nameTransliteration,
+                        secondaryLabel = name.nameEnglish,
+                        isFavorite = name.isFavorite,
+                        accent = accent,
+                        onClick = { onNavigateToAsmaUlHusna(name.id) },
+                        onFavoriteClick = {
+                            asmaUlHusnaViewModel.onEvent(CatalogEvent.ToggleFavorite(name.id))
+                        },
                     )
                 }
-                return@LazyVerticalGrid
-            }
 
-            favouriteSection(
-                title = allahTitle,
-                items = allah.favorites,
-                key = { "allah:${it.id}" },
-            ) { name ->
-                val accent = NamesAccents.allah()
-                NameMedallionCard(
-                    number = name.id,
-                    arabicName = name.nameArabic,
-                    primaryLabel = name.nameTransliteration,
-                    secondaryLabel = name.nameEnglish,
-                    isFavorite = name.isFavorite,
-                    accent = accent,
-                    onClick = { onNavigateToAsmaUlHusna(name.id) },
-                    onFavoriteClick = {
-                        asmaUlHusnaViewModel.onEvent(CatalogEvent.ToggleFavorite(name.id))
-                    },
-                )
-            }
+                favouriteSection(
+                    title = prophetNameTitle,
+                    items = prophetNames.favorites,
+                    key = { "prophet-name:${it.id}" },
+                ) { name ->
+                    val accent = NamesAccents.prophetNames()
+                    NameMedallionCard(
+                        number = name.id,
+                        arabicName = name.nameArabic,
+                        primaryLabel = name.nameTransliteration,
+                        secondaryLabel = name.nameEnglish,
+                        isFavorite = name.isFavorite,
+                        accent = accent,
+                        onClick = { onNavigateToAsmaUnNabi(name.id) },
+                        onFavoriteClick = {
+                            asmaUnNabiViewModel.onEvent(CatalogEvent.ToggleFavorite(name.id))
+                        },
+                    )
+                }
 
-            favouriteSection(
-                title = prophetNameTitle,
-                items = prophetNames.favorites,
-                key = { "prophet-name:${it.id}" },
-            ) { name ->
-                val accent = NamesAccents.prophetNames()
-                NameMedallionCard(
-                    number = name.id,
-                    arabicName = name.nameArabic,
-                    primaryLabel = name.nameTransliteration,
-                    secondaryLabel = name.nameEnglish,
-                    isFavorite = name.isFavorite,
-                    accent = accent,
-                    onClick = { onNavigateToAsmaUnNabi(name.id) },
-                    onFavoriteClick = {
-                        asmaUnNabiViewModel.onEvent(CatalogEvent.ToggleFavorite(name.id))
-                    },
-                )
-            }
-
-            favouriteSection(
-                title = prophetsTitle,
-                items = prophets.favorites,
-                key = { "prophet:${it.id}" },
-            ) { prophet ->
-                val accent = NamesAccents.prophets()
-                NameMedallionCard(
-                    number = prophet.id,
-                    arabicName = prophet.nameArabic,
-                    primaryLabel = prophet.nameEnglish,
-                    secondaryLabel = prophet.nameTransliteration,
-                    isFavorite = prophet.isFavorite,
-                    accent = accent,
-                    onClick = { onNavigateToProphet(prophet.id) },
-                    onFavoriteClick = {
-                        prophetViewModel.onEvent(CatalogEvent.ToggleFavorite(prophet.id))
-                    },
-                    titleLabel = prophet.titleEnglish,
-                    eraChip = prophet.era,
-                )
+                favouriteSection(
+                    title = prophetsTitle,
+                    items = prophets.favorites,
+                    key = { "prophet:${it.id}" },
+                ) { prophet ->
+                    val accent = NamesAccents.prophets()
+                    NameMedallionCard(
+                        number = prophet.id,
+                        arabicName = prophet.nameArabic,
+                        primaryLabel = prophet.nameEnglish,
+                        secondaryLabel = prophet.nameTransliteration,
+                        isFavorite = prophet.isFavorite,
+                        accent = accent,
+                        onClick = { onNavigateToProphet(prophet.id) },
+                        onFavoriteClick = {
+                            prophetViewModel.onEvent(CatalogEvent.ToggleFavorite(prophet.id))
+                        },
+                        titleLabel = prophet.titleEnglish,
+                        eraChip = prophet.era,
+                    )
+                }
             }
         }
     }

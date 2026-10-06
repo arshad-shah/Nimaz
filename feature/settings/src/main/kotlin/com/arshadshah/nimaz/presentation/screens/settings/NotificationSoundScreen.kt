@@ -50,6 +50,8 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazSettingsItem
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.viewmodel.settings.SettingsEvent
 import com.arshadshah.nimaz.presentation.viewmodel.settings.SettingsViewModel
+import com.arshadshah.nimaz.presentation.components.molecules.NimazScrollbarBox
+import androidx.compose.foundation.lazy.rememberLazyListState
 
 /**
  * Sound & delivery subscreen (#301): the global adhan toggle, muezzin (voice) selection with
@@ -89,86 +91,91 @@ fun NotificationSoundScreen(
             )
         }
     ) { padding ->
-        LazyColumn(
+        val scrollbarState = rememberLazyListState()
+        NimazScrollbarBox(
+            state = scrollbarState,
             modifier = Modifier
                 .fillMaxSize()
-                .testTag(com.arshadshah.nimaz.core.navigation.ScreenTags.NotificationsList)
-                .padding(padding)
-                .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .padding(padding),
         ) {
-            item { Spacer(Modifier.height(4.dp)) }
+            LazyColumn(
+                state = scrollbarState,
+                modifier = Modifier.fillMaxSize().testTag(com.arshadshah.nimaz.core.navigation.ScreenTags.NotificationsList).padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                item { Spacer(Modifier.height(4.dp)) }
 
-            item {
-                NimazSectionHeader(title = stringResource(R.string.notification_settings_adhan_section))
-            }
-            item {
-                NimazMenuGroup {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = stringResource(R.string.notification_settings_enable_adhan),
-                                style = MaterialTheme.typography.bodyLarge,
-                                fontWeight = FontWeight.Medium,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                            Text(
-                                text = stringResource(R.string.notification_settings_enable_adhan_subtitle),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                item {
+                    NimazSectionHeader(title = stringResource(R.string.notification_settings_adhan_section))
+                }
+                item {
+                    NimazMenuGroup {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = stringResource(R.string.notification_settings_enable_adhan),
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    fontWeight = FontWeight.Medium,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                                Text(
+                                    text = stringResource(R.string.notification_settings_enable_adhan_subtitle),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                            NimazSwitch(
+                                checked = notificationState.adhanEnabled,
+                                onCheckedChange = {
+                                    viewModel.onEvent(SettingsEvent.SetAdhanEnabled(!notificationState.adhanEnabled))
+                                }
                             )
                         }
-                        NimazSwitch(
-                            checked = notificationState.adhanEnabled,
+                    }
+                }
+
+                if (notificationState.adhanEnabled) {
+                    item {
+                        NimazMenuGroup {
+                            NimazSettingsItem(
+                                title = stringResource(R.string.notif_sound_voice),
+                                subtitle = AdhanSound.fromName(selectedAdhanName).origin,
+                                value = AdhanSound.fromName(selectedAdhanName).displayName,
+                                onClick = { voicePickerOpen = true },
+                                showArrow = true
+                            )
+                        }
+                    }
+                }
+
+                item {
+                    NimazMenuGroup {
+                        NimazSettingsItem(
+                            title = stringResource(R.string.notification_settings_vibration),
+                            subtitle = stringResource(R.string.notification_settings_vibration_subtitle),
+                            checked = notificationState.vibrationEnabled,
                             onCheckedChange = {
-                                viewModel.onEvent(SettingsEvent.SetAdhanEnabled(!notificationState.adhanEnabled))
+                                viewModel.onEvent(SettingsEvent.SetVibrationEnabled(!notificationState.vibrationEnabled))
+                            }
+                        )
+                        NimazMenuDivider(inset = false)
+                        NimazSettingsItem(
+                            title = stringResource(R.string.notification_settings_dnd),
+                            subtitle = stringResource(R.string.notification_settings_dnd_subtitle),
+                            checked = notificationState.respectDnd,
+                            onCheckedChange = {
+                                viewModel.onEvent(SettingsEvent.SetRespectDnd(!notificationState.respectDnd))
                             }
                         )
                     }
                 }
+                item { Spacer(Modifier.height(16.dp)) }
             }
-
-            if (notificationState.adhanEnabled) {
-                item {
-                    NimazMenuGroup {
-                        NimazSettingsItem(
-                            title = stringResource(R.string.notif_sound_voice),
-                            subtitle = AdhanSound.fromName(selectedAdhanName).origin,
-                            value = AdhanSound.fromName(selectedAdhanName).displayName,
-                            onClick = { voicePickerOpen = true },
-                            showArrow = true
-                        )
-                    }
-                }
-            }
-
-            item {
-                NimazMenuGroup {
-                    NimazSettingsItem(
-                        title = stringResource(R.string.notification_settings_vibration),
-                        subtitle = stringResource(R.string.notification_settings_vibration_subtitle),
-                        checked = notificationState.vibrationEnabled,
-                        onCheckedChange = {
-                            viewModel.onEvent(SettingsEvent.SetVibrationEnabled(!notificationState.vibrationEnabled))
-                        }
-                    )
-                    NimazMenuDivider(inset = false)
-                    NimazSettingsItem(
-                        title = stringResource(R.string.notification_settings_dnd),
-                        subtitle = stringResource(R.string.notification_settings_dnd_subtitle),
-                        checked = notificationState.respectDnd,
-                        onCheckedChange = {
-                            viewModel.onEvent(SettingsEvent.SetRespectDnd(!notificationState.respectDnd))
-                        }
-                    )
-                }
-            }
-            item { Spacer(Modifier.height(16.dp)) }
         }
     }
 

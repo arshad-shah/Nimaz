@@ -52,6 +52,8 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazSettingsItem
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.viewmodel.settings.SearchSettingsEvent
 import com.arshadshah.nimaz.presentation.viewmodel.settings.SearchSettingsViewModel
+import com.arshadshah.nimaz.presentation.components.molecules.NimazScrollbarBox
+import androidx.compose.foundation.lazy.rememberLazyListState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -75,143 +77,149 @@ fun SearchSettingsScreen(
             )
         },
     ) { paddingValues ->
-        LazyColumn(
+        val scrollbarState = rememberLazyListState()
+        NimazScrollbarBox(
+            state = scrollbarState,
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
-                .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+                .padding(paddingValues),
         ) {
-            // ── Local search ──────────────────────────────────────────────
-            // First, and above the AI section, because this is the search everyone has:
-            // "Ask with Proof" is off by default and stays off for most installs.
-            item { NimazSectionHeader(title = stringResource(R.string.search_results_section)) }
-            item {
-                NimazMenuGroup {
-                    NimazNumberStepper(
-                        value = state.search.resultsPerSource,
-                        onValueChange = {
-                            viewModel.onEvent(SearchSettingsEvent.SetResultsPerSource(it))
-                        },
-                        variant = NimazNumberStepperVariant.INLINE,
-                        label = stringResource(R.string.search_results_per_source),
-                        minValue = SearchPreferences.MIN_RESULTS_PER_SOURCE,
-                        maxValue = SearchPreferences.MAX_RESULTS_PER_SOURCE,
-                        step = 10,
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                    )
-                    Text(
-                        text = stringResource(
-                            R.string.search_results_per_source_subtitle,
-                            state.search.resultsPerSource * state.search.sources.size,
-                        ),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier
-                            .padding(horizontal = 16.dp)
-                            .padding(bottom = 12.dp),
-                    )
-                    NimazMenuDivider(inset = false)
-                    NimazSettingsItem(
-                        title = stringResource(R.string.search_strictness),
-                        subtitle = stringResource(strictnessDescription(state.search.strictness)),
-                        value = stringResource(strictnessLabel(state.search.strictness)),
-                        onClick = { showStrictnessPicker = true },
-                        showArrow = true,
-                    )
-                    NimazMenuDivider(inset = false)
-                    NimazSettingsItem(
-                        title = stringResource(R.string.search_default_scope),
-                        subtitle = stringResource(R.string.search_default_scope_subtitle),
-                        value = state.search.defaultScope
-                            ?.let { stringResource(sourceLabel(it)) }
-                            ?: stringResource(R.string.search_scope_everything),
-                        onClick = { showScopePicker = true },
-                        showArrow = true,
-                    )
-                }
-            }
-
-            // ── Where to search ───────────────────────────────────────────
-            item { NimazSectionHeader(title = stringResource(R.string.search_sources_section)) }
-            item {
-                NimazMenuGroup {
-                    LibrarySource.entries.forEachIndexed { index, source ->
-                        if (index > 0) {
-                            NimazMenuDivider(inset = false)
-                        }
-                        val isOn = source in state.search.sources
-                        // The last source left on cannot be switched off: an empty set is a
-                        // search that returns nothing for every query, and the sanitiser would
-                        // read it straight back as "everything" — a switch that flips itself.
-                        val isLastOn = isOn && state.search.sources.size == 1
-                        NimazSettingsItem(
-                            title = stringResource(sourceLabel(source)),
-                            subtitle = if (isLastOn) {
-                                stringResource(R.string.search_source_last_one)
-                            } else {
-                                stringResource(sourceDescription(source))
+            LazyColumn(
+                state = scrollbarState,
+                modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                // ── Local search ──────────────────────────────────────────────
+                // First, and above the AI section, because this is the search everyone has:
+                // "Ask with Proof" is off by default and stays off for most installs.
+                item { NimazSectionHeader(title = stringResource(R.string.search_results_section)) }
+                item {
+                    NimazMenuGroup {
+                        NimazNumberStepper(
+                            value = state.search.resultsPerSource,
+                            onValueChange = {
+                                viewModel.onEvent(SearchSettingsEvent.SetResultsPerSource(it))
                             },
-                            checked = isOn,
-                            enabled = !isLastOn,
+                            variant = NimazNumberStepperVariant.INLINE,
+                            label = stringResource(R.string.search_results_per_source),
+                            minValue = SearchPreferences.MIN_RESULTS_PER_SOURCE,
+                            maxValue = SearchPreferences.MAX_RESULTS_PER_SOURCE,
+                            step = 10,
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                        )
+                        Text(
+                            text = stringResource(
+                                R.string.search_results_per_source_subtitle,
+                                state.search.resultsPerSource * state.search.sources.size,
+                            ),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier
+                                .padding(horizontal = 16.dp)
+                                .padding(bottom = 12.dp),
+                        )
+                        NimazMenuDivider(inset = false)
+                        NimazSettingsItem(
+                            title = stringResource(R.string.search_strictness),
+                            subtitle = stringResource(strictnessDescription(state.search.strictness)),
+                            value = stringResource(strictnessLabel(state.search.strictness)),
+                            onClick = { showStrictnessPicker = true },
+                            showArrow = true,
+                        )
+                        NimazMenuDivider(inset = false)
+                        NimazSettingsItem(
+                            title = stringResource(R.string.search_default_scope),
+                            subtitle = stringResource(R.string.search_default_scope_subtitle),
+                            value = state.search.defaultScope
+                                ?.let { stringResource(sourceLabel(it)) }
+                                ?: stringResource(R.string.search_scope_everything),
+                            onClick = { showScopePicker = true },
+                            showArrow = true,
+                        )
+                    }
+                }
+
+                // ── Where to search ───────────────────────────────────────────
+                item { NimazSectionHeader(title = stringResource(R.string.search_sources_section)) }
+                item {
+                    NimazMenuGroup {
+                        LibrarySource.entries.forEachIndexed { index, source ->
+                            if (index > 0) {
+                                NimazMenuDivider(inset = false)
+                            }
+                            val isOn = source in state.search.sources
+                            // The last source left on cannot be switched off: an empty set is a
+                            // search that returns nothing for every query, and the sanitiser would
+                            // read it straight back as "everything" — a switch that flips itself.
+                            val isLastOn = isOn && state.search.sources.size == 1
+                            NimazSettingsItem(
+                                title = stringResource(sourceLabel(source)),
+                                subtitle = if (isLastOn) {
+                                    stringResource(R.string.search_source_last_one)
+                                } else {
+                                    stringResource(sourceDescription(source))
+                                },
+                                checked = isOn,
+                                enabled = !isLastOn,
+                                onCheckedChange = {
+                                    viewModel.onEvent(SearchSettingsEvent.ToggleSource(source))
+                                },
+                            )
+                        }
+                    }
+                }
+
+                // ── AI answers ────────────────────────────────────────────────
+                item { NimazSectionHeader(title = stringResource(R.string.ai_answers)) }
+                item {
+                    NimazMenuGroup {
+                        NimazSettingsItem(
+                            title = stringResource(R.string.ai_answers_enable),
+                            subtitle = stringResource(R.string.ai_answers_enable_subtitle),
+                            checked = state.aiEnabled,
                             onCheckedChange = {
-                                viewModel.onEvent(SearchSettingsEvent.ToggleSource(source))
+                                viewModel.onEvent(SearchSettingsEvent.ToggleAiRequested)
                             },
                         )
                     }
                 }
-            }
 
-            // ── AI answers ────────────────────────────────────────────────
-            item { NimazSectionHeader(title = stringResource(R.string.ai_answers)) }
-            item {
-                NimazMenuGroup {
-                    NimazSettingsItem(
-                        title = stringResource(R.string.ai_answers_enable),
-                        subtitle = stringResource(R.string.ai_answers_enable_subtitle),
-                        checked = state.aiEnabled,
-                        onCheckedChange = {
-                            viewModel.onEvent(SearchSettingsEvent.ToggleAiRequested)
-                        },
-                    )
+                // ── Privacy ───────────────────────────────────────────────────
+                item { NimazSectionHeader(title = stringResource(R.string.ai_privacy)) }
+                item {
+                    NimazAccordion(title = stringResource(R.string.ai_what_gets_shared)) {
+                        Text(
+                            text = stringResource(R.string.ai_disclosure_full),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                        )
+                    }
                 }
-            }
-
-            // ── Privacy ───────────────────────────────────────────────────
-            item { NimazSectionHeader(title = stringResource(R.string.ai_privacy)) }
-            item {
-                NimazAccordion(title = stringResource(R.string.ai_what_gets_shared)) {
-                    Text(
-                        text = stringResource(R.string.ai_disclosure_full),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                    )
+                item {
+                    NimazMenuGroup {
+                        NimazSettingsItem(
+                            title = stringResource(R.string.ai_history),
+                            subtitle = stringResource(R.string.ai_history_subtitle),
+                            checked = state.historyEnabled,
+                            onCheckedChange = {
+                                viewModel.onEvent(SearchSettingsEvent.SetHistoryEnabled(it))
+                            },
+                        )
+                        NimazMenuDivider(inset = false)
+                        // An in-place destructive action, not navigation — no
+                        // trailing arrow; disabled while there is nothing to clear.
+                        NimazMenuItem(
+                            title = stringResource(R.string.ai_clear_history),
+                            subtitle = stringResource(R.string.ai_clear_history_subtitle),
+                            trailingIcon = null,
+                            enabled = state.savedQuestions.isNotEmpty(),
+                            onClick = { showClearHistoryDialog = true },
+                        )
+                    }
                 }
+                item { Spacer(modifier = Modifier.height(16.dp)) }
             }
-            item {
-                NimazMenuGroup {
-                    NimazSettingsItem(
-                        title = stringResource(R.string.ai_history),
-                        subtitle = stringResource(R.string.ai_history_subtitle),
-                        checked = state.historyEnabled,
-                        onCheckedChange = {
-                            viewModel.onEvent(SearchSettingsEvent.SetHistoryEnabled(it))
-                        },
-                    )
-                    NimazMenuDivider(inset = false)
-                    // An in-place destructive action, not navigation — no
-                    // trailing arrow; disabled while there is nothing to clear.
-                    NimazMenuItem(
-                        title = stringResource(R.string.ai_clear_history),
-                        subtitle = stringResource(R.string.ai_clear_history_subtitle),
-                        trailingIcon = null,
-                        enabled = state.savedQuestions.isNotEmpty(),
-                        onClick = { showClearHistoryDialog = true },
-                    )
-                }
-            }
-            item { Spacer(modifier = Modifier.height(16.dp)) }
         }
     }
 

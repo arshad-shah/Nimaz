@@ -53,6 +53,8 @@ import com.arshadshah.nimaz.presentation.viewmodel.tracker.PrayerTrackerViewMode
 import com.arshadshah.nimaz.presentation.viewmodel.tracker.StatsPeriod
 import java.time.Instant
 import java.time.ZoneId
+import com.arshadshah.nimaz.presentation.components.molecules.NimazScrollbarBox
+import androidx.compose.foundation.lazy.rememberLazyListState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -73,111 +75,118 @@ fun PrayerStatsScreen(
             )
         }
     ) { paddingValues ->
-        LazyColumn(
+        val scrollbarState = rememberLazyListState()
+        NimazScrollbarBox(
+            state = scrollbarState,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues),
-            contentPadding = PaddingValues(20.dp),
-            verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-            // Period Selector
-            item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    StatsPeriod.entries.forEach { period ->
-                        FilterChip(
-                            selected = state.period == period,
-                            onClick = { viewModel.onEvent(PrayerTrackerEvent.SetStatsPeriod(period)) },
-                            label = {
-                                Text(
-                                    text = when (period) {
-                                        StatsPeriod.WEEK -> stringResource(R.string.stats_period_week)
-                                        StatsPeriod.MONTH -> stringResource(R.string.stats_period_month)
-                                        StatsPeriod.YEAR -> stringResource(R.string.stats_period_year)
-                                        StatsPeriod.ALL_TIME -> stringResource(R.string.all_time)
-                                    }
-                                )
-                            }
-                        )
-                    }
-                }
-            }
-
-            // Donut Chart — replaces OverviewCard + StreakCard
-            item {
-                state.stats?.let { stats ->
-                    val weekLabel = stringResource(R.string.this_week)
-                    val monthLabel = stringResource(R.string.stats_this_month)
-                    val yearLabel = stringResource(R.string.stats_this_year)
-                    val allTimeLabel = stringResource(R.string.all_time)
-                    val periodLabel = try {
-                        val startDate = Instant.ofEpochMilli(stats.startDate)
-                            .atZone(ZoneId.systemDefault())
-                            .toLocalDate()
-                        startDate.formatMonthYear()
-                    } catch (_: Exception) {
-                        when (state.period) {
-                            StatsPeriod.WEEK -> weekLabel
-                            StatsPeriod.MONTH -> monthLabel
-                            StatsPeriod.YEAR -> yearLabel
-                            StatsPeriod.ALL_TIME -> allTimeLabel
+            LazyColumn(
+                state = scrollbarState,
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(20.dp),
+                verticalArrangement = Arrangement.spacedBy(20.dp)
+            ) {
+                // Period Selector
+                item {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        StatsPeriod.entries.forEach { period ->
+                            FilterChip(
+                                selected = state.period == period,
+                                onClick = { viewModel.onEvent(PrayerTrackerEvent.SetStatsPeriod(period)) },
+                                label = {
+                                    Text(
+                                        text = when (period) {
+                                            StatsPeriod.WEEK -> stringResource(R.string.stats_period_week)
+                                            StatsPeriod.MONTH -> stringResource(R.string.stats_period_month)
+                                            StatsPeriod.YEAR -> stringResource(R.string.stats_period_year)
+                                            StatsPeriod.ALL_TIME -> stringResource(R.string.all_time)
+                                        }
+                                    )
+                                }
+                            )
                         }
                     }
+                }
 
-                    PrayerStatsChart(
-                        stats = stats,
-                        chartType = PrayerChartType.DONUT,
-                        title = stringResource(R.string.prayer_completion),
-                        subtitle = periodLabel,
-                        summaryItems = listOf(
-                            ChartStatItem(
-                                "${stats.totalPrayed}",
-                                stringResource(R.string.prayed),
-                                NimazColors.StatusColors.Prayed
-                            ),
-                            ChartStatItem(
-                                "${stats.totalMissed}",
-                                stringResource(R.string.missed),
-                                NimazColors.StatusColors.Missed
-                            ),
-                            ChartStatItem(
-                                "${stats.perfectDays}",
-                                stringResource(R.string.stat_perfect_days),
-                                NimazColors.PrayerColors.Maghrib
-                            ),
-                            ChartStatItem(
-                                "${state.currentStreak}",
-                                stringResource(R.string.stat_current_streak),
-                                NimazColors.StatusColors.Prayed
-                            ),
-                            ChartStatItem(
-                                "${state.longestStreak}",
-                                stringResource(R.string.stat_longest_streak),
-                                MaterialTheme.colorScheme.secondary
+                // Donut Chart — replaces OverviewCard + StreakCard
+                item {
+                    state.stats?.let { stats ->
+                        val weekLabel = stringResource(R.string.this_week)
+                        val monthLabel = stringResource(R.string.stats_this_month)
+                        val yearLabel = stringResource(R.string.stats_this_year)
+                        val allTimeLabel = stringResource(R.string.all_time)
+                        val periodLabel = try {
+                            val startDate = Instant.ofEpochMilli(stats.startDate)
+                                .atZone(ZoneId.systemDefault())
+                                .toLocalDate()
+                            startDate.formatMonthYear()
+                        } catch (_: Exception) {
+                            when (state.period) {
+                                StatsPeriod.WEEK -> weekLabel
+                                StatsPeriod.MONTH -> monthLabel
+                                StatsPeriod.YEAR -> yearLabel
+                                StatsPeriod.ALL_TIME -> allTimeLabel
+                            }
+                        }
+
+                        PrayerStatsChart(
+                            stats = stats,
+                            chartType = PrayerChartType.DONUT,
+                            title = stringResource(R.string.prayer_completion),
+                            subtitle = periodLabel,
+                            summaryItems = listOf(
+                                ChartStatItem(
+                                    "${stats.totalPrayed}",
+                                    stringResource(R.string.prayed),
+                                    NimazColors.StatusColors.Prayed
+                                ),
+                                ChartStatItem(
+                                    "${stats.totalMissed}",
+                                    stringResource(R.string.missed),
+                                    NimazColors.StatusColors.Missed
+                                ),
+                                ChartStatItem(
+                                    "${stats.perfectDays}",
+                                    stringResource(R.string.stat_perfect_days),
+                                    NimazColors.PrayerColors.Maghrib
+                                ),
+                                ChartStatItem(
+                                    "${state.currentStreak}",
+                                    stringResource(R.string.stat_current_streak),
+                                    NimazColors.StatusColors.Prayed
+                                ),
+                                ChartStatItem(
+                                    "${state.longestStreak}",
+                                    stringResource(R.string.stat_longest_streak),
+                                    MaterialTheme.colorScheme.secondary
+                                )
                             )
                         )
-                    )
+                    }
                 }
-            }
 
-            // Bar Chart — replaces PrayerBreakdownSection
-            item {
-                state.stats?.let { stats ->
-                    PrayerStatsChart(
-                        stats = stats,
-                        chartType = PrayerChartType.BAR,
-                        title = stringResource(R.string.prayer_breakdown),
-                        summaryItems = emptyList()
-                    )
+                // Bar Chart — replaces PrayerBreakdownSection
+                item {
+                    state.stats?.let { stats ->
+                        PrayerStatsChart(
+                            stats = stats,
+                            chartType = PrayerChartType.BAR,
+                            title = stringResource(R.string.prayer_breakdown),
+                            summaryItems = emptyList()
+                        )
+                    }
                 }
-            }
 
-            // Insights
-            item {
-                state.stats?.let { stats ->
-                    InsightsSection(stats = stats)
+                // Insights
+                item {
+                    state.stats?.let { stats ->
+                        InsightsSection(stats = stats)
+                    }
                 }
             }
         }

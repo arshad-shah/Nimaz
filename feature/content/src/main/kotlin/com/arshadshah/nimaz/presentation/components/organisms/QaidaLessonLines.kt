@@ -31,6 +31,8 @@ import com.arshadshah.nimaz.presentation.components.molecules.QaidaCellTile
 import com.arshadshah.nimaz.presentation.components.molecules.QaidaPlayLineButton
 import com.arshadshah.nimaz.presentation.theme.NimazSpacing
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
+import com.arshadshah.nimaz.presentation.components.molecules.NimazScrollbarBox
+import androidx.compose.foundation.layout.fillMaxSize
 
 /**
  * The reader body: a lesson's lines, each with an optional instruction, a
@@ -48,54 +50,58 @@ fun QaidaLessonLines(
     modifier: Modifier = Modifier,
     completedCellIds: Set<Int> = emptySet(),
 ) {
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = NimazSpacing.Large, vertical = NimazSpacing.Medium),
-        verticalArrangement = Arrangement.spacedBy(NimazSpacing.ExtraLarge),
+    val scrollbarScrollState = rememberScrollState()
+    NimazScrollbarBox(
+        state = scrollbarScrollState,
+        modifier = modifier.fillMaxWidth(),
     ) {
-        content.lines.forEach { lineContent ->
-            Column(verticalArrangement = Arrangement.spacedBy(NimazSpacing.Small)) {
-                val instruction = lineContent.line.instructionEnglish
-                // Show the header row only when there's an instruction to read or
-                // the play control is enabled — text-only mode drops empty rows.
-                if (!instruction.isNullOrBlank() || QAIDA_AUDIO_UI_ENABLED) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(NimazSpacing.Small),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        // Weighted so a long instruction wraps/ellipsizes instead of
-                        // squeezing the Play-line button at the row's end.
-                        Text(
-                            text = instruction ?: "",
-                            style = MaterialTheme.typography.titleSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier.weight(1f),
-                        )
-                        // Hidden while audio is being regenerated (text-only mode).
-                        if (QAIDA_AUDIO_UI_ENABLED) {
-                            QaidaPlayLineButton(onClick = { onPlayLine(lineContent.line.id) })
+        Column(
+            modifier = Modifier.fillMaxWidth().verticalScroll(scrollbarScrollState)
+                .padding(horizontal = NimazSpacing.Large, vertical = NimazSpacing.Medium),
+            verticalArrangement = Arrangement.spacedBy(NimazSpacing.ExtraLarge),
+        ) {
+            content.lines.forEach { lineContent ->
+                Column(verticalArrangement = Arrangement.spacedBy(NimazSpacing.Small)) {
+                    val instruction = lineContent.line.instructionEnglish
+                    // Show the header row only when there's an instruction to read or
+                    // the play control is enabled — text-only mode drops empty rows.
+                    if (!instruction.isNullOrBlank() || QAIDA_AUDIO_UI_ENABLED) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(NimazSpacing.Small),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            // Weighted so a long instruction wraps/ellipsizes instead of
+                            // squeezing the Play-line button at the row's end.
+                            Text(
+                                text = instruction ?: "",
+                                style = MaterialTheme.typography.titleSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.weight(1f),
+                            )
+                            // Hidden while audio is being regenerated (text-only mode).
+                            if (QAIDA_AUDIO_UI_ENABLED) {
+                                QaidaPlayLineButton(onClick = { onPlayLine(lineContent.line.id) })
+                            }
                         }
                     }
-                }
-                CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-                    FlowRow(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(NimazSpacing.Small),
-                        verticalArrangement = Arrangement.spacedBy(NimazSpacing.Small),
-                    ) {
-                        lineContent.cells.forEach { cell ->
-                            QaidaCellTile(
-                                cell = cell,
-                                isPlaying = cell.id == playingCellId,
-                                showTransliteration = showTransliteration,
-                                onTap = onCellTap,
-                                isCompleted = cell.id in completedCellIds,
-                            )
+                    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+                        FlowRow(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(NimazSpacing.Small),
+                            verticalArrangement = Arrangement.spacedBy(NimazSpacing.Small),
+                        ) {
+                            lineContent.cells.forEach { cell ->
+                                QaidaCellTile(
+                                    cell = cell,
+                                    isPlaying = cell.id == playingCellId,
+                                    showTransliteration = showTransliteration,
+                                    onTap = onCellTap,
+                                    isCompleted = cell.id in completedCellIds,
+                                )
+                            }
                         }
                     }
                 }

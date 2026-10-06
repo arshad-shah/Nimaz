@@ -63,6 +63,8 @@ import com.arshadshah.nimaz.presentation.theme.NimazPatternStyle
 import com.arshadshah.nimaz.presentation.viewmodel.settings.AppTheme
 import com.arshadshah.nimaz.presentation.viewmodel.settings.SettingsEvent
 import com.arshadshah.nimaz.presentation.viewmodel.settings.SettingsViewModel
+import com.arshadshah.nimaz.presentation.components.molecules.NimazScrollbarBox
+import androidx.compose.foundation.lazy.rememberLazyListState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -83,78 +85,83 @@ fun AppearanceSettingsScreen(
             )
         }
     ) { paddingValues ->
-        LazyColumn(
+        val scrollbarState = rememberLazyListState()
+        NimazScrollbarBox(
+            state = scrollbarState,
             modifier = Modifier
                 .fillMaxSize()
-                .testTag(ScreenTags.AppearanceList)
-                .padding(paddingValues)
-                .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .padding(paddingValues),
         ) {
-            item { Spacer(modifier = Modifier.height(4.dp)) }
+            LazyColumn(
+                state = scrollbarState,
+                modifier = Modifier.fillMaxSize().testTag(ScreenTags.AppearanceList).padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                item { Spacer(modifier = Modifier.height(4.dp)) }
 
-            // Theme Section
-            item {
-                NimazSectionHeader(title = stringResource(R.string.appearance_theme))
-            }
-            item {
-                ThemeSelectionCard(
-                    selectedTheme = generalState.theme,
-                    onThemeSelected = { viewModel.onEvent(SettingsEvent.SetTheme(it)) }
-                )
-            }
+                // Theme Section
+                item {
+                    NimazSectionHeader(title = stringResource(R.string.appearance_theme))
+                }
+                item {
+                    ThemeSelectionCard(
+                        selectedTheme = generalState.theme,
+                        onThemeSelected = { viewModel.onEvent(SettingsEvent.SetTheme(it)) }
+                    )
+                }
 
-            // Background Pattern Section
-            item {
-                NimazSectionHeader(title = stringResource(R.string.appearance_pattern))
-            }
-            item {
-                PatternStyleCard(
-                    selected = generalState.patternStyle,
-                    onSelect = { viewModel.onEvent(SettingsEvent.SetPatternStyle(it)) }
-                )
-            }
+                // Background Pattern Section
+                item {
+                    NimazSectionHeader(title = stringResource(R.string.appearance_pattern))
+                }
+                item {
+                    PatternStyleCard(
+                        selected = generalState.patternStyle,
+                        onSelect = { viewModel.onEvent(SettingsEvent.SetPatternStyle(it)) }
+                    )
+                }
 
-            // Display Section
-            item {
-                NimazSectionHeader(title = stringResource(R.string.appearance_display))
-            }
-            item {
-                DisplaySettingsCard(
-                    hapticFeedback = generalState.hapticFeedback,
-                    use24HourFormat = generalState.use24HourFormat,
-                    animationsEnabled = generalState.animationsEnabled,
-                    onHapticFeedbackToggle = {
-                        viewModel.onEvent(SettingsEvent.SetHapticFeedback(!generalState.hapticFeedback))
-                    },
-                    on24HourToggle = {
-                        viewModel.onEvent(SettingsEvent.Set24HourFormat(!generalState.use24HourFormat))
-                    },
-                    onAnimationsToggle = {
-                        viewModel.onEvent(SettingsEvent.SetAnimationsEnabled(!generalState.animationsEnabled))
-                    }
-                )
-            }
+                // Display Section
+                item {
+                    NimazSectionHeader(title = stringResource(R.string.appearance_display))
+                }
+                item {
+                    DisplaySettingsCard(
+                        hapticFeedback = generalState.hapticFeedback,
+                        use24HourFormat = generalState.use24HourFormat,
+                        animationsEnabled = generalState.animationsEnabled,
+                        onHapticFeedbackToggle = {
+                            viewModel.onEvent(SettingsEvent.SetHapticFeedback(!generalState.hapticFeedback))
+                        },
+                        on24HourToggle = {
+                            viewModel.onEvent(SettingsEvent.Set24HourFormat(!generalState.use24HourFormat))
+                        },
+                        onAnimationsToggle = {
+                            viewModel.onEvent(SettingsEvent.SetAnimationsEnabled(!generalState.animationsEnabled))
+                        }
+                    )
+                }
 
-            // Home Screen Section
-            item {
-                NimazSectionHeader(title = stringResource(R.string.appearance_home_screen))
-            }
-            item {
-                HomeScreenSettingsCard(
-                    useHijriPrimary = generalState.useHijriPrimary,
-                    onHijriPrimaryToggle = {
-                        viewModel.onEvent(SettingsEvent.SetHijriPrimary(!generalState.useHijriPrimary))
-                    },
-                    hijriDayOffset = generalState.hijriDayOffset,
-                    onHijriDayOffsetChange = {
-                        viewModel.onEvent(SettingsEvent.SetHijriDayOffset(it))
-                    }
-                )
-            }
+                // Home Screen Section
+                item {
+                    NimazSectionHeader(title = stringResource(R.string.appearance_home_screen))
+                }
+                item {
+                    HomeScreenSettingsCard(
+                        useHijriPrimary = generalState.useHijriPrimary,
+                        onHijriPrimaryToggle = {
+                            viewModel.onEvent(SettingsEvent.SetHijriPrimary(!generalState.useHijriPrimary))
+                        },
+                        hijriDayOffset = generalState.hijriDayOffset,
+                        onHijriDayOffsetChange = {
+                            viewModel.onEvent(SettingsEvent.SetHijriDayOffset(it))
+                        }
+                    )
+                }
 
-            item {
-                Spacer(modifier = Modifier.height(16.dp))
+                item {
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
             }
         }
     }

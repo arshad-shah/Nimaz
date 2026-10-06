@@ -65,6 +65,8 @@ import com.arshadshah.nimaz.presentation.components.organisms.NimazSearchBar
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.viewmodel.tracker.TasbihEvent
 import com.arshadshah.nimaz.presentation.viewmodel.tracker.TasbihViewModel
+import com.arshadshah.nimaz.presentation.components.molecules.NimazScrollbarBox
+import androidx.compose.foundation.lazy.rememberLazyListState
 
 private data class DhikrTab(
     val category: TasbihCategory? = null,
@@ -191,26 +193,33 @@ fun ChooseDhikrScreen(
                 }
             )
 
-            LazyColumn(
+            val scrollbarState = rememberLazyListState()
+            NimazScrollbarBox(
+                state = scrollbarState,
                 modifier = Modifier.weight(1f),
-                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                items(filtered, key = { it.id }) { preset ->
-                    val isCustom = preset.id in customIds
-                    SwipeableDhikrRow(
-                        preset = preset,
-                        selected = counterState.selectedPreset?.id == preset.id,
-                        isFavorite = preset.id in favorites,
-                        isCustom = isCustom,
-                        onClick = {
-                            viewModel.onEvent(TasbihEvent.SelectPreset(preset))
-                            onBack()
-                        },
-                        onToggleFavorite = { viewModel.onEvent(TasbihEvent.ToggleFavorite(preset.id)) },
-                        onEdit = { onEditPreset(preset.id) },
-                        onRequestDelete = { presetToDelete = preset }
-                    )
+                LazyColumn(
+                    state = scrollbarState,
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    items(filtered, key = { it.id }) { preset ->
+                        val isCustom = preset.id in customIds
+                        SwipeableDhikrRow(
+                            preset = preset,
+                            selected = counterState.selectedPreset?.id == preset.id,
+                            isFavorite = preset.id in favorites,
+                            isCustom = isCustom,
+                            onClick = {
+                                viewModel.onEvent(TasbihEvent.SelectPreset(preset))
+                                onBack()
+                            },
+                            onToggleFavorite = { viewModel.onEvent(TasbihEvent.ToggleFavorite(preset.id)) },
+                            onEdit = { onEditPreset(preset.id) },
+                            onRequestDelete = { presetToDelete = preset }
+                        )
+                    }
                 }
             }
 

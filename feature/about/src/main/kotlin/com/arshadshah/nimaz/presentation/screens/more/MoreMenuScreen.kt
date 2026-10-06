@@ -72,6 +72,8 @@ import com.arshadshah.nimaz.presentation.screens.resolve
 import com.arshadshah.nimaz.presentation.viewmodel.more.MoreEvent
 import com.arshadshah.nimaz.presentation.viewmodel.more.MoreUiState
 import com.arshadshah.nimaz.presentation.viewmodel.more.MoreViewModel
+import com.arshadshah.nimaz.presentation.components.molecules.NimazScrollbarBox
+import androidx.compose.foundation.lazy.rememberLazyListState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -159,219 +161,224 @@ fun MoreMenuScreen(
             )
         }
     ) { paddingValues ->
-        LazyColumn(
+        val scrollbarState = rememberLazyListState()
+        NimazScrollbarBox(
+            state = scrollbarState,
             modifier = Modifier
                 .fillMaxSize()
-                .testTag(ScreenTags.MoreList)
-                .padding(paddingValues)
-                .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .padding(paddingValues),
         ) {
-            item { Spacer(modifier = Modifier.height(4.dp)) }
+            LazyColumn(
+                state = scrollbarState,
+                modifier = Modifier.fillMaxSize().testTag(ScreenTags.MoreList).padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                item { Spacer(modifier = Modifier.height(4.dp)) }
 
-            // Pinned shortcuts — above the first section, because reaching them without
-            // scrolling is the entire point.
-            item {
-                NimazSectionHeader(
-                    title = stringResource(R.string.more_pinned_title),
-                    trailingContent = {
-                        NimazIconButton(
-                            icon = Icons.Default.Edit,
-                            onClick = { showPinSheet = true },
-                            contentDescription = stringResource(R.string.more_pinned_edit),
-                            size = NimazIconButtonSize.SMALL,
+                // Pinned shortcuts — above the first section, because reaching them without
+                // scrolling is the entire point.
+                item {
+                    NimazSectionHeader(
+                        title = stringResource(R.string.more_pinned_title),
+                        trailingContent = {
+                            NimazIconButton(
+                                icon = Icons.Default.Edit,
+                                onClick = { showPinSheet = true },
+                                contentDescription = stringResource(R.string.more_pinned_edit),
+                                size = NimazIconButtonSize.SMALL,
+                            )
+                        }
+                    )
+                }
+                item {
+                    PinnedShortcutRow(
+                        pinned = state.pinnedShortcuts,
+                        destinations = pinDestinations,
+                    )
+                }
+
+                // Daily Practice Section
+                item {
+                    NimazSectionHeader(title = stringResource(R.string.daily_practice))
+                }
+                item {
+                    NimazMenuGroup {
+                        NimazMenuItem(
+                            title = stringResource(R.string.prayer_tracker),
+                            subtitle = MoreSubtitles.prayerTracker(
+                                logged = state.prayersLogged,
+                                total = state.prayersTrackable ?: 0,
+                            ).resolve(),
+                            icon = Icons.Default.Schedule,
+                            iconTint = MoreSectionTints.dailyPractice,
+                            onClick = onNavigateToPrayerTracker
+                        )
+                        NimazMenuDivider()
+                        NimazMenuItem(
+                            title = stringResource(R.string.fasting),
+                            subtitle = MoreSubtitles.fasting(state.pendingMakeupFasts).resolve(),
+                            icon = Icons.Default.Fastfood,
+                            iconTint = MoreSectionTints.dailyPractice,
+                            onClick = onNavigateToFasting
+                        )
+                        NimazMenuDivider()
+                        NimazMenuItem(
+                            title = stringResource(R.string.night_worship_title),
+                            subtitle = MoreSubtitles.nightWorship(
+                                nameRes = state.nextWorship?.let(WorshipReminderContent::nameRes),
+                                minutesUntil = state.minutesUntilNextWorship,
+                            ).resolve(),
+                            icon = Icons.Default.Bedtime,
+                            iconTint = MoreSectionTints.dailyPractice,
+                            onClick = onNavigateToNightWorship
+                        )
+                        NimazMenuDivider()
+                        NimazMenuItem(
+                            title = stringResource(R.string.khatam_quran),
+                            subtitle = MoreSubtitles.khatam(
+                                juz = state.khatamJuz,
+                                daysAgainstPace = state.khatamDaysAgainstPace,
+                            ).resolve(),
+                            icon = Icons.AutoMirrored.Filled.MenuBook,
+                            iconTint = MoreSectionTints.dailyPractice,
+                            onClick = onNavigateToKhatam
                         )
                     }
-                )
-            }
-            item {
-                PinnedShortcutRow(
-                    pinned = state.pinnedShortcuts,
-                    destinations = pinDestinations,
-                )
-            }
-
-            // Daily Practice Section
-            item {
-                NimazSectionHeader(title = stringResource(R.string.daily_practice))
-            }
-            item {
-                NimazMenuGroup {
-                    NimazMenuItem(
-                        title = stringResource(R.string.prayer_tracker),
-                        subtitle = MoreSubtitles.prayerTracker(
-                            logged = state.prayersLogged,
-                            total = state.prayersTrackable ?: 0,
-                        ).resolve(),
-                        icon = Icons.Default.Schedule,
-                        iconTint = MoreSectionTints.dailyPractice,
-                        onClick = onNavigateToPrayerTracker
-                    )
-                    NimazMenuDivider()
-                    NimazMenuItem(
-                        title = stringResource(R.string.fasting),
-                        subtitle = MoreSubtitles.fasting(state.pendingMakeupFasts).resolve(),
-                        icon = Icons.Default.Fastfood,
-                        iconTint = MoreSectionTints.dailyPractice,
-                        onClick = onNavigateToFasting
-                    )
-                    NimazMenuDivider()
-                    NimazMenuItem(
-                        title = stringResource(R.string.night_worship_title),
-                        subtitle = MoreSubtitles.nightWorship(
-                            nameRes = state.nextWorship?.let(WorshipReminderContent::nameRes),
-                            minutesUntil = state.minutesUntilNextWorship,
-                        ).resolve(),
-                        icon = Icons.Default.Bedtime,
-                        iconTint = MoreSectionTints.dailyPractice,
-                        onClick = onNavigateToNightWorship
-                    )
-                    NimazMenuDivider()
-                    NimazMenuItem(
-                        title = stringResource(R.string.khatam_quran),
-                        subtitle = MoreSubtitles.khatam(
-                            juz = state.khatamJuz,
-                            daysAgainstPace = state.khatamDaysAgainstPace,
-                        ).resolve(),
-                        icon = Icons.AutoMirrored.Filled.MenuBook,
-                        iconTint = MoreSectionTints.dailyPractice,
-                        onClick = onNavigateToKhatam
-                    )
                 }
-            }
 
-            // Learning Section
-            item {
-                NimazSectionHeader(title = stringResource(R.string.learning))
-            }
-            item {
-                NimazMenuGroup {
-                    NimazMenuItem(
-                        title = stringResource(R.string.learn_pray_title),
-                        subtitle = stringResource(R.string.learn_pray_subtitle),
-                        icon = Icons.AutoMirrored.Filled.MenuBook,
-                        iconTint = MoreSectionTints.learning,
-                        onClick = onNavigateToLearnToPray,
-                    )
-                    NimazMenuDivider()
-                    NimazMenuItem(
-                        title = stringResource(R.string.qaida),
-                        subtitle = MoreSubtitles.qaida(
-                            currentLesson = state.qaidaLesson,
-                            totalLessons = state.qaidaTotalLessons ?: 0,
-                        ).resolve(),
-                        icon = Icons.Default.Abc,
-                        iconTint = MoreSectionTints.learning,
-                        onClick = onNavigateToQaida
-                    )
-                    NimazMenuDivider()
-                    // No subtitle from here down: these are reference collections with nothing
-                    // true to report about them. Restating the title is what was removed.
-                    // One row for what used to be three — "Allah's 99 Names", "Prophet's 99
-                    // Names" and "Prophets of Islam" are three tabs of one screen now, and
-                    // this is the one place a reader looks for any of them.
-                    NimazMenuItem(
-                        title = stringResource(R.string.names_title),
-                        subtitle = stringResource(R.string.names_more_subtitle),
-                        icon = Icons.Default.AutoAwesome,
-                        iconTint = MoreSectionTints.learning,
-                        onClick = onNavigateToNames
-                    )
-                    NimazMenuDivider()
-                    NimazMenuItem(
-                        title = stringResource(R.string.hadith),
-                        icon = Icons.Default.FormatQuote,
-                        iconTint = MoreSectionTints.learning,
-                        onClick = onNavigateToHadith
-                    )
-                    NimazMenuDivider()
-                    NimazMenuItem(
-                        title = stringResource(R.string.duas),
-                        icon = ImageVector.vectorResource(R.drawable.ic_dua),
-                        iconTint = MoreSectionTints.learning,
-                        onClick = onNavigateToDuas
-                    )
-                    NimazMenuDivider()
-                    NimazMenuItem(
-                        title = stringResource(R.string.tafseer),
-                        icon = Icons.AutoMirrored.Filled.Article,
-                        iconTint = MoreSectionTints.learning,
-                        onClick = onNavigateToTafseer
-                    )
+                // Learning Section
+                item {
+                    NimazSectionHeader(title = stringResource(R.string.learning))
                 }
-            }
-
-            // Tools Section
-            item {
-                NimazSectionHeader(title = stringResource(R.string.tools))
-            }
-            item {
-                NimazMenuGroup {
-                    NimazMenuItem(
-                        title = stringResource(R.string.calendar),
-                        subtitle = MoreSubtitles.islamicCalendar(state.hijriToday).resolve(),
-                        icon = Icons.Default.CalendarMonth,
-                        iconTint = MoreSectionTints.tools,
-                        onClick = onNavigateToCalendar
-                    )
-                    NimazMenuDivider()
-                    NimazMenuItem(
-                        title = stringResource(R.string.prayer_times),
-                        icon = Icons.Default.Mosque,
-                        iconTint = MoreSectionTints.tools,
-                        onClick = onNavigateToPrayerTimes
-                    )
-                    NimazMenuDivider()
-                    NimazMenuItem(
-                        title = stringResource(R.string.monthly_prayer_times),
-                        icon = Icons.Default.CalendarViewMonth,
-                        iconTint = MoreSectionTints.tools,
-                        onClick = onNavigateToMonthlyPrayerTimes
-                    )
-                    NimazMenuDivider()
-                    NimazMenuItem(
-                        title = stringResource(R.string.zakat),
-                        subtitle = state.zakatSubtitle(),
-                        icon = Icons.Default.Calculate,
-                        iconTint = MoreSectionTints.tools,
-                        onClick = onNavigateToZakat
-                    )
+                item {
+                    NimazMenuGroup {
+                        NimazMenuItem(
+                            title = stringResource(R.string.learn_pray_title),
+                            subtitle = stringResource(R.string.learn_pray_subtitle),
+                            icon = Icons.AutoMirrored.Filled.MenuBook,
+                            iconTint = MoreSectionTints.learning,
+                            onClick = onNavigateToLearnToPray,
+                        )
+                        NimazMenuDivider()
+                        NimazMenuItem(
+                            title = stringResource(R.string.qaida),
+                            subtitle = MoreSubtitles.qaida(
+                                currentLesson = state.qaidaLesson,
+                                totalLessons = state.qaidaTotalLessons ?: 0,
+                            ).resolve(),
+                            icon = Icons.Default.Abc,
+                            iconTint = MoreSectionTints.learning,
+                            onClick = onNavigateToQaida
+                        )
+                        NimazMenuDivider()
+                        // No subtitle from here down: these are reference collections with nothing
+                        // true to report about them. Restating the title is what was removed.
+                        // One row for what used to be three — "Allah's 99 Names", "Prophet's 99
+                        // Names" and "Prophets of Islam" are three tabs of one screen now, and
+                        // this is the one place a reader looks for any of them.
+                        NimazMenuItem(
+                            title = stringResource(R.string.names_title),
+                            subtitle = stringResource(R.string.names_more_subtitle),
+                            icon = Icons.Default.AutoAwesome,
+                            iconTint = MoreSectionTints.learning,
+                            onClick = onNavigateToNames
+                        )
+                        NimazMenuDivider()
+                        NimazMenuItem(
+                            title = stringResource(R.string.hadith),
+                            icon = Icons.Default.FormatQuote,
+                            iconTint = MoreSectionTints.learning,
+                            onClick = onNavigateToHadith
+                        )
+                        NimazMenuDivider()
+                        NimazMenuItem(
+                            title = stringResource(R.string.duas),
+                            icon = ImageVector.vectorResource(R.drawable.ic_dua),
+                            iconTint = MoreSectionTints.learning,
+                            onClick = onNavigateToDuas
+                        )
+                        NimazMenuDivider()
+                        NimazMenuItem(
+                            title = stringResource(R.string.tafseer),
+                            icon = Icons.AutoMirrored.Filled.Article,
+                            iconTint = MoreSectionTints.learning,
+                            onClick = onNavigateToTafseer
+                        )
+                    }
                 }
-            }
 
-            // Support Section
-            item {
-                NimazSectionHeader(title = stringResource(R.string.support))
-            }
-            item {
-                NimazMenuGroup {
-                    NimazMenuItem(
-                        title = stringResource(R.string.about_nimaz),
-                        icon = Icons.Default.Info,
-                        onClick = onNavigateToAbout
-                    )
-                    NimazMenuDivider()
-                    NimazMenuItem(
-                        title = stringResource(R.string.help_support),
-                        icon = Icons.AutoMirrored.Filled.Help,
-                        onClick = onNavigateToHelp
-                    )
-                    NimazMenuDivider()
-                    NimazMenuItem(
-                        title = stringResource(R.string.share_app),
-                        icon = Icons.Default.Share,
-                        onClick = onShareApp
-                    )
-                    NimazMenuDivider()
-                    NimazMenuItem(
-                        title = stringResource(R.string.rate_us),
-                        icon = Icons.Default.Star,
-                        onClick = onRateApp
-                    )
+                // Tools Section
+                item {
+                    NimazSectionHeader(title = stringResource(R.string.tools))
                 }
-            }
+                item {
+                    NimazMenuGroup {
+                        NimazMenuItem(
+                            title = stringResource(R.string.calendar),
+                            subtitle = MoreSubtitles.islamicCalendar(state.hijriToday).resolve(),
+                            icon = Icons.Default.CalendarMonth,
+                            iconTint = MoreSectionTints.tools,
+                            onClick = onNavigateToCalendar
+                        )
+                        NimazMenuDivider()
+                        NimazMenuItem(
+                            title = stringResource(R.string.prayer_times),
+                            icon = Icons.Default.Mosque,
+                            iconTint = MoreSectionTints.tools,
+                            onClick = onNavigateToPrayerTimes
+                        )
+                        NimazMenuDivider()
+                        NimazMenuItem(
+                            title = stringResource(R.string.monthly_prayer_times),
+                            icon = Icons.Default.CalendarViewMonth,
+                            iconTint = MoreSectionTints.tools,
+                            onClick = onNavigateToMonthlyPrayerTimes
+                        )
+                        NimazMenuDivider()
+                        NimazMenuItem(
+                            title = stringResource(R.string.zakat),
+                            subtitle = state.zakatSubtitle(),
+                            icon = Icons.Default.Calculate,
+                            iconTint = MoreSectionTints.tools,
+                            onClick = onNavigateToZakat
+                        )
+                    }
+                }
 
-            item { Spacer(modifier = Modifier.height(16.dp)) }
+                // Support Section
+                item {
+                    NimazSectionHeader(title = stringResource(R.string.support))
+                }
+                item {
+                    NimazMenuGroup {
+                        NimazMenuItem(
+                            title = stringResource(R.string.about_nimaz),
+                            icon = Icons.Default.Info,
+                            onClick = onNavigateToAbout
+                        )
+                        NimazMenuDivider()
+                        NimazMenuItem(
+                            title = stringResource(R.string.help_support),
+                            icon = Icons.AutoMirrored.Filled.Help,
+                            onClick = onNavigateToHelp
+                        )
+                        NimazMenuDivider()
+                        NimazMenuItem(
+                            title = stringResource(R.string.share_app),
+                            icon = Icons.Default.Share,
+                            onClick = onShareApp
+                        )
+                        NimazMenuDivider()
+                        NimazMenuItem(
+                            title = stringResource(R.string.rate_us),
+                            icon = Icons.Default.Star,
+                            onClick = onRateApp
+                        )
+                    }
+                }
+
+                item { Spacer(modifier = Modifier.height(16.dp)) }
+            }
         }
     }
 }

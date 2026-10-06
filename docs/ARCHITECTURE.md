@@ -1350,6 +1350,14 @@ with no label and a touch target under 48dp fail the lane we already run. It can
       Every variant has a 48 dp touch strip, and TalkBack announces Rail's translated
       "Vertical scrollbar" unless the screen passes `contentDescription`. To take a newer Rail,
       replace `core/rail/src/main` with upstream's `rail/src/main` and update `RAIL_VERSION`.
+      **Every vertically scrolling screen wears one.** A new `LazyColumn`, uniform-span
+      `LazyVerticalGrid` or `verticalScroll` column that fills a screen or pane goes inside a
+      `NimazScrollbarBox`; the box takes the layout modifiers (size, weight, scaffold padding) and
+      the list keeps `fillMaxSize()`, its test tag and its horizontal padding, so the thumb sits
+      on the screen edge. The deliberate exceptions: wheel pickers (`NimazListPicker`,
+      `NimazTimePicker`), Mushaf pages (a page fits the viewport), lists nested inside another
+      scrolling list, the A–Z Topics index (its letter rail owns that edge) and short bottom-sheet
+      grids.
     - the line between two rows of a `NimazMenuGroup` is **`NimazMenuDivider()`**
       (`components/molecules/NimazMenuItem.kt`), **never** a hand-written `NimazDivider` with its
       own padding and alpha. The same hairline had been spelled out at ~55 call sites in three

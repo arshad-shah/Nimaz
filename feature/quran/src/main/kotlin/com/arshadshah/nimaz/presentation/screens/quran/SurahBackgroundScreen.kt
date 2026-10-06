@@ -49,6 +49,7 @@ import com.arshadshah.nimaz.presentation.foundation.tokens.labelRes
 import com.arshadshah.nimaz.presentation.viewmodel.quran.SurahThematicEvent
 import com.arshadshah.nimaz.presentation.viewmodel.quran.SurahThematicViewModel
 import kotlinx.coroutines.launch
+import com.arshadshah.nimaz.presentation.components.molecules.NimazScrollbarBox
 
 /**
  * A surah's long-form background, read the way prose is read.
@@ -155,21 +156,26 @@ fun SurahBackgroundScreen(
                         },
                     )
 
-                    LazyColumn(
+                    NimazScrollbarBox(
                         state = listState,
                         modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(bottom = 40.dp),
                     ) {
-                        itemsIndexed(
-                            items = sections,
-                            key = { _, section -> section.position },
-                        ) { _, section ->
-                            BackgroundSection(
-                                section = section,
-                                fontSize = state.proseFontSize,
-                                onOpenAyah = onOpenAyah,
-                                onOpenTopic = onOpenTopic,
-                            )
+                        LazyColumn(
+                            state = listState,
+                            modifier = Modifier.fillMaxSize(),
+                            contentPadding = PaddingValues(bottom = 40.dp),
+                        ) {
+                            itemsIndexed(
+                                items = sections,
+                                key = { _, section -> section.position },
+                            ) { _, section ->
+                                BackgroundSection(
+                                    section = section,
+                                    fontSize = state.proseFontSize,
+                                    onOpenAyah = onOpenAyah,
+                                    onOpenTopic = onOpenTopic,
+                                )
+                            }
                         }
                     }
                 }

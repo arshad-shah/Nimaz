@@ -89,6 +89,7 @@ import com.arshadshah.nimaz.presentation.viewmodel.onboarding.OnboardingViewMode
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
+import com.arshadshah.nimaz.presentation.components.molecules.NimazScrollbarBox
 
 internal const val ONBOARDING_PAGE_COUNT = 5
 internal const val ONBOARDING_MOTION_MS = 420
@@ -331,42 +332,48 @@ private fun SetupPage(
 ) {
     BoxWithConstraints(Modifier.fillMaxSize()) {
         val artHeight = maxHeight * 0.44f
-        Column(
-            Modifier.fillMaxSize().verticalScroll(rememberScrollState())
-                .padding(bottom = insets.calculateBottomPadding() + FooterHeight + 12.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
+        val scrollbarScrollState = rememberScrollState()
+        NimazScrollbarBox(
+            state = scrollbarScrollState,
+            modifier = Modifier.fillMaxSize(),
         ) {
-            Box(Modifier.fillMaxWidth().height(artHeight).clipToBounds()) {
-                Image(
-                    painter = painterResource(OnboardingIllustration.PERMISSIONS.resource),
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    alignment = BiasAlignment(0f, -0.1f),
-                    modifier = Modifier.fillMaxSize().graphicsLayer { translationX = offset() * size.width * ART_PARALLAX },
-                )
-                Box(Modifier.fillMaxSize().background(Brush.verticalGradient(
-                    0f to Floor.copy(alpha = 0.6f),
-                    0.25f to Floor.copy(alpha = 0f),
-                    0.7f to Floor.copy(alpha = 0.35f),
-                    1f to Floor,
-                )))
-            }
-            Column(Modifier.widthIn(max = 600.dp).fillMaxWidth().padding(horizontal = AdaptiveSpacing.screenPadding())) {
-                Reveal(revealed, 0) {
-                    Text(stringResource(R.string.onboarding_setup_title),
-                        style = MaterialTheme.typography.headlineLarge.copy(fontWeight = FontWeight.Light),
-                        color = Ivory, modifier = Modifier.semantics { heading() })
+            Column(
+                Modifier.fillMaxSize().verticalScroll(scrollbarScrollState)
+                    .padding(bottom = insets.calculateBottomPadding() + FooterHeight + 12.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Box(Modifier.fillMaxWidth().height(artHeight).clipToBounds()) {
+                    Image(
+                        painter = painterResource(OnboardingIllustration.PERMISSIONS.resource),
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        alignment = BiasAlignment(0f, -0.1f),
+                        modifier = Modifier.fillMaxSize().graphicsLayer { translationX = offset() * size.width * ART_PARALLAX },
+                    )
+                    Box(Modifier.fillMaxSize().background(Brush.verticalGradient(
+                        0f to Floor.copy(alpha = 0.6f),
+                        0.25f to Floor.copy(alpha = 0f),
+                        0.7f to Floor.copy(alpha = 0.35f),
+                        1f to Floor,
+                    )))
                 }
-                Spacer(Modifier.height(10.dp))
-                Reveal(revealed, 1) {
-                    Text(stringResource(R.string.onboarding_intro_setup_body), style = MaterialTheme.typography.bodyLarge,
-                        color = OnboardingArtColors.TextSoft.copy(alpha = 0.78f))
-                }
-                Spacer(Modifier.height(20.dp))
-                Reveal(revealed, 2) {
-                    Column {
-                        NimazDivider(color = Ivory.copy(alpha = 0.12f))
-                        rows()
+                Column(Modifier.widthIn(max = 600.dp).fillMaxWidth().padding(horizontal = AdaptiveSpacing.screenPadding())) {
+                    Reveal(revealed, 0) {
+                        Text(stringResource(R.string.onboarding_setup_title),
+                            style = MaterialTheme.typography.headlineLarge.copy(fontWeight = FontWeight.Light),
+                            color = Ivory, modifier = Modifier.semantics { heading() })
+                    }
+                    Spacer(Modifier.height(10.dp))
+                    Reveal(revealed, 1) {
+                        Text(stringResource(R.string.onboarding_intro_setup_body), style = MaterialTheme.typography.bodyLarge,
+                            color = OnboardingArtColors.TextSoft.copy(alpha = 0.78f))
+                    }
+                    Spacer(Modifier.height(20.dp))
+                    Reveal(revealed, 2) {
+                        Column {
+                            NimazDivider(color = Ivory.copy(alpha = 0.12f))
+                            rows()
+                        }
                     }
                 }
             }

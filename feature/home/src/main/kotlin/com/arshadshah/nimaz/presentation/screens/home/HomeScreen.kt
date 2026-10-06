@@ -95,6 +95,8 @@ import com.arshadshah.nimaz.presentation.viewmodel.home.HomeEvent
 import com.arshadshah.nimaz.presentation.viewmodel.home.HomeUiState
 import com.arshadshah.nimaz.presentation.viewmodel.home.HomeViewModel
 import kotlin.time.Instant
+import com.arshadshah.nimaz.presentation.components.molecules.NimazScrollbarBox
+import androidx.compose.foundation.layout.fillMaxWidth
 
 /**
  * The clock-derived slice of Home. The ViewModel publishes prayer *instants*; this turns them into
@@ -353,91 +355,96 @@ private fun HomeCompactContent(
         getBatteryIntent = { batteryOptimizationIntent(activityContext) },
     )
 
-    LazyColumn(
+    NimazScrollbarBox(
         state = listState,
-        // Tagged so behavior tests can scroll to entries below the fold ("Also today"
-        // sits under the hero, the banner slot and the prayer card).
-        modifier = Modifier
-            .fillMaxSize()
-            .testTag(ScreenTags.HomeList),
+        modifier = Modifier.fillMaxSize(),
     ) {
-        item(key = "hero") {
-            HomeHero(
-                hijriDate = state.hijriDate,
-                gregorianDate = gregorianDate,
-                nextPrayer = homeClock.nextPrayer,
-                nextPrayerAt = homeClock.nextPrayerAt,
-                sunriseFraction = state.sunriseFraction,
-                sunsetFraction = state.sunsetFraction,
-            )
-        }
+        LazyColumn(
+            state = listState,
+            // Tagged so behavior tests can scroll to entries below the fold ("Also today"
+            // sits under the hero, the banner slot and the prayer card).
+            modifier = Modifier
+                .fillMaxSize()
+                .testTag(ScreenTags.HomeList),
+        ) {
+            item(key = "hero") {
+                HomeHero(
+                    hijriDate = state.hijriDate,
+                    gregorianDate = gregorianDate,
+                    nextPrayer = homeClock.nextPrayer,
+                    nextPrayerAt = homeClock.nextPrayerAt,
+                    sunriseFraction = state.sunriseFraction,
+                    sunsetFraction = state.sunsetFraction,
+                )
+            }
 
-        val hasAnyBanner = banners.isNotEmpty() || announcementState.announcement != null
-        if (hasAnyBanner) {
-            item(key = "banner_slot") {
-                val allBannerItems = remember(announcementState.announcement, banners) {
-                    buildList {
-                        val ann = announcementState.announcement
-                        if (ann != null) {
-                            add(HomeBannerItem(
-                                id = ann.id,
-                                icon = announcementIcon(ann.type),
-                                title = ann.title,
-                                subtitle = ann.body,
-                                variant = announcementVariant(ann.type),
-                                actionLabel = if (announcementState.showCta) ann.ctaLabel else null,
-                                onAction = if (announcementState.showCta) onAnnouncementCta else null,
-                                dismissable = ann.dismissable,
-                                onDismiss = if (ann.dismissable) onAnnouncementDismiss else null,
-                            ))
+            val hasAnyBanner = banners.isNotEmpty() || announcementState.announcement != null
+            if (hasAnyBanner) {
+                item(key = "banner_slot") {
+                    val allBannerItems = remember(announcementState.announcement, banners) {
+                        buildList {
+                            val ann = announcementState.announcement
+                            if (ann != null) {
+                                add(HomeBannerItem(
+                                    id = ann.id,
+                                    icon = announcementIcon(ann.type),
+                                    title = ann.title,
+                                    subtitle = ann.body,
+                                    variant = announcementVariant(ann.type),
+                                    actionLabel = if (announcementState.showCta) ann.ctaLabel else null,
+                                    onAction = if (announcementState.showCta) onAnnouncementCta else null,
+                                    dismissable = ann.dismissable,
+                                    onDismiss = if (ann.dismissable) onAnnouncementDismiss else null,
+                                ))
+                            }
+                            addAll(banners)
                         }
-                        addAll(banners)
                     }
+                    HomeBannerSlot(
+                        items = allBannerItems,
+                        modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 12.dp),
+                    )
                 }
-                HomeBannerSlot(
-                    items = allBannerItems,
-                    modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 12.dp),
+            }
+
+            // Today's Islamic occasion — Mawlid, Ashura, an Eid, a pushed celebration. Above the
+            // prayer card on purpose: it appears on a handful of days a year, and on one of those
+            // days it is the more important thing on the screen.
+            if (state.celebrationCards.isNotEmpty()) {
+                item(key = "occasions") {
+                    HomeOccasionsSection(
+                        cards = state.celebrationCards,
+                        onOpenRoute = onOpenAnnouncementRoute,
+                        onDismiss = { viewModel.onEvent(HomeEvent.DismissAnnouncement) },
+                        modifier = Modifier.padding(top = 12.dp),
+                    )
+                }
+            }
+
+            item(key = "prayer_section") {
+                HomePrayerCard(
+                    prayers = homeClock.prayers,
+                    onSettingsClick = onNavigateToPrayerSettings,
+                    onTrackerClick = onNavigateToPrayerTracker,
+                    onTogglePrayer = onTogglePrayer,
+                    onSetPrayerStatus = onSetPrayerStatus,
+                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp),
                 )
             }
-        }
 
-        // Today's Islamic occasion — Mawlid, Ashura, an Eid, a pushed celebration. Above the
-        // prayer card on purpose: it appears on a handful of days a year, and on one of those
-        // days it is the more important thing on the screen.
-        if (state.celebrationCards.isNotEmpty()) {
-            item(key = "occasions") {
-                HomeOccasionsSection(
-                    cards = state.celebrationCards,
-                    onOpenRoute = onOpenAnnouncementRoute,
-                    onDismiss = { viewModel.onEvent(HomeEvent.DismissAnnouncement) },
-                    modifier = Modifier.padding(top = 12.dp),
+            item(key = "also_today") {
+                HomeAlsoTodaySection(
+                    isFriday = state.isFriday,
+                    dailyHadith = state.dailyHadith,
+                    dailyDua = state.dailyDua,
+                    worshipCard = state.worshipCard,
+                    onNavigateToAlKahf = onNavigateToAlKahf,
+                    onOpenHadith = state.dailyHadithId?.let { id -> { onOpenHadith(id) } } ?: {},
+                    onNavigateToDua = onNavigateToDua,
+                    onOpenWorship = onOpenWorship,
+                    modifier = Modifier.padding(start = 20.dp, end = 20.dp, bottom = 34.dp),
                 )
             }
-        }
-
-        item(key = "prayer_section") {
-            HomePrayerCard(
-                prayers = homeClock.prayers,
-                onSettingsClick = onNavigateToPrayerSettings,
-                onTrackerClick = onNavigateToPrayerTracker,
-                onTogglePrayer = onTogglePrayer,
-                onSetPrayerStatus = onSetPrayerStatus,
-                modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp),
-            )
-        }
-
-        item(key = "also_today") {
-            HomeAlsoTodaySection(
-                isFriday = state.isFriday,
-                dailyHadith = state.dailyHadith,
-                dailyDua = state.dailyDua,
-                worshipCard = state.worshipCard,
-                onNavigateToAlKahf = onNavigateToAlKahf,
-                onOpenHadith = state.dailyHadithId?.let { id -> { onOpenHadith(id) } } ?: {},
-                onNavigateToDua = onNavigateToDua,
-                onOpenWorship = onOpenWorship,
-                modifier = Modifier.padding(start = 20.dp, end = 20.dp, bottom = 34.dp),
-            )
         }
     }
 }
@@ -560,61 +567,71 @@ private fun HomeTabletContent(
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             // Left column: Prayer times
-            LazyColumn(
+            val scrollbarState = rememberLazyListState()
+            NimazScrollbarBox(
+                state = scrollbarState,
                 modifier = Modifier
                     .weight(1f)
-                    .fillMaxHeight()
+                    .fillMaxHeight(),
             ) {
-                item("prayer_times_header") {
-                    PrayerTimesSectionHeader(
-                        passedCount = homeClock.prayers.count { it.isPassed },
-                        upcomingCount = homeClock.prayers.count { !it.isPassed },
-                        onSettingsClick = onNavigateToPrayerSettings,
-                        modifier = Modifier
-                            .padding(horizontal = 4.dp, vertical = 8.dp)
-                            .clickable { onNavigateToPrayerTimes() }
-                    )
-                }
+                LazyColumn(
+                    state = scrollbarState,
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    item("prayer_times_header") {
+                        PrayerTimesSectionHeader(
+                            passedCount = homeClock.prayers.count { it.isPassed },
+                            upcomingCount = homeClock.prayers.count { !it.isPassed },
+                            onSettingsClick = onNavigateToPrayerSettings,
+                            modifier = Modifier
+                                .padding(horizontal = 4.dp, vertical = 8.dp)
+                                .clickable { onNavigateToPrayerTimes() }
+                        )
+                    }
 
-                items(homeClock.prayers, key = { it.type }) { prayer ->
-                    PrayerTimeCard(
-                        prayer = prayer,
-                        isActive = prayer.isNext,
-                        onClick = { onNavigateToPrayerTracker() },
-                        onToggle = { onTogglePrayer(prayer.type) },
-                        modifier = Modifier.padding(horizontal = 4.dp, vertical = 4.dp)
-                    )
+                    items(homeClock.prayers, key = { it.type }) { prayer ->
+                        PrayerTimeCard(
+                            prayer = prayer,
+                            isActive = prayer.isNext,
+                            onClick = { onNavigateToPrayerTracker() },
+                            onToggle = { onTogglePrayer(prayer.type) },
+                            modifier = Modifier.padding(horizontal = 4.dp, vertical = 4.dp)
+                        )
+                    }
                 }
             }
 
             // Right column: Progress + Today info
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-                    .verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+            val scrollbarScrollState = rememberScrollState()
+            NimazScrollbarBox(
+                state = scrollbarScrollState,
+                modifier = Modifier.weight(1f).fillMaxHeight(),
             ) {
-                TodaysProgressCard(
-                    prayerTimes = homeClock.prayers,
-                    modifier = Modifier.padding(horizontal = 4.dp)
-                )
+                Column(
+                    modifier = Modifier.fillMaxSize().verticalScroll(scrollbarScrollState),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    TodaysProgressCard(
+                        prayerTimes = homeClock.prayers,
+                        modifier = Modifier.padding(horizontal = 4.dp)
+                    )
 
-                NimazSectionHeader(
-                    title = stringResource(R.string.today),
-                    modifier = Modifier.padding(horizontal = 4.dp)
-                )
-                TodayInfoCards(
-                    fastingToday = state.fastingToday,
-                    dailyHadith = state.dailyHadith,
-                    dailyHadithReference = state.dailyHadithReference,
-                    dailyHadithGrade = state.dailyHadithGrade,
-                    dailyDua = state.dailyDua,
-                    onHadithClick = state.dailyHadithId?.let { id -> { onOpenHadith(id) } },
-                    modifier = Modifier.padding(horizontal = 4.dp)
-                )
+                    NimazSectionHeader(
+                        title = stringResource(R.string.today),
+                        modifier = Modifier.padding(horizontal = 4.dp)
+                    )
+                    TodayInfoCards(
+                        fastingToday = state.fastingToday,
+                        dailyHadith = state.dailyHadith,
+                        dailyHadithReference = state.dailyHadithReference,
+                        dailyHadithGrade = state.dailyHadithGrade,
+                        dailyDua = state.dailyDua,
+                        onHadithClick = state.dailyHadithId?.let { id -> { onOpenHadith(id) } },
+                        modifier = Modifier.padding(horizontal = 4.dp)
+                    )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
             }
         }
     }

@@ -54,6 +54,8 @@ import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.components.organisms.NimazSearchBar
 import com.arshadshah.nimaz.presentation.viewmodel.settings.SettingsEvent
 import com.arshadshah.nimaz.presentation.viewmodel.settings.SettingsViewModel
+import com.arshadshah.nimaz.presentation.components.molecules.NimazScrollbarBox
+import androidx.compose.foundation.lazy.rememberLazyListState
 
 /** Localised label for a reciter's [RecitationStyle]. */
 @Composable
@@ -97,128 +99,135 @@ fun SelectReciterScreen(
             )
         }
     ) { paddingValues ->
-        LazyColumn(
+        val scrollbarState = rememberLazyListState()
+        NimazScrollbarBox(
+            state = scrollbarState,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues),
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            item {
-                NimazSearchBar(
-                    query = searchQuery,
-                    onQueryChange = { searchQuery = it },
-                    onClear = { searchQuery = "" },
-                    placeholder = stringResource(R.string.select_reciter_search_hint)
-                )
-            }
+            LazyColumn(
+                state = scrollbarState,
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                item {
+                    NimazSearchBar(
+                        query = searchQuery,
+                        onQueryChange = { searchQuery = it },
+                        onClear = { searchQuery = "" },
+                        placeholder = stringResource(R.string.select_reciter_search_hint)
+                    )
+                }
 
-            // Currently Selected Section
-            item {
-                Text(
-                    text = stringResource(R.string.select_reciter_currently_selected),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    letterSpacing = MaterialTheme.typography.labelSmall.letterSpacing,
-                    modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
-                )
-            }
+                // Currently Selected Section
+                item {
+                    Text(
+                        text = stringResource(R.string.select_reciter_currently_selected),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        letterSpacing = MaterialTheme.typography.labelSmall.letterSpacing,
+                        modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
+                    )
+                }
 
-            item {
-                NimazCard(
-                    style = NimazCardStyle.FILLED,
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
-                    tone = NimazTone.ACCENT
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(15.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                item {
+                    NimazCard(
+                        style = NimazCardStyle.FILLED,
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(16.dp),
+                        tone = NimazTone.ACCENT
                     ) {
-                        Box(
+                        Row(
                             modifier = Modifier
-                                .size(56.dp)
-                                .clip(RoundedCornerShape(14.dp))
-                                .background(MaterialTheme.colorScheme.surfaceVariant),
-                            contentAlignment = Alignment.Center
+                                .fillMaxWidth()
+                                .padding(15.dp),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            NimazIcon(
-                                imageVector = Icons.Default.Mic,
-                                contentDescription = null,
-                                variant = NimazIconVariant.PRIMARY,
-                                iconSize = 28.dp
+                            Box(
+                                modifier = Modifier
+                                    .size(56.dp)
+                                    .clip(RoundedCornerShape(14.dp))
+                                    .background(MaterialTheme.colorScheme.surfaceVariant),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                NimazIcon(
+                                    imageVector = Icons.Default.Mic,
+                                    contentDescription = null,
+                                    variant = NimazIconVariant.PRIMARY,
+                                    iconSize = 28.dp
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.width(15.dp))
+
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = currentReciter.displayName,
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                                Text(
+                                    text = currentReciter.country,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+
+                            NimazBadge(
+                                text = stringResource(R.string.active),
+                                tone = NimazTone.ACCENT,
+                                emphasis = NimazBadgeEmphasis.SOFT,
+                                size = NimazBadgeSize.LARGE,
+                                icon = Icons.Filled.FiberManualRecord
                             )
                         }
-
-                        Spacer(modifier = Modifier.width(15.dp))
-
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = currentReciter.displayName,
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.SemiBold
-                            )
-                            Text(
-                                text = currentReciter.country,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-
-                        NimazBadge(
-                            text = stringResource(R.string.active),
-                            tone = NimazTone.ACCENT,
-                            emphasis = NimazBadgeEmphasis.SOFT,
-                            size = NimazBadgeSize.LARGE,
-                            icon = Icons.Filled.FiberManualRecord
-                        )
                     }
                 }
-            }
 
-            // Popular Reciters Section
-            item {
-                Text(
-                    text = stringResource(R.string.select_reciter_popular),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(top = 16.dp, bottom = 4.dp)
-                )
-            }
+                // Popular Reciters Section
+                item {
+                    Text(
+                        text = stringResource(R.string.select_reciter_popular),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(top = 16.dp, bottom = 4.dp)
+                    )
+                }
 
-            items(
-                items = filteredReciters,
-                key = { it.id }
-            ) { reciter ->
-                val isSelected = reciter == currentReciter
-                val isThisPreviewing = preview.reciterId == reciter.id
+                items(
+                    items = filteredReciters,
+                    key = { it.id }
+                ) { reciter ->
+                    val isSelected = reciter == currentReciter
+                    val isThisPreviewing = preview.reciterId == reciter.id
 
-                VoiceOptionCard(
-                    name = reciter.displayName,
-                    primaryTag = recitationStyleLabel(reciter.style),
-                    secondaryTag = reciter.country,
-                    isSelected = isSelected,
-                    isPlaying = isThisPreviewing && preview.isPlaying,
-                    isDownloading = isThisPreviewing && preview.isDownloading,
-                    // Reciter audio streams — no separate download step to gate.
-                    isDownloaded = true,
-                    previewContentDescription = stringResource(R.string.cd_preview),
-                    onClick = {
-                        viewModel.onEvent(SettingsEvent.SetReciter(reciter.id))
-                    },
-                    onPreviewClick = {
-                        if (isThisPreviewing && preview.isPlaying) {
-                            viewModel.onEvent(SettingsEvent.StopReciterPreview)
-                        } else {
-                            viewModel.onEvent(SettingsEvent.PreviewReciter(reciter.id))
+                    VoiceOptionCard(
+                        name = reciter.displayName,
+                        primaryTag = recitationStyleLabel(reciter.style),
+                        secondaryTag = reciter.country,
+                        isSelected = isSelected,
+                        isPlaying = isThisPreviewing && preview.isPlaying,
+                        isDownloading = isThisPreviewing && preview.isDownloading,
+                        // Reciter audio streams — no separate download step to gate.
+                        isDownloaded = true,
+                        previewContentDescription = stringResource(R.string.cd_preview),
+                        onClick = {
+                            viewModel.onEvent(SettingsEvent.SetReciter(reciter.id))
+                        },
+                        onPreviewClick = {
+                            if (isThisPreviewing && preview.isPlaying) {
+                                viewModel.onEvent(SettingsEvent.StopReciterPreview)
+                            } else {
+                                viewModel.onEvent(SettingsEvent.PreviewReciter(reciter.id))
+                            }
                         }
-                    }
-                )
-            }
+                    )
+                }
 
-            item { Spacer(modifier = Modifier.height(16.dp)) }
+                item { Spacer(modifier = Modifier.height(16.dp)) }
+            }
         }
     }
 }

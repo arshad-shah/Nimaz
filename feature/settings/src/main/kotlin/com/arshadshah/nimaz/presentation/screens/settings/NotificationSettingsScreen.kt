@@ -42,6 +42,8 @@ import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.viewmodel.settings.NotificationSettingsUiState
 import com.arshadshah.nimaz.presentation.viewmodel.settings.SettingsEvent
 import com.arshadshah.nimaz.presentation.viewmodel.settings.SettingsViewModel
+import com.arshadshah.nimaz.presentation.components.molecules.NimazScrollbarBox
+import androidx.compose.foundation.lazy.rememberLazyListState
 
 /**
  * Notifications hub (#301): a master switch and five rows into focused subscreens.
@@ -89,112 +91,117 @@ fun NotificationSettingsScreen(
             )
         }
     ) { paddingValues ->
-        LazyColumn(
+        val scrollbarState = rememberLazyListState()
+        NimazScrollbarBox(
+            state = scrollbarState,
             modifier = Modifier
                 .fillMaxSize()
-                .testTag(ScreenTags.NotificationsList)
-                .padding(paddingValues)
-                .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .padding(paddingValues),
         ) {
-            item { Spacer(modifier = Modifier.height(4.dp)) }
-
-            item {
-                NimazMenuGroup {
-                    NimazSettingsItem(
-                        title = stringResource(R.string.notification_settings_enable),
-                        subtitle = stringResource(R.string.notification_settings_enable_subtitle),
-                        checked = notificationState.notificationsEnabled,
-                        onCheckedChange = {
-                            viewModel.onEvent(SettingsEvent.SetNotificationsEnabled(it))
-                        }
-                    )
-                }
-            }
-
-            if (notificationState.notificationsEnabled) {
-                if (diagnostics?.hasProblem == true) {
-                    item {
-                        NimazBanner(
-                            title = stringResource(R.string.notif_hub_delivery_warning),
-                            variant = NimazBannerVariant.WARNING,
-                            onClick = onNavigateToDiagnostics,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    }
-                }
+            LazyColumn(
+                state = scrollbarState,
+                modifier = Modifier.fillMaxSize().testTag(ScreenTags.NotificationsList).padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                item { Spacer(modifier = Modifier.height(4.dp)) }
 
                 item {
                     NimazMenuGroup {
                         NimazSettingsItem(
-                            title = stringResource(R.string.notif_hub_prayers_title),
-                            subtitle = prayersSubtitle(
-                                summary.fajrAlertStyle,
-                                summary.reminderEnabled,
-                                summary.reminderMinutes
-                            ),
-                            value = stringResource(
-                                R.string.notif_hub_count_of,
-                                summary.enabledPrayerCount,
-                                5
-                            ),
-                            onClick = onNavigateToPrayers,
-                            showArrow = true
-                        )
-                        NimazMenuDivider(inset = false)
-                        NimazSettingsItem(
-                            title = stringResource(R.string.notif_hub_sound_title),
-                            subtitle = soundSubtitle(notificationState),
-                            onClick = onNavigateToSound,
-                            showArrow = true
-                        )
-                    }
-                }
-
-                item {
-                    NimazMenuGroup {
-                        NimazSettingsItem(
-                            title = stringResource(R.string.worship_settings_title),
-                            subtitle = stringResource(R.string.notif_hub_worship_subtitle),
-                            value = stringResource(
-                                R.string.notif_hub_count_on,
-                                notificationState.worshipReminders.count { it.value }
-                            ),
-                            onClick = onNavigateToWorshipReminders,
-                            showArrow = true
-                        )
-                        NimazMenuDivider(inset = false)
-                        NimazSettingsItem(
-                            title = stringResource(R.string.notif_hub_weekly_title),
-                            subtitle = weeklySubtitle(notificationState),
-                            onClick = onNavigateToWeekly,
-                            showArrow = true
-                        )
-                    }
-                }
-
-                item {
-                    NimazMenuGroup {
-                        NimazSettingsItem(
-                            title = stringResource(R.string.notif_hub_diagnostics_title),
-                            subtitle = stringResource(R.string.notif_hub_diagnostics_subtitle),
-                            onClick = onNavigateToDiagnostics,
-                            showArrow = true,
-                            trailingContent = if (diagnostics?.hasProblem == true) {
-                                {
-                                    NimazBadge(
-                                        text = stringResource(R.string.notif_diag_needs_attention),
-                                        tone = NimazTone.WARNING
-                                    )
-                                }
-                            } else {
-                                null
+                            title = stringResource(R.string.notification_settings_enable),
+                            subtitle = stringResource(R.string.notification_settings_enable_subtitle),
+                            checked = notificationState.notificationsEnabled,
+                            onCheckedChange = {
+                                viewModel.onEvent(SettingsEvent.SetNotificationsEnabled(it))
                             }
                         )
                     }
                 }
+
+                if (notificationState.notificationsEnabled) {
+                    if (diagnostics?.hasProblem == true) {
+                        item {
+                            NimazBanner(
+                                title = stringResource(R.string.notif_hub_delivery_warning),
+                                variant = NimazBannerVariant.WARNING,
+                                onClick = onNavigateToDiagnostics,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
+                    }
+
+                    item {
+                        NimazMenuGroup {
+                            NimazSettingsItem(
+                                title = stringResource(R.string.notif_hub_prayers_title),
+                                subtitle = prayersSubtitle(
+                                    summary.fajrAlertStyle,
+                                    summary.reminderEnabled,
+                                    summary.reminderMinutes
+                                ),
+                                value = stringResource(
+                                    R.string.notif_hub_count_of,
+                                    summary.enabledPrayerCount,
+                                    5
+                                ),
+                                onClick = onNavigateToPrayers,
+                                showArrow = true
+                            )
+                            NimazMenuDivider(inset = false)
+                            NimazSettingsItem(
+                                title = stringResource(R.string.notif_hub_sound_title),
+                                subtitle = soundSubtitle(notificationState),
+                                onClick = onNavigateToSound,
+                                showArrow = true
+                            )
+                        }
+                    }
+
+                    item {
+                        NimazMenuGroup {
+                            NimazSettingsItem(
+                                title = stringResource(R.string.worship_settings_title),
+                                subtitle = stringResource(R.string.notif_hub_worship_subtitle),
+                                value = stringResource(
+                                    R.string.notif_hub_count_on,
+                                    notificationState.worshipReminders.count { it.value }
+                                ),
+                                onClick = onNavigateToWorshipReminders,
+                                showArrow = true
+                            )
+                            NimazMenuDivider(inset = false)
+                            NimazSettingsItem(
+                                title = stringResource(R.string.notif_hub_weekly_title),
+                                subtitle = weeklySubtitle(notificationState),
+                                onClick = onNavigateToWeekly,
+                                showArrow = true
+                            )
+                        }
+                    }
+
+                    item {
+                        NimazMenuGroup {
+                            NimazSettingsItem(
+                                title = stringResource(R.string.notif_hub_diagnostics_title),
+                                subtitle = stringResource(R.string.notif_hub_diagnostics_subtitle),
+                                onClick = onNavigateToDiagnostics,
+                                showArrow = true,
+                                trailingContent = if (diagnostics?.hasProblem == true) {
+                                    {
+                                        NimazBadge(
+                                            text = stringResource(R.string.notif_diag_needs_attention),
+                                            tone = NimazTone.WARNING
+                                        )
+                                    }
+                                } else {
+                                    null
+                                }
+                            )
+                        }
+                    }
+                }
+                item { Spacer(modifier = Modifier.height(16.dp)) }
             }
-            item { Spacer(modifier = Modifier.height(16.dp)) }
         }
     }
 }

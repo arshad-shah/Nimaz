@@ -96,6 +96,7 @@ import com.arshadshah.nimaz.presentation.viewmodel.quran.QuranReaderUiState
 import com.arshadshah.nimaz.presentation.viewmodel.quran.QuranViewModel
 import com.arshadshah.nimaz.presentation.viewmodel.quran.ReadingMode
 import kotlinx.coroutines.launch
+import com.arshadshah.nimaz.presentation.components.molecules.NimazScrollbarBox
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -929,82 +930,87 @@ fun QuranReaderScreen(
                         onGoTo = { showGoToSheet = true },
                         goToContentDescription = stringResource(R.string.reader_go_to),
                     )
-                    LazyColumn(
+                    NimazScrollbarBox(
                         state = listState,
                         modifier = Modifier.weight(1f),
-                        contentPadding = PaddingValues(bottom = listBottomPadding)
                     ) {
-                        // Surah Banner or Juz Banner
-                        if (state.readingMode == ReadingMode.SURAH) {
-                            state.surahWithAyahs?.let { surahWithAyahs ->
-                                item(key = "banner") {
-                                    SurahHeaderCartouche(
-                                        surah = surahWithAyahs.surah,
-                                        modifier = Modifier.padding(
-                                            horizontal = 12.dp,
-                                            vertical = 8.dp
-                                        ),
-                                        showBismillah = (surahNumber ?: 0) != 9 && (surahNumber
-                                            ?: 0) != 1
-                                    )
+                        LazyColumn(
+                            state = listState,
+                            modifier = Modifier.fillMaxSize(),
+                            contentPadding = PaddingValues(bottom = listBottomPadding)
+                        ) {
+                            // Surah Banner or Juz Banner
+                            if (state.readingMode == ReadingMode.SURAH) {
+                                state.surahWithAyahs?.let { surahWithAyahs ->
+                                    item(key = "banner") {
+                                        SurahHeaderCartouche(
+                                            surah = surahWithAyahs.surah,
+                                            modifier = Modifier.padding(
+                                                horizontal = 12.dp,
+                                                vertical = 8.dp
+                                            ),
+                                            showBismillah = (surahNumber ?: 0) != 9 && (surahNumber
+                                                ?: 0) != 1
+                                        )
+                                    }
                                 }
                             }
-                        }
 
-                        // Ayahs
-                        items(
-                            items = displayAyahs,
-                            key = { it.id }
-                        ) { ayah ->
-                            // The mushaf's own outline starts a new subject here (schemaVersion 24).
-                            // Printed above the verse it opens on, so reading down the list reads as
-                            // passages rather than as 286 undifferentiated verses.
-                            state.passageStarts[ayah.numberInSurah]?.let { passage ->
-                                PassageHeading(passage = passage)
-                            }
+                            // Ayahs
+                            items(
+                                items = displayAyahs,
+                                key = { it.id }
+                            ) { ayah ->
+                                // The mushaf's own outline starts a new subject here (schemaVersion 24).
+                                // Printed above the verse it opens on, so reading down the list reads as
+                                // passages rather than as 286 undifferentiated verses.
+                                state.passageStarts[ayah.numberInSurah]?.let { passage ->
+                                    PassageHeading(passage = passage)
+                                }
 
-                            if (state.readingMode == ReadingMode.JUZ && ayah.id in surahStartIds) {
-                                val surah = surahByNumber[ayah.surahNumber]
-                                PageSurahSeparator(
-                                    surahNumber = ayah.surahNumber,
-                                    surahNameArabic = surah?.nameArabic ?: "",
-                                    surahNameEnglish = surah?.nameEnglish
-                                        ?: stringResource(
-                                            R.string.surah_number_format,
-                                            ayah.surahNumber
-                                        ),
-                                    showBismillah = ayah.numberInSurah == 1 && ayah.surahNumber != 1 && ayah.surahNumber != 9
+                                if (state.readingMode == ReadingMode.JUZ && ayah.id in surahStartIds) {
+                                    val surah = surahByNumber[ayah.surahNumber]
+                                    PageSurahSeparator(
+                                        surahNumber = ayah.surahNumber,
+                                        surahNameArabic = surah?.nameArabic ?: "",
+                                        surahNameEnglish = surah?.nameEnglish
+                                            ?: stringResource(
+                                                R.string.surah_number_format,
+                                                ayah.surahNumber
+                                            ),
+                                        showBismillah = ayah.numberInSurah == 1 && ayah.surahNumber != 1 && ayah.surahNumber != 9
+                                    )
+                                }
+
+                                val isHighlighted =
+                                    audioState.currentAyahId == ayah.id && audioState.isActive
+                                val isAudioPlaying = isHighlighted && audioState.isPlaying
+
+                                AyahItem(
+                                    ayah = ayah,
+                                    showTranslation = state.showTranslation,
+                                    showTransliteration = state.showTransliteration,
+                                    arabicFontSize = state.arabicFontSize,
+                                    arabicFontFamily = state.arabicFontFamily,
+                                    translationLanguage = state.translationLanguage,
+                                    fontSize = state.fontSize,
+                                    isHighlighted = isHighlighted,
+                                    isAudioPlaying = isAudioPlaying,
+                                    isFavorite = ayah.id in favoriteAyahIds,
+                                    hasNote = ayah.id in state.ayahNotes,
+                                    isKhatamRead = ayah.id in state.khatamReadAyahIds,
+                                    isKhatamMode = state.activeKhatamId != null,
+                                    showTajweed = state.showTajweed,
+                                    tajweedUnderline = state.tajweedUnderline,
+                                    onOpenActions = { sheetAyah = ayah },
+                                    onKhatamToggle = {
+                                        viewModel.onEvent(QuranEvent.ToggleKhatamAyah(ayah.id))
+                                    },
+                                    // No rule under the final verse — there is nothing below it to
+                                    // divide from, and the line would hang over the list's padding.
+                                    showDivider = ayah.id != displayAyahs.lastOrNull()?.id,
                                 )
                             }
-
-                            val isHighlighted =
-                                audioState.currentAyahId == ayah.id && audioState.isActive
-                            val isAudioPlaying = isHighlighted && audioState.isPlaying
-
-                            AyahItem(
-                                ayah = ayah,
-                                showTranslation = state.showTranslation,
-                                showTransliteration = state.showTransliteration,
-                                arabicFontSize = state.arabicFontSize,
-                                arabicFontFamily = state.arabicFontFamily,
-                                translationLanguage = state.translationLanguage,
-                                fontSize = state.fontSize,
-                                isHighlighted = isHighlighted,
-                                isAudioPlaying = isAudioPlaying,
-                                isFavorite = ayah.id in favoriteAyahIds,
-                                hasNote = ayah.id in state.ayahNotes,
-                                isKhatamRead = ayah.id in state.khatamReadAyahIds,
-                                isKhatamMode = state.activeKhatamId != null,
-                                showTajweed = state.showTajweed,
-                                tajweedUnderline = state.tajweedUnderline,
-                                onOpenActions = { sheetAyah = ayah },
-                                onKhatamToggle = {
-                                    viewModel.onEvent(QuranEvent.ToggleKhatamAyah(ayah.id))
-                                },
-                                // No rule under the final verse — there is nothing below it to
-                                // divide from, and the line would hang over the list's padding.
-                                showDivider = ayah.id != displayAyahs.lastOrNull()?.id,
-                            )
                         }
                     }
                 }

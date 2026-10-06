@@ -33,6 +33,8 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazLoadingState
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.viewmodel.content.DuaEvent
 import com.arshadshah.nimaz.presentation.viewmodel.content.DuaViewModel
+import com.arshadshah.nimaz.presentation.components.molecules.NimazScrollbarBox
+import androidx.compose.foundation.lazy.rememberLazyListState
 
 /**
  * Every dua for one occasion, gathered across the curated categories.
@@ -107,20 +109,29 @@ fun DuaOccasionScreen(
                 )
             }
 
-            else -> LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                items(items = state.duas, key = { it.id }) { dua ->
-                    DuaListItem(
-                        dua = dua,
-                        onClick = { onNavigateToDua(dua.id) }
-                    )
+            else -> {
+                val scrollbarState = rememberLazyListState()
+                NimazScrollbarBox(
+                    state = scrollbarState,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues),
+                ) {
+                    LazyColumn(
+                        state = scrollbarState,
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        items(items = state.duas, key = { it.id }) { dua ->
+                            DuaListItem(
+                                dua = dua,
+                                onClick = { onNavigateToDua(dua.id) }
+                            )
+                        }
+                        item { Spacer(modifier = Modifier.height(16.dp)) }
+                    }
                 }
-                item { Spacer(modifier = Modifier.height(16.dp)) }
             }
         }
     }

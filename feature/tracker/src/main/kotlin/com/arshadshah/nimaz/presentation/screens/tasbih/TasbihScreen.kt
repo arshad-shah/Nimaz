@@ -93,6 +93,7 @@ import com.arshadshah.nimaz.presentation.viewmodel.tracker.TasbihCounterStyle
 import com.arshadshah.nimaz.presentation.viewmodel.tracker.TasbihCounterUiState
 import com.arshadshah.nimaz.presentation.viewmodel.tracker.TasbihEvent
 import com.arshadshah.nimaz.presentation.viewmodel.tracker.TasbihViewModel
+import com.arshadshah.nimaz.presentation.components.molecules.NimazScrollbarBox
 
 @Composable
 fun TasbihScreen(
@@ -197,24 +198,27 @@ fun TasbihScreen(
 
                 Row(modifier = Modifier.fillMaxSize()) {
                     // LEFT pane (~40%): current-tasbih info + count capsule.
-                    Column(
-                        modifier = Modifier
-                            .weight(0.4f)
-                            .fillMaxHeight()
-                            .verticalScroll(rememberScrollState())
-                            .padding(horizontal = 20.dp, vertical = 16.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    val scrollbarScrollState = rememberScrollState()
+                    NimazScrollbarBox(
+                        state = scrollbarScrollState,
+                        modifier = Modifier.weight(0.4f).fillMaxHeight(),
                     ) {
-                        CurrentTasbihInfoCard(
-                            arabic = counterState.selectedPreset?.arabicText,
-                            name = counterState.selectedPreset?.name
-                                ?: stringResource(R.string.free_count_label),
-                            translation = counterState.selectedPreset?.translation,
-                            target = counterState.targetCount,
-                            onClick = { showCurrentSheet = true }
-                        )
-                        capsule()
+                        Column(
+                            modifier = Modifier.fillMaxSize().verticalScroll(scrollbarScrollState)
+                                .padding(horizontal = 20.dp, vertical = 16.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            CurrentTasbihInfoCard(
+                                arabic = counterState.selectedPreset?.arabicText,
+                                name = counterState.selectedPreset?.name
+                                    ?: stringResource(R.string.free_count_label),
+                                translation = counterState.selectedPreset?.translation,
+                                target = counterState.targetCount,
+                                onClick = { showCurrentSheet = true }
+                            )
+                            capsule()
+                        }
                     }
 
                     // RIGHT pane (~60%): the counter + controls.

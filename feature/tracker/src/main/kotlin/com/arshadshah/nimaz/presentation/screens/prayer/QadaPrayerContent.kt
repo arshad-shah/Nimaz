@@ -34,6 +34,8 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazEmptyState
 import com.arshadshah.nimaz.presentation.components.molecules.NimazQadaPrayerItem
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.viewmodel.tracker.QadaPrayersUiState
+import com.arshadshah.nimaz.presentation.components.molecules.NimazScrollbarBox
+import androidx.compose.foundation.lazy.rememberLazyListState
 
 /**
  * The make-up prayers a user owes: a summary, then the list, grouped by month.
@@ -55,46 +57,53 @@ fun QadaPrayerList(
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(horizontal = 20.dp, vertical = 16.dp),
 ) {
-    LazyColumn(
+    val scrollbarState = rememberLazyListState()
+    NimazScrollbarBox(
+        state = scrollbarState,
         modifier = modifier.fillMaxSize(),
-        contentPadding = contentPadding,
-        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        item {
-            QadaSummaryCard(totalMissed = state.totalMissed)
-        }
-
-        if (state.missedPrayers.isEmpty() && !state.isLoading) {
+        LazyColumn(
+            state = scrollbarState,
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = contentPadding,
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
             item {
-                NimazEmptyState(
-                    title = stringResource(R.string.all_caught_up),
-                    message = stringResource(R.string.all_caught_up_message)
-                )
+                QadaSummaryCard(totalMissed = state.totalMissed)
             }
-        }
 
-        state.groupedByMonth.forEach { (monthYear, prayers) ->
+            if (state.missedPrayers.isEmpty() && !state.isLoading) {
+                item {
+                    NimazEmptyState(
+                        title = stringResource(R.string.all_caught_up),
+                        message = stringResource(R.string.all_caught_up_message)
+                    )
+                }
+            }
+
+            state.groupedByMonth.forEach { (monthYear, prayers) ->
+                item {
+                    Text(
+                        text = monthYear,
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(vertical = 8.dp)
+                    )
+                }
+
+                items(prayers, key = { it.id }) { prayer ->
+                    NimazQadaPrayerItem(
+                        prayer = prayer,
+                        actionText = stringResource(R.string.qada_mark_made_up),
+                        onMarkCompleted = { onMarkCompleted(prayer) }
+                    )
+                }
+            }
+
             item {
-                Text(
-                    text = monthYear,
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.padding(vertical = 8.dp)
-                )
+                Spacer(modifier = Modifier.height(16.dp))
             }
-
-            items(prayers, key = { it.id }) { prayer ->
-                NimazQadaPrayerItem(
-                    prayer = prayer,
-                    actionText = stringResource(R.string.qada_mark_made_up),
-                    onMarkCompleted = { onMarkCompleted(prayer) }
-                )
-            }
-        }
-
-        item {
-            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }

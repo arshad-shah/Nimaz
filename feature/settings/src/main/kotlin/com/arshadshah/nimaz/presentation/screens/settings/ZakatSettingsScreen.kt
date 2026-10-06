@@ -53,6 +53,8 @@ import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.viewmodel.settings.ZakatSettingsEvent
 import com.arshadshah.nimaz.presentation.viewmodel.settings.ZakatSettingsUiState
 import com.arshadshah.nimaz.presentation.viewmodel.settings.ZakatSettingsViewModel
+import com.arshadshah.nimaz.presentation.components.molecules.NimazScrollbarBox
+import androidx.compose.foundation.lazy.rememberLazyListState
 
 /**
  * The zakat basis: which nisab applies, what gold and silver are worth, and which currency
@@ -98,122 +100,128 @@ fun ZakatSettingsScreen(
             )
         },
     ) { paddingValues ->
-        LazyColumn(
+        val scrollbarState = rememberLazyListState()
+        NimazScrollbarBox(
+            state = scrollbarState,
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
-                .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+                .padding(paddingValues),
         ) {
-            item { Spacer(modifier = Modifier.height(4.dp)) }
+            LazyColumn(
+                state = scrollbarState,
+                modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                item { Spacer(modifier = Modifier.height(4.dp)) }
 
-            // ── 1. The threshold these settings produce ──────────────────────────────────
-            item { NisabPreviewHero(state = state) }
+                // ── 1. The threshold these settings produce ──────────────────────────────────
+                item { NisabPreviewHero(state = state) }
 
-            // ── 2. Which basis ──────────────────────────────────────────────────────────
-            item {
-                NimazSectionHeader(title = stringResource(R.string.zakat_section_nisab))
-                // What nisab *is*, above the choice — the same line the calculator's accordion
-                // carried when these controls lived there.
-                Text(
-                    text = stringResource(R.string.zakat_section_nisab_subtitle),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(start = 4.dp, bottom = 4.dp),
-                )
-            }
-            item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                ) {
-                    NisabOptionCard(
-                        label = stringResource(R.string.gold),
-                        // Formatted, not truncated: `price.toInt()` rendered a silver price of
-                        // 0.80 as "0", and a hardcoded "$" ignored the chosen currency.
-                        subtitle = stringResource(
-                            R.string.zakat_nisab_gold_subtitle,
-                            formatCurrency(state.goldPricePerGram, state.currency),
-                        ),
-                        isSelected = state.nisabType == NisabType.GOLD,
-                        accentColor = NimazColors.ZakatColors.Gold,
-                        onClick = {
-                            viewModel.onEvent(ZakatSettingsEvent.SetNisabType(NisabType.GOLD))
-                        },
-                        modifier = Modifier.weight(1f),
-                    )
-                    NisabOptionCard(
-                        label = stringResource(R.string.silver),
-                        subtitle = stringResource(
-                            R.string.zakat_nisab_silver_subtitle,
-                            formatCurrency(state.silverPricePerGram, state.currency),
-                        ),
-                        isSelected = state.nisabType == NisabType.SILVER,
-                        accentColor = NimazColors.ZakatColors.Silver,
-                        onClick = {
-                            viewModel.onEvent(ZakatSettingsEvent.SetNisabType(NisabType.SILVER))
-                        },
-                        modifier = Modifier.weight(1f),
-                    )
-                }
-            }
-            item {
-                Text(
-                    text = stringResource(R.string.zakat_settings_nisab_hint),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(horizontal = 4.dp),
-                )
-            }
-
-            // ── 3. What the metals are worth ────────────────────────────────────────────
-            item { NimazSectionHeader(title = stringResource(R.string.zakat_metal_prices)) }
-            item {
-                NimazMenuGroup {
-                    PriceRow(
-                        label = stringResource(R.string.zakat_gold_price_label),
-                        price = state.goldPricePerGram,
-                        currency = state.currency,
-                        onPriceChange = {
-                            viewModel.onEvent(ZakatSettingsEvent.SetGoldPrice(it))
-                        },
-                    )
-                    NimazMenuDivider(inset = false)
-                    PriceRow(
-                        label = stringResource(R.string.zakat_silver_price_label),
-                        price = state.silverPricePerGram,
-                        currency = state.currency,
-                        onPriceChange = {
-                            viewModel.onEvent(ZakatSettingsEvent.SetSilverPrice(it))
-                        },
-                    )
-                    // Inside the group, attached to the two fields it is about: these are
-                    // starting points, and a default read as a market rate is how a zakat
-                    // figure goes quietly wrong.
+                // ── 2. Which basis ──────────────────────────────────────────────────────────
+                item {
+                    NimazSectionHeader(title = stringResource(R.string.zakat_section_nisab))
+                    // What nisab *is*, above the choice — the same line the calculator's accordion
+                    // carried when these controls lived there.
                     Text(
-                        text = stringResource(R.string.zakat_metal_prices_hint),
+                        text = stringResource(R.string.zakat_section_nisab_subtitle),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 14.dp),
+                        modifier = Modifier.padding(start = 4.dp, bottom = 4.dp),
                     )
                 }
-            }
-
-            // ── 4. The unit everything is read in ───────────────────────────────────────
-            item { NimazSectionHeader(title = stringResource(R.string.zakat_currency)) }
-            item {
-                NimazMenuGroup {
-                    NimazSettingsItem(
-                        title = stringResource(R.string.zakat_currency),
-                        subtitle = currencyLabel(state.currency),
-                        value = state.currency,
-                        onClick = { showCurrencyPicker = true },
-                        showArrow = true,
+                item {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    ) {
+                        NisabOptionCard(
+                            label = stringResource(R.string.gold),
+                            // Formatted, not truncated: `price.toInt()` rendered a silver price of
+                            // 0.80 as "0", and a hardcoded "$" ignored the chosen currency.
+                            subtitle = stringResource(
+                                R.string.zakat_nisab_gold_subtitle,
+                                formatCurrency(state.goldPricePerGram, state.currency),
+                            ),
+                            isSelected = state.nisabType == NisabType.GOLD,
+                            accentColor = NimazColors.ZakatColors.Gold,
+                            onClick = {
+                                viewModel.onEvent(ZakatSettingsEvent.SetNisabType(NisabType.GOLD))
+                            },
+                            modifier = Modifier.weight(1f),
+                        )
+                        NisabOptionCard(
+                            label = stringResource(R.string.silver),
+                            subtitle = stringResource(
+                                R.string.zakat_nisab_silver_subtitle,
+                                formatCurrency(state.silverPricePerGram, state.currency),
+                            ),
+                            isSelected = state.nisabType == NisabType.SILVER,
+                            accentColor = NimazColors.ZakatColors.Silver,
+                            onClick = {
+                                viewModel.onEvent(ZakatSettingsEvent.SetNisabType(NisabType.SILVER))
+                            },
+                            modifier = Modifier.weight(1f),
+                        )
+                    }
+                }
+                item {
+                    Text(
+                        text = stringResource(R.string.zakat_settings_nisab_hint),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(horizontal = 4.dp),
                     )
                 }
-            }
 
-            item { Spacer(modifier = Modifier.height(16.dp)) }
+                // ── 3. What the metals are worth ────────────────────────────────────────────
+                item { NimazSectionHeader(title = stringResource(R.string.zakat_metal_prices)) }
+                item {
+                    NimazMenuGroup {
+                        PriceRow(
+                            label = stringResource(R.string.zakat_gold_price_label),
+                            price = state.goldPricePerGram,
+                            currency = state.currency,
+                            onPriceChange = {
+                                viewModel.onEvent(ZakatSettingsEvent.SetGoldPrice(it))
+                            },
+                        )
+                        NimazMenuDivider(inset = false)
+                        PriceRow(
+                            label = stringResource(R.string.zakat_silver_price_label),
+                            price = state.silverPricePerGram,
+                            currency = state.currency,
+                            onPriceChange = {
+                                viewModel.onEvent(ZakatSettingsEvent.SetSilverPrice(it))
+                            },
+                        )
+                        // Inside the group, attached to the two fields it is about: these are
+                        // starting points, and a default read as a market rate is how a zakat
+                        // figure goes quietly wrong.
+                        Text(
+                            text = stringResource(R.string.zakat_metal_prices_hint),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 14.dp),
+                        )
+                    }
+                }
+
+                // ── 4. The unit everything is read in ───────────────────────────────────────
+                item { NimazSectionHeader(title = stringResource(R.string.zakat_currency)) }
+                item {
+                    NimazMenuGroup {
+                        NimazSettingsItem(
+                            title = stringResource(R.string.zakat_currency),
+                            subtitle = currencyLabel(state.currency),
+                            value = state.currency,
+                            onClick = { showCurrencyPicker = true },
+                            showArrow = true,
+                        )
+                    }
+                }
+
+                item { Spacer(modifier = Modifier.height(16.dp)) }
+            }
         }
     }
 

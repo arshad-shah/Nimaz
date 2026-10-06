@@ -104,6 +104,8 @@ import com.arshadshah.nimaz.presentation.viewmodel.search.SearchEvent
 import com.arshadshah.nimaz.presentation.viewmodel.search.SearchFilter
 import com.arshadshah.nimaz.presentation.viewmodel.search.SearchViewModel
 import com.arshadshah.nimaz.presentation.viewmodel.search.accepts
+import com.arshadshah.nimaz.presentation.components.molecules.NimazScrollbarBox
+import androidx.compose.foundation.lazy.rememberLazyListState
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -250,238 +252,245 @@ fun SearchScreen(
                 )
             }
 
-            LazyColumn(
+            val scrollbarState = rememberLazyListState()
+            NimazScrollbarBox(
+                state = scrollbarState,
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f),
-                contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                // AI-off discovery card — global search, resting state only.
-                if (enableAsk && !askState.aiEnabled && !askState.hintDismissed &&
-                    state.query.isEmpty()
+                LazyColumn(
+                    state = scrollbarState,
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    item(key = "ai_discover") {
-                        AskDiscoveryCard(
-                            onOpenSettings = onNavigateToSearchSettings,
-                            onDismiss = { askViewModel.onEvent(AskEvent.DismissHint) },
-                        )
-                    }
-                }
-
-                // The AI hero card for the current phase (thinking / answer / error).
-                if (askEnabled) {
-                    when (val phase = askState.phase) {
-                        AskPhase.Idle -> Unit
-                        AskPhase.Loading -> item(key = "ai_card") { AskLoadingCard() }
-                        is AskPhase.Answer -> item(key = "ai_card") {
-                            AskAnswerCard(answer = phase.answer, confidence = phase.confidence)
-                        }
-
-                        is AskPhase.Error -> item(key = "ai_card") {
-                            AskErrorCard(
-                                error = phase.error,
-                                onRetry = { askViewModel.onEvent(AskEvent.Submit) },
-                            )
-                        }
-                    }
-                }
-
-                if (answerPhase != null) {
-                    // Answer state: ONE merged list scoped by the top-bar filter —
-                    // cited proofs first (marked "Cited"), then the related
-                    // results driven by the AI's terms. A related result that is
-                    // also cited is dropped so nothing appears twice. While the
-                    // AI-terms lookup is still running, the keyword results the
-                    // user was already looking at stay on screen below the cited
-                    // rows and are swapped in place when it lands — the list
-                    // never blanks into a separate loading stage.
-                    val citedVisible = answerPhase.proofs
-                        .filter { it.source.matchesFilter(state.selectedFilter) }
-                    val citedIds = answerPhase.proofs.map { it.citationId }.toSet()
-                    val related = state.filteredResults
-                        .filterNot { it.citationKey() in citedIds }
-
-                    if (!state.isSearching) {
-                        item {
-                            Text(
-                                text = stringResource(
-                                    R.string.search_answer_count_format,
-                                    citedVisible.size + related.size,
-                                    citedVisible.size
-                                ),
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                    // AI-off discovery card — global search, resting state only.
+                    if (enableAsk && !askState.aiEnabled && !askState.hintDismissed &&
+                        state.query.isEmpty()
+                    ) {
+                        item(key = "ai_discover") {
+                            AskDiscoveryCard(
+                                onOpenSettings = onNavigateToSearchSettings,
+                                onDismiss = { askViewModel.onEvent(AskEvent.DismissHint) },
                             )
                         }
                     }
 
-                    items(citedVisible, key = { it.citationId }) { proof ->
-                        CitedProofCard(
-                            proof = proof,
-                            query = state.query,
-                            onClick = { onNavigateToProof(proof.target) }
-                        )
-                    }
-
-                    items(related, key = { it.key }) { result ->
-                        UnifiedResultCard(
-                            result = result,
-                            query = state.query,
-                            onNavigateToQuranAyah = onNavigateToQuranAyah,
-                            onNavigateToSurah = onNavigateToSurah,
-                            onNavigateToHadith = onNavigateToHadith,
-                            onNavigateToDua = onNavigateToDua,
-                            onNavigateToName = onNavigateToName,
-                        )
-                    }
-
-                    if (state.isSearching && related.isEmpty()) {
-                        item { SearchingIndicator() }
-                    }
-                } else if (state.query.isEmpty()) {
-                    // Resting: example questions to ask (AI on), then recent
-                    // searches and questions merged into one list.
+                    // The AI hero card for the current phase (thinking / answer / error).
                     if (askEnabled) {
-                        item {
-                            SectionHeader(title = stringResource(R.string.search_try_asking))
-                        }
-                        item {
-                            FlowRow(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                verticalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                listOf(
-                                    stringResource(R.string.ask_example_1),
-                                    stringResource(R.string.ask_example_2),
-                                    stringResource(R.string.ask_example_3),
-                                    stringResource(R.string.ask_example_4),
-                                ).forEach { example ->
-                                    NimazBadge(
-                                        text = example,
-                                        icon = Icons.Default.AutoAwesome,
-                                        shape = NimazBadgeShape.ROUNDED,
-                                        size = NimazBadgeSize.LARGE,
-                                        colors = NimazBadgeDefaults.colors(
-                                            tone = NimazTone.ACCENT,
-                                            emphasis = NimazBadgeEmphasis.OUTLINED
-                                        ),
-                                        onClick = {
-                                            viewModel.onEvent(SearchEvent.UpdateQuery(example))
-                                            askViewModel.onEvent(AskEvent.SelectRecent(example))
-                                        }
-                                    )
-                                }
+                        when (val phase = askState.phase) {
+                            AskPhase.Idle -> Unit
+                            AskPhase.Loading -> item(key = "ai_card") { AskLoadingCard() }
+                            is AskPhase.Answer -> item(key = "ai_card") {
+                                AskAnswerCard(answer = phase.answer, confidence = phase.confidence)
+                            }
+
+                            is AskPhase.Error -> item(key = "ai_card") {
+                                AskErrorCard(
+                                    error = phase.error,
+                                    onRetry = { askViewModel.onEvent(AskEvent.Submit) },
+                                )
                             }
                         }
                     }
 
-                    val mergedRecent =
+                    if (answerPhase != null) {
+                        // Answer state: ONE merged list scoped by the top-bar filter —
+                        // cited proofs first (marked "Cited"), then the related
+                        // results driven by the AI's terms. A related result that is
+                        // also cited is dropped so nothing appears twice. While the
+                        // AI-terms lookup is still running, the keyword results the
+                        // user was already looking at stay on screen below the cited
+                        // rows and are swapped in place when it lands — the list
+                        // never blanks into a separate loading stage.
+                        val citedVisible = answerPhase.proofs
+                            .filter { it.source.matchesFilter(state.selectedFilter) }
+                        val citedIds = answerPhase.proofs.map { it.citationId }.toSet()
+                        val related = state.filteredResults
+                            .filterNot { it.citationKey() in citedIds }
+
+                        if (!state.isSearching) {
+                            item {
+                                Text(
+                                    text = stringResource(
+                                        R.string.search_answer_count_format,
+                                        citedVisible.size + related.size,
+                                        citedVisible.size
+                                    ),
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+
+                        items(citedVisible, key = { it.citationId }) { proof ->
+                            CitedProofCard(
+                                proof = proof,
+                                query = state.query,
+                                onClick = { onNavigateToProof(proof.target) }
+                            )
+                        }
+
+                        items(related, key = { it.key }) { result ->
+                            UnifiedResultCard(
+                                result = result,
+                                query = state.query,
+                                onNavigateToQuranAyah = onNavigateToQuranAyah,
+                                onNavigateToSurah = onNavigateToSurah,
+                                onNavigateToHadith = onNavigateToHadith,
+                                onNavigateToDua = onNavigateToDua,
+                                onNavigateToName = onNavigateToName,
+                            )
+                        }
+
+                        if (state.isSearching && related.isEmpty()) {
+                            item { SearchingIndicator() }
+                        }
+                    } else if (state.query.isEmpty()) {
+                        // Resting: example questions to ask (AI on), then recent
+                        // searches and questions merged into one list.
                         if (askEnabled) {
-                            (state.recentSearches + askState.recentQuestions).distinct().take(10)
-                        } else {
-                            state.recentSearches
-                        }
-                    if (mergedRecent.isNotEmpty()) {
-                        item {
-                            SectionHeader(
-                                title = stringResource(R.string.search_recent),
-                                actionLabel = stringResource(R.string.cd_clear),
-                                onAction = { viewModel.onEvent(SearchEvent.ClearRecentSearches) }
-                            )
-                        }
-                        items(mergedRecent, key = { it }) { recentSearch ->
-                            RecentSearchItem(
-                                query = recentSearch,
-                                onClick = {
-                                    viewModel.onEvent(SearchEvent.SelectRecentSearch(recentSearch))
-                                    if (enableAsk) {
-                                        askViewModel.onEvent(AskEvent.UpdateQuestion(recentSearch))
+                            item {
+                                SectionHeader(title = stringResource(R.string.search_try_asking))
+                            }
+                            item {
+                                FlowRow(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    listOf(
+                                        stringResource(R.string.ask_example_1),
+                                        stringResource(R.string.ask_example_2),
+                                        stringResource(R.string.ask_example_3),
+                                        stringResource(R.string.ask_example_4),
+                                    ).forEach { example ->
+                                        NimazBadge(
+                                            text = example,
+                                            icon = Icons.Default.AutoAwesome,
+                                            shape = NimazBadgeShape.ROUNDED,
+                                            size = NimazBadgeSize.LARGE,
+                                            colors = NimazBadgeDefaults.colors(
+                                                tone = NimazTone.ACCENT,
+                                                emphasis = NimazBadgeEmphasis.OUTLINED
+                                            ),
+                                            onClick = {
+                                                viewModel.onEvent(SearchEvent.UpdateQuery(example))
+                                                askViewModel.onEvent(AskEvent.SelectRecent(example))
+                                            }
+                                        )
                                     }
-                                },
-                                onRemove = {
-                                    viewModel.onEvent(SearchEvent.RemoveRecentSearch(recentSearch))
                                 }
+                            }
+                        }
+
+                        val mergedRecent =
+                            if (askEnabled) {
+                                (state.recentSearches + askState.recentQuestions).distinct().take(10)
+                            } else {
+                                state.recentSearches
+                            }
+                        if (mergedRecent.isNotEmpty()) {
+                            item {
+                                SectionHeader(
+                                    title = stringResource(R.string.search_recent),
+                                    actionLabel = stringResource(R.string.cd_clear),
+                                    onAction = { viewModel.onEvent(SearchEvent.ClearRecentSearches) }
+                                )
+                            }
+                            items(mergedRecent, key = { it }) { recentSearch ->
+                                RecentSearchItem(
+                                    query = recentSearch,
+                                    onClick = {
+                                        viewModel.onEvent(SearchEvent.SelectRecentSearch(recentSearch))
+                                        if (enableAsk) {
+                                            askViewModel.onEvent(AskEvent.UpdateQuestion(recentSearch))
+                                        }
+                                    },
+                                    onRemove = {
+                                        viewModel.onEvent(SearchEvent.RemoveRecentSearch(recentSearch))
+                                    }
+                                )
+                            }
+                        }
+                    } else {
+                        // Typing: keyword results as-you-type (also the fallback list
+                        // while an ask is loading or errored).
+                        if (askEnabled && askState.phase is AskPhase.Idle) {
+                            item {
+                                Text(
+                                    text = stringResource(R.string.search_typing_hint),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+
+                        if (state.isSearching) {
+                            item { SearchingIndicator() }
+                        }
+
+                        // A failed search is a SECTION inside the list, not a screen: the query
+                        // box above it must stay usable, since trying different words is the
+                        // other thing a reader can do here. Before the no-results branch, which
+                        // is otherwise what a failure renders as.
+                        val searchError = state.error
+                        if (!state.isSearching && searchError != null) {
+                            item {
+                                NimazErrorState(
+                                    title = stringResource(searchError.message),
+                                    message = stringResource(R.string.search_failed_body),
+                                    kind = searchError.kind,
+                                    details = searchError.details,
+                                    variant = NimazErrorVariant.SECTION,
+                                    primaryAction = NimazErrorDefaults.retry(
+                                        onRetry = { viewModel.onEvent(SearchEvent.ExecuteSearch) },
+                                        label = stringResource(R.string.try_again),
+                                    ),
+                                )
+                            }
+                        }
+
+                        if (!state.isSearching && searchError == null &&
+                            state.filteredResults.isNotEmpty()
+                        ) {
+                            item {
+                                Text(
+                                    text = pluralStringResource(
+                                        R.plurals.search_matches_format,
+                                        statsState.totalResults,
+                                        statsState.totalResults
+                                    ),
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+
+                        items(state.filteredResults, key = { it.key }) { result ->
+                            UnifiedResultCard(
+                                result = result,
+                                query = state.query,
+                                onNavigateToQuranAyah = onNavigateToQuranAyah,
+                                onNavigateToSurah = onNavigateToSurah,
+                                onNavigateToHadith = onNavigateToHadith,
+                                onNavigateToDua = onNavigateToDua,
+                                onNavigateToName = onNavigateToName,
                             )
                         }
-                    }
-                } else {
-                    // Typing: keyword results as-you-type (also the fallback list
-                    // while an ask is loading or errored).
-                    if (askEnabled && askState.phase is AskPhase.Idle) {
-                        item {
-                            Text(
-                                text = stringResource(R.string.search_typing_hint),
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
 
-                    if (state.isSearching) {
-                        item { SearchingIndicator() }
-                    }
-
-                    // A failed search is a SECTION inside the list, not a screen: the query
-                    // box above it must stay usable, since trying different words is the
-                    // other thing a reader can do here. Before the no-results branch, which
-                    // is otherwise what a failure renders as.
-                    val searchError = state.error
-                    if (!state.isSearching && searchError != null) {
-                        item {
-                            NimazErrorState(
-                                title = stringResource(searchError.message),
-                                message = stringResource(R.string.search_failed_body),
-                                kind = searchError.kind,
-                                details = searchError.details,
-                                variant = NimazErrorVariant.SECTION,
-                                primaryAction = NimazErrorDefaults.retry(
-                                    onRetry = { viewModel.onEvent(SearchEvent.ExecuteSearch) },
-                                    label = stringResource(R.string.try_again),
-                                ),
-                            )
-                        }
-                    }
-
-                    if (!state.isSearching && searchError == null &&
-                        state.filteredResults.isNotEmpty()
-                    ) {
-                        item {
-                            Text(
-                                text = pluralStringResource(
-                                    R.plurals.search_matches_format,
-                                    statsState.totalResults,
-                                    statsState.totalResults
-                                ),
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
-
-                    items(state.filteredResults, key = { it.key }) { result ->
-                        UnifiedResultCard(
-                            result = result,
-                            query = state.query,
-                            onNavigateToQuranAyah = onNavigateToQuranAyah,
-                            onNavigateToSurah = onNavigateToSurah,
-                            onNavigateToHadith = onNavigateToHadith,
-                            onNavigateToDua = onNavigateToDua,
-                            onNavigateToName = onNavigateToName,
-                        )
-                    }
-
-                    if (!state.isSearching && searchError == null &&
-                        state.filteredResults.isEmpty()
-                    ) {
-                        item {
-                            NimazEmptyState(
-                                title = stringResource(R.string.no_results_format, state.query),
-                                message = stringResource(R.string.no_results_hint),
-                                icon = Icons.Default.Search,
-                                iconTint = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
+                        if (!state.isSearching && searchError == null &&
+                            state.filteredResults.isEmpty()
+                        ) {
+                            item {
+                                NimazEmptyState(
+                                    title = stringResource(R.string.no_results_format, state.query),
+                                    message = stringResource(R.string.no_results_hint),
+                                    icon = Icons.Default.Search,
+                                    iconTint = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
                         }
                     }
                 }

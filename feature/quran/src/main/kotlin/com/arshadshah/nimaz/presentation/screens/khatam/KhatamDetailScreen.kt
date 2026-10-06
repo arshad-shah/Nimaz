@@ -47,6 +47,8 @@ import com.arshadshah.nimaz.presentation.viewmodel.quran.KhatamDetailUiState
 import com.arshadshah.nimaz.presentation.viewmodel.quran.KhatamEvent
 import com.arshadshah.nimaz.presentation.viewmodel.quran.KhatamViewModel
 import kotlin.math.roundToInt
+import com.arshadshah.nimaz.presentation.components.molecules.NimazScrollbarBox
+import androidx.compose.foundation.lazy.rememberLazyListState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -183,56 +185,63 @@ private fun KhatamDetailContent(
         ),
     )
 
-    LazyColumn(
+    val scrollbarState = rememberLazyListState()
+    NimazScrollbarBox(
+        state = scrollbarState,
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(
-            start = NimazSpacing.Large,
-            end = NimazSpacing.Large,
-            top = contentPadding.calculateTopPadding() + NimazSpacing.Small,
-            bottom = contentPadding.calculateBottomPadding() + NimazSpacing.ExtraLarge,
-        ),
-        verticalArrangement = Arrangement.spacedBy(NimazSpacing.Medium),
     ) {
-        item(key = "hero") {
-            KhatamHeroCard(
-                khatam = khatam,
-                insights = insights,
-                accent = accent,
-                // The top bar already names the khatam.
-                showName = false,
-                showActiveBadge = khatam.isActive,
-                dailyReading = state.dailyReading,
-                continueLabel = when {
-                    !khatam.isActive -> stringResource(R.string.khatam_switch_plan)
-                    state.dailyReading?.isComplete == false -> stringResource(R.string.khatam_read_todays_portion)
-                    else -> continueText
-                },
-                onContinue = onContinue.takeIf { hasNextPosition || !khatam.isActive },
-            )
-        }
+        LazyColumn(
+            state = scrollbarState,
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(
+                start = NimazSpacing.Large,
+                end = NimazSpacing.Large,
+                top = contentPadding.calculateTopPadding() + NimazSpacing.Small,
+                bottom = contentPadding.calculateBottomPadding() + NimazSpacing.ExtraLarge,
+            ),
+            verticalArrangement = Arrangement.spacedBy(NimazSpacing.Medium),
+        ) {
+            item(key = "hero") {
+                KhatamHeroCard(
+                    khatam = khatam,
+                    insights = insights,
+                    accent = accent,
+                    // The top bar already names the khatam.
+                    showName = false,
+                    showActiveBadge = khatam.isActive,
+                    dailyReading = state.dailyReading,
+                    continueLabel = when {
+                        !khatam.isActive -> stringResource(R.string.khatam_switch_plan)
+                        state.dailyReading?.isComplete == false -> stringResource(R.string.khatam_read_todays_portion)
+                        else -> continueText
+                    },
+                    onContinue = onContinue.takeIf { hasNextPosition || !khatam.isActive },
+                )
+            }
 
-        item(key = "journey-header") {
-            NimazSectionHeader(
-                title = stringResource(R.string.khatam_section_journey),
-                trailingText = stringResource(
-                    R.string.khatam_journey_progress,
-                    insights.juzCompleted,
-                    Khatam.TOTAL_JUZ,
-                ),
-            )
-        }
+            item(key = "journey-header") {
+                NimazSectionHeader(
+                    title = stringResource(R.string.khatam_section_journey),
+                    trailingText = stringResource(
+                        R.string.khatam_journey_progress,
+                        insights.juzCompleted,
+                        Khatam.TOTAL_JUZ,
+                    ),
+                )
+            }
 
-        item(key = "journey") {
-            KhatamJourneyTrail(
-                juzProgress = state.juzProgress,
-                accent = accent,
-            )
-        }
-        item(key = "stats") { NimazStatsGrid(stats = stats) }
-        item(key = "activity-header") {
-            NimazSectionHeader(title = stringResource(R.string.khatam_reading_activity))
-        }
-        item(key = "activity") { KhatamReadingActivity(logs = state.dailyLogs) }
+            item(key = "journey") {
+                KhatamJourneyTrail(
+                    juzProgress = state.juzProgress,
+                    accent = accent,
+                )
+            }
+            item(key = "stats") { NimazStatsGrid(stats = stats) }
+            item(key = "activity-header") {
+                NimazSectionHeader(title = stringResource(R.string.khatam_reading_activity))
+            }
+            item(key = "activity") { KhatamReadingActivity(logs = state.dailyLogs) }
 
+        }
     }
 }
