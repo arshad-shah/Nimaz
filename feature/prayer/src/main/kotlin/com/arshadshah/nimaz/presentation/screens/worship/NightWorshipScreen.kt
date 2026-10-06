@@ -54,6 +54,7 @@ import com.arshadshah.nimaz.presentation.viewmodel.worship.NightWorshipEvent
 import com.arshadshah.nimaz.presentation.viewmodel.worship.NightWorshipUiState
 import com.arshadshah.nimaz.presentation.viewmodel.worship.NightWorshipViewModel
 import kotlin.time.Instant
+import com.arshadshah.nimaz.presentation.components.molecules.NimazScrollbarBox
 
 /**
  * Night worship hub — the destination for the Tahajjud and Witr Home cards.
@@ -123,63 +124,66 @@ fun NightWorshipContent(
             )
         }
     ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+        val scrollbarScrollState = rememberScrollState()
+        NimazScrollbarBox(
+            state = scrollbarScrollState,
+            modifier = Modifier.fillMaxSize().padding(padding),
         ) {
-            Spacer(Modifier.height(4.dp))
+            Column(
+                modifier = Modifier.fillMaxSize().verticalScroll(scrollbarScrollState)
+                    .padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                Spacer(Modifier.height(4.dp))
 
-            NightWindowCard(
-                lastThirdAt = state.lastThirdAt,
-                fajrAt = state.fajrAt,
-                isLoading = state.isLoading,
-                error = state.error,
-                onRetry = { onEvent(NightWorshipEvent.Refresh) },
-            )
+                NightWindowCard(
+                    lastThirdAt = state.lastThirdAt,
+                    fajrAt = state.fajrAt,
+                    isLoading = state.isLoading,
+                    error = state.error,
+                    onRetry = { onEvent(NightWorshipEvent.Refresh) },
+                )
 
-            RakahCounterCard(
-                count = state.rakahCount,
-                onAddPair = { onEvent(NightWorshipEvent.AddRakahPair) },
-                onReset = { onEvent(NightWorshipEvent.ResetRakahs) },
-            )
+                RakahCounterCard(
+                    count = state.rakahCount,
+                    onAddPair = { onEvent(NightWorshipEvent.AddRakahPair) },
+                    onReset = { onEvent(NightWorshipEvent.ResetRakahs) },
+                )
 
-            NightWorshipRow(
-                icon = Icons.Filled.Bedtime,
-                title = stringResource(R.string.night_worship_witr_title),
-                body = stringResource(R.string.night_worship_witr_body),
-                testTag = NightWorshipWitrRowTestTag,
-                onClick = { onOpenDuaCategory(DUA_CATEGORY_WITR_AND_NIGHT_PRAYER) },
-            )
+                NightWorshipRow(
+                    icon = Icons.Filled.Bedtime,
+                    title = stringResource(R.string.night_worship_witr_title),
+                    body = stringResource(R.string.night_worship_witr_body),
+                    testTag = NightWorshipWitrRowTestTag,
+                    onClick = { onOpenDuaCategory(DUA_CATEGORY_WITR_AND_NIGHT_PRAYER) },
+                )
 
-            NightWorshipRow(
-                icon = Icons.Filled.MenuBook,
-                title = stringResource(R.string.night_worship_recite_title),
-                body = stringResource(R.string.night_worship_recite_body),
-                testTag = NightWorshipReciteRowTestTag,
-                onClick = { onOpenSurah(SURAH_AL_MULK) },
-            )
+                NightWorshipRow(
+                    icon = Icons.Filled.MenuBook,
+                    title = stringResource(R.string.night_worship_recite_title),
+                    body = stringResource(R.string.night_worship_recite_body),
+                    testTag = NightWorshipReciteRowTestTag,
+                    onClick = { onOpenSurah(SURAH_AL_MULK) },
+                )
 
-            NightWorshipRow(
-                icon = Icons.Filled.SelfImprovement,
-                title = stringResource(R.string.night_worship_duas_title),
-                body = stringResource(R.string.night_worship_duas_body),
-                testTag = NightWorshipDuasRowTestTag,
-                onClick = { onOpenDuaCategory(DUA_CATEGORY_WITR_AND_NIGHT_PRAYER) },
-            )
+                NightWorshipRow(
+                    icon = Icons.Filled.SelfImprovement,
+                    title = stringResource(R.string.night_worship_duas_title),
+                    body = stringResource(R.string.night_worship_duas_body),
+                    testTag = NightWorshipDuasRowTestTag,
+                    onClick = { onOpenDuaCategory(DUA_CATEGORY_WITR_AND_NIGHT_PRAYER) },
+                )
 
-            NightWorshipRow(
-                icon = Icons.Filled.NightsStay,
-                title = stringResource(R.string.night_worship_why_title),
-                body = stringResource(R.string.night_worship_why_body),
-                testTag = NightWorshipWhyRowTestTag,
-                onClick = { onOpenHadith(HADITH_ID_LAST_THIRD_DESCENT) },
-            )
+                NightWorshipRow(
+                    icon = Icons.Filled.NightsStay,
+                    title = stringResource(R.string.night_worship_why_title),
+                    body = stringResource(R.string.night_worship_why_body),
+                    testTag = NightWorshipWhyRowTestTag,
+                    onClick = { onOpenHadith(HADITH_ID_LAST_THIRD_DESCENT) },
+                )
 
-            Spacer(Modifier.height(24.dp))
+                Spacer(Modifier.height(24.dp))
+            }
         }
     }
 }

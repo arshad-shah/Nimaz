@@ -43,6 +43,8 @@ import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.viewmodel.help.HelpEvent
 import com.arshadshah.nimaz.presentation.viewmodel.help.HelpViewModel
+import com.arshadshah.nimaz.presentation.components.molecules.NimazScrollbarBox
+import androidx.compose.foundation.lazy.rememberLazyListState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -101,21 +103,28 @@ fun HelpGuideScreen(
             }
 
             else -> {
-                LazyColumn(
+                val scrollbarState = rememberLazyListState()
+                NimazScrollbarBox(
+                    state = scrollbarState,
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(padding),
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    item { HelpGuideHero(guide) }
-                    item {
-                        HelpStepTimeline(
-                            steps = guide.steps,
-                            onPathChipClick = { step -> step.deeplinkRoute?.let(onDeepLink) }
-                        )
+                    LazyColumn(
+                        state = scrollbarState,
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        item { HelpGuideHero(guide) }
+                        item {
+                            HelpStepTimeline(
+                                steps = guide.steps,
+                                onPathChipClick = { step -> step.deeplinkRoute?.let(onDeepLink) }
+                            )
+                        }
+                        item { HelpGuideDone() }
                     }
-                    item { HelpGuideDone() }
                 }
             }
         }

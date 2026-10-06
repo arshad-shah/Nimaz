@@ -68,6 +68,9 @@ class MaterialTextFieldGuardTest {
         "NimazSearchBar.kt",
         // The stepper's editable value — a field inside a +/- control rather than a form field.
         "NimazNumberStepper.kt",
+        // Read-only tafseer text: a selectable field for exact UTF-16 highlight ranges, never
+        // an input. Landed in #649 without being listed here, which turned this test red on dev.
+        "TafseerHighlightableText.kt",
     )
 
     @Test

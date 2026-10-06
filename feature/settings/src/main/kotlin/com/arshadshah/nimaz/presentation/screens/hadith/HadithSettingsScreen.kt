@@ -43,6 +43,8 @@ import com.arshadshah.nimaz.presentation.foundation.reader.readerTypographySetti
 import com.arshadshah.nimaz.presentation.theme.QuranArabicFont
 import com.arshadshah.nimaz.presentation.viewmodel.settings.SettingsEvent
 import com.arshadshah.nimaz.presentation.viewmodel.settings.SettingsViewModel
+import com.arshadshah.nimaz.presentation.components.molecules.NimazScrollbarBox
+import androidx.compose.foundation.lazy.rememberLazyListState
 
 /**
  * Reading preferences for the Hadith reader. Mirrors the Dua/Quran settings
@@ -70,81 +72,87 @@ fun HadithSettingsScreen(
             )
         }
     ) { paddingValues ->
-        LazyColumn(
+        val scrollbarState = rememberLazyListState()
+        NimazScrollbarBox(
+            state = scrollbarState,
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
-                .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .padding(paddingValues),
         ) {
-            item { Spacer(modifier = Modifier.height(4.dp)) }
+            LazyColumn(
+                state = scrollbarState,
+                modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                item { Spacer(modifier = Modifier.height(4.dp)) }
 
-            item {
-                HadithPreviewCard(
-                    arabicFontSize = hadithState.arabicFontSize,
-                    arabicFontFamily = selectedFont.fontFamily,
-                    translationFontSize = hadithState.translationFontSize,
-                    showArabic = hadithState.showArabic,
-                    showTranslation = hadithState.showTranslation,
-                    showGrade = hadithState.showGrade
-                )
-            }
-
-            readerTypographySettings(
-                arabicFontSize = hadithState.arabicFontSize,
-                onArabicFontSize = { viewModel.onEvent(SettingsEvent.SetHadithArabicFontSize(it)) },
-                selectedFont = selectedFont,
-                onArabicFont = { viewModel.onEvent(SettingsEvent.SetHadithArabicFont(it)) },
-                translationFontSize = hadithState.translationFontSize,
-                onTranslationFontSize = {
-                    viewModel.onEvent(
-                        SettingsEvent.SetHadithTranslationFontSize(
-                            it
-                        )
-                    )
-                },
-            )
-
-            item { NimazSectionHeader(title = stringResource(R.string.display_options)) }
-            item {
-                NimazMenuGroup {
-                    NimazSettingsItem(
-                        title = stringResource(R.string.show_arabic),
-                        subtitle = stringResource(R.string.show_arabic_subtitle),
-                        checked = hadithState.showArabic,
-                        onCheckedChange = { viewModel.onEvent(SettingsEvent.SetHadithShowArabic(!hadithState.showArabic)) }
-                    )
-                    NimazMenuDivider(inset = false)
-                    NimazSettingsItem(
-                        title = stringResource(R.string.show_translation),
-                        subtitle = stringResource(R.string.show_translation_subtitle),
-                        checked = hadithState.showTranslation,
-                        onCheckedChange = {
-                            viewModel.onEvent(
-                                SettingsEvent.SetHadithShowTranslation(
-                                    !hadithState.showTranslation
-                                )
-                            )
-                        }
-                    )
-                    NimazMenuDivider(inset = false)
-                    NimazSettingsItem(
-                        title = stringResource(R.string.hadith_show_grade),
-                        subtitle = stringResource(R.string.hadith_show_grade_subtitle),
-                        checked = hadithState.showGrade,
-                        onCheckedChange = { viewModel.onEvent(SettingsEvent.SetHadithShowGrade(!hadithState.showGrade)) }
-                    )
-                    NimazMenuDivider(inset = false)
-                    NimazSettingsItem(
-                        title = stringResource(R.string.hadith_show_chain),
-                        subtitle = stringResource(R.string.hadith_show_chain_subtitle),
-                        checked = hadithState.showChain,
-                        onCheckedChange = { viewModel.onEvent(SettingsEvent.SetHadithShowChain(!hadithState.showChain)) }
+                item {
+                    HadithPreviewCard(
+                        arabicFontSize = hadithState.arabicFontSize,
+                        arabicFontFamily = selectedFont.fontFamily,
+                        translationFontSize = hadithState.translationFontSize,
+                        showArabic = hadithState.showArabic,
+                        showTranslation = hadithState.showTranslation,
+                        showGrade = hadithState.showGrade
                     )
                 }
-            }
 
-            item { Spacer(modifier = Modifier.height(16.dp)) }
+                readerTypographySettings(
+                    arabicFontSize = hadithState.arabicFontSize,
+                    onArabicFontSize = { viewModel.onEvent(SettingsEvent.SetHadithArabicFontSize(it)) },
+                    selectedFont = selectedFont,
+                    onArabicFont = { viewModel.onEvent(SettingsEvent.SetHadithArabicFont(it)) },
+                    translationFontSize = hadithState.translationFontSize,
+                    onTranslationFontSize = {
+                        viewModel.onEvent(
+                            SettingsEvent.SetHadithTranslationFontSize(
+                                it
+                            )
+                        )
+                    },
+                )
+
+                item { NimazSectionHeader(title = stringResource(R.string.display_options)) }
+                item {
+                    NimazMenuGroup {
+                        NimazSettingsItem(
+                            title = stringResource(R.string.show_arabic),
+                            subtitle = stringResource(R.string.show_arabic_subtitle),
+                            checked = hadithState.showArabic,
+                            onCheckedChange = { viewModel.onEvent(SettingsEvent.SetHadithShowArabic(!hadithState.showArabic)) }
+                        )
+                        NimazMenuDivider(inset = false)
+                        NimazSettingsItem(
+                            title = stringResource(R.string.show_translation),
+                            subtitle = stringResource(R.string.show_translation_subtitle),
+                            checked = hadithState.showTranslation,
+                            onCheckedChange = {
+                                viewModel.onEvent(
+                                    SettingsEvent.SetHadithShowTranslation(
+                                        !hadithState.showTranslation
+                                    )
+                                )
+                            }
+                        )
+                        NimazMenuDivider(inset = false)
+                        NimazSettingsItem(
+                            title = stringResource(R.string.hadith_show_grade),
+                            subtitle = stringResource(R.string.hadith_show_grade_subtitle),
+                            checked = hadithState.showGrade,
+                            onCheckedChange = { viewModel.onEvent(SettingsEvent.SetHadithShowGrade(!hadithState.showGrade)) }
+                        )
+                        NimazMenuDivider(inset = false)
+                        NimazSettingsItem(
+                            title = stringResource(R.string.hadith_show_chain),
+                            subtitle = stringResource(R.string.hadith_show_chain_subtitle),
+                            checked = hadithState.showChain,
+                            onCheckedChange = { viewModel.onEvent(SettingsEvent.SetHadithShowChain(!hadithState.showChain)) }
+                        )
+                    }
+                }
+
+                item { Spacer(modifier = Modifier.height(16.dp)) }
+            }
         }
     }
 }

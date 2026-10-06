@@ -52,6 +52,7 @@ import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.viewmodel.tracker.TasbihEvent
 import com.arshadshah.nimaz.presentation.viewmodel.tracker.TasbihViewModel
+import com.arshadshah.nimaz.presentation.components.molecules.NimazScrollbarBox
 
 /**
  * The custom-dhikr form, in both of its modes.
@@ -142,99 +143,102 @@ fun AddPresetScreen(
             )
         }
     ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 20.dp, vertical = 16.dp),
-            // The field family's rhythm: one field's label must not crowd the helper line of
-            // the field above it.
-            verticalArrangement = Arrangement.spacedBy(NimazFieldDefaults.FieldGap)
+        val scrollbarScrollState = rememberScrollState()
+        NimazScrollbarBox(
+            state = scrollbarScrollState,
+            modifier = Modifier.fillMaxSize().padding(paddingValues),
         ) {
-            // Name (required). The 14dp radius, the RTL/gold Arabic styling and the error
-            // wiring all used to be set here, per field; they are the shell's and the
-            // variant's job now.
-            NimazTextField(
-                value = name,
-                onValueChange = {
-                    name = it
-                    nameError = false
-                },
-                label = stringResource(R.string.field_name),
-                required = true,
-                placeholder = stringResource(R.string.preset_name_placeholder),
-                error = if (nameError) stringResource(R.string.name_required_error) else null,
-                modifier = Modifier.fillMaxWidth(),
-            )
-
-            NimazTextField(
-                value = arabicText,
-                onValueChange = { arabicText = it },
-                label = stringResource(R.string.arabic_text),
-                variant = NimazFieldVariant.ARABIC,
-                placeholder = stringResource(R.string.arabic_placeholder),
-                modifier = Modifier.fillMaxWidth(),
-            )
-
-            NimazTextField(
-                value = transliteration,
-                onValueChange = { transliteration = it },
-                label = stringResource(R.string.transliteration),
-                placeholder = stringResource(R.string.transliteration_placeholder),
-                modifier = Modifier.fillMaxWidth(),
-            )
-
-            NimazTextField(
-                value = translation,
-                onValueChange = { translation = it },
-                label = stringResource(R.string.translation),
-                placeholder = stringResource(R.string.translation_placeholder),
-                modifier = Modifier.fillMaxWidth(),
-            )
-
-            // Target Count stepper
-            SectionLabel(stringResource(R.string.target_count))
-            NimazNumberStepper(
-                value = targetCount.toIntOrNull() ?: 0,
-                onValueChange = { targetCount = it.coerceAtLeast(1).toString() },
-                variant = NimazNumberStepperVariant.SPREAD,
-                size = NimazNumberStepperSize.LARGE,
-                type = NimazNumberStepperType.ACCENT,
-                minValue = 1
-            )
-
-            // Category pill chips
-            SectionLabel(stringResource(R.string.category))
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .horizontalScroll(rememberScrollState()),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            Column(
+                modifier = Modifier.fillMaxSize().verticalScroll(scrollbarScrollState)
+                    .padding(horizontal = 20.dp, vertical = 16.dp),
+                // The field family's rhythm: one field's label must not crowd the helper line of
+                // the field above it.
+                verticalArrangement = Arrangement.spacedBy(NimazFieldDefaults.FieldGap)
             ) {
-                TasbihCategory.entries.forEach { category ->
-                    CategoryPill(
-                        label = categoryLabel(category),
-                        selected = selectedCategory == category,
-                        onClick = { selectedCategory = category }
-                    )
+                // Name (required). The 14dp radius, the RTL/gold Arabic styling and the error
+                // wiring all used to be set here, per field; they are the shell's and the
+                // variant's job now.
+                NimazTextField(
+                    value = name,
+                    onValueChange = {
+                        name = it
+                        nameError = false
+                    },
+                    label = stringResource(R.string.field_name),
+                    required = true,
+                    placeholder = stringResource(R.string.preset_name_placeholder),
+                    error = if (nameError) stringResource(R.string.name_required_error) else null,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+
+                NimazTextField(
+                    value = arabicText,
+                    onValueChange = { arabicText = it },
+                    label = stringResource(R.string.arabic_text),
+                    variant = NimazFieldVariant.ARABIC,
+                    placeholder = stringResource(R.string.arabic_placeholder),
+                    modifier = Modifier.fillMaxWidth(),
+                )
+
+                NimazTextField(
+                    value = transliteration,
+                    onValueChange = { transliteration = it },
+                    label = stringResource(R.string.transliteration),
+                    placeholder = stringResource(R.string.transliteration_placeholder),
+                    modifier = Modifier.fillMaxWidth(),
+                )
+
+                NimazTextField(
+                    value = translation,
+                    onValueChange = { translation = it },
+                    label = stringResource(R.string.translation),
+                    placeholder = stringResource(R.string.translation_placeholder),
+                    modifier = Modifier.fillMaxWidth(),
+                )
+
+                // Target Count stepper
+                SectionLabel(stringResource(R.string.target_count))
+                NimazNumberStepper(
+                    value = targetCount.toIntOrNull() ?: 0,
+                    onValueChange = { targetCount = it.coerceAtLeast(1).toString() },
+                    variant = NimazNumberStepperVariant.SPREAD,
+                    size = NimazNumberStepperSize.LARGE,
+                    type = NimazNumberStepperType.ACCENT,
+                    minValue = 1
+                )
+
+                // Category pill chips
+                SectionLabel(stringResource(R.string.category))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    TasbihCategory.entries.forEach { category ->
+                        CategoryPill(
+                            label = categoryLabel(category),
+                            selected = selectedCategory == category,
+                            onClick = { selectedCategory = category }
+                        )
+                    }
                 }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Create button (primary CTA)
+                NimazButton(
+                    text = stringResource(
+                        if (editing != null) R.string.save_tasbih else R.string.create_tasbih
+                    ),
+                    onClick = { submit() },
+                    variant = NimazButtonVariant.FILLED,
+                    size = NimazButtonSize.LARGE,
+                    fullWidth = true
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
             }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Create button (primary CTA)
-            NimazButton(
-                text = stringResource(
-                    if (editing != null) R.string.save_tasbih else R.string.create_tasbih
-                ),
-                onClick = { submit() },
-                variant = NimazButtonVariant.FILLED,
-                size = NimazButtonSize.LARGE,
-                fullWidth = true
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }

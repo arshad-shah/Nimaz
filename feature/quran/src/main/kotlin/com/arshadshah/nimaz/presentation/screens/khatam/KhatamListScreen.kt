@@ -49,6 +49,8 @@ import com.arshadshah.nimaz.presentation.foundation.tokens.rememberKhatamAccent
 import com.arshadshah.nimaz.presentation.theme.NimazSpacing
 import com.arshadshah.nimaz.presentation.viewmodel.quran.KhatamListUiState
 import com.arshadshah.nimaz.presentation.viewmodel.quran.KhatamViewModel
+import com.arshadshah.nimaz.presentation.components.molecules.NimazScrollbarBox
+import androidx.compose.foundation.lazy.rememberLazyListState
 
 /** Which status bucket the list is filtered to. */
 private enum class KhatamTab { IN_PROGRESS, COMPLETED, ARCHIVED }
@@ -149,75 +151,82 @@ private fun KhatamListContent(
     val hasNextPosition = state.nextUnreadSurah != null && state.nextUnreadAyah != null
     val continueText = continueLabel(state)
 
-    LazyColumn(
+    val scrollbarState = rememberLazyListState()
+    NimazScrollbarBox(
+        state = scrollbarState,
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(
-            start = NimazSpacing.Large,
-            end = NimazSpacing.Large,
-            top = contentPadding.calculateTopPadding() + NimazSpacing.Small,
-            bottom = contentPadding.calculateBottomPadding() + NimazSpacing.ExtraLarge,
-        ),
-        verticalArrangement = Arrangement.spacedBy(NimazSpacing.Small),
     ) {
-        item(key = "tabs") {
-            NimazSegmentedControl(
-                options = tabs.asSegments(),
-                selectedIndex = selectedTab.ordinal,
-                onSelect = { onTabSelect(KhatamTab.entries[it]) },
-                purpose = NimazSegmentedPurpose.VIEW,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = NimazSpacing.Small),
-            )
-        }
+        LazyColumn(
+            state = scrollbarState,
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(
+                start = NimazSpacing.Large,
+                end = NimazSpacing.Large,
+                top = contentPadding.calculateTopPadding() + NimazSpacing.Small,
+                bottom = contentPadding.calculateBottomPadding() + NimazSpacing.ExtraLarge,
+            ),
+            verticalArrangement = Arrangement.spacedBy(NimazSpacing.Small),
+        ) {
+            item(key = "tabs") {
+                NimazSegmentedControl(
+                    options = tabs.asSegments(),
+                    selectedIndex = selectedTab.ordinal,
+                    onSelect = { onTabSelect(KhatamTab.entries[it]) },
+                    purpose = NimazSegmentedPurpose.VIEW,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = NimazSpacing.Small),
+                )
+            }
 
-        if (selectedTab == KhatamTab.IN_PROGRESS && active != null && activeInsights != null) {
-            item(key = "hero-${active.id}") {
-                KhatamHeroCard(
-                    khatam = active,
-                    insights = activeInsights,
-                    accent = accent,
-                    dailyReading = state.dailyReading,
-                    continueLabel = if (state.dailyReading?.isComplete == false) stringResource(R.string.khatam_read_todays_portion) else continueText,
-                    onContinue = onContinue.takeIf { hasNextPosition },
-                    onClick = { onKhatamClick(active.id) },
-                )
+            if (selectedTab == KhatamTab.IN_PROGRESS && active != null && activeInsights != null) {
+                item(key = "hero-${active.id}") {
+                    KhatamHeroCard(
+                        khatam = active,
+                        insights = activeInsights,
+                        accent = accent,
+                        dailyReading = state.dailyReading,
+                        continueLabel = if (state.dailyReading?.isComplete == false) stringResource(R.string.khatam_read_todays_portion) else continueText,
+                        onContinue = onContinue.takeIf { hasNextPosition },
+                        onClick = { onKhatamClick(active.id) },
+                    )
+                }
             }
-        }
 
-        if (visible.isEmpty() && !(selectedTab == KhatamTab.IN_PROGRESS && active != null)) {
-            item(key = "empty-${selectedTab.name}") {
-                NimazEmptyState(
-                    title = stringResource(emptyTitleRes(selectedTab)),
-                    message = stringResource(R.string.khatam_start_journey),
-                    icon = Icons.Default.MenuBook,
-                    iconTint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.padding(vertical = NimazSpacing.Medium),
-                )
+            if (visible.isEmpty() && !(selectedTab == KhatamTab.IN_PROGRESS && active != null)) {
+                item(key = "empty-${selectedTab.name}") {
+                    NimazEmptyState(
+                        title = stringResource(emptyTitleRes(selectedTab)),
+                        message = stringResource(R.string.khatam_start_journey),
+                        icon = Icons.Default.MenuBook,
+                        iconTint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(vertical = NimazSpacing.Medium),
+                    )
+                }
+            } else if (visible.isNotEmpty()) {
+                item(key = "header-${selectedTab.name}") {
+                    NimazSectionHeader(
+                        title = if (selectedTab == KhatamTab.IN_PROGRESS && active != null) stringResource(R.string.khatam_other_plans) else tabs[selectedTab.ordinal],
+                        trailingText = visible.size.toString(),
+                    )
+                }
+                items(visible, key = { it.id }) { khatam ->
+                    KhatamRowCard(
+                        khatam = khatam,
+                        accent = accent,
+                        subtitle = rowSubtitle(khatam),
+                        onClick = { onKhatamClick(khatam.id) },
+                    )
+                }
             }
-        } else if (visible.isNotEmpty()) {
-            item(key = "header-${selectedTab.name}") {
-                NimazSectionHeader(
-                    title = if (selectedTab == KhatamTab.IN_PROGRESS && active != null) stringResource(R.string.khatam_other_plans) else tabs[selectedTab.ordinal],
-                    trailingText = visible.size.toString(),
-                )
-            }
-            items(visible, key = { it.id }) { khatam ->
-                KhatamRowCard(
-                    khatam = khatam,
-                    accent = accent,
-                    subtitle = rowSubtitle(khatam),
-                    onClick = { onKhatamClick(khatam.id) },
-                )
-            }
-        }
-        if (selectedTab == KhatamTab.IN_PROGRESS) {
-            item(key = "marking-hint") {
-                NimazBanner(
-                    title = stringResource(R.string.khatam_marking_hint),
-                    variant = NimazBannerVariant.INFO,
-                    icon = Icons.Default.MenuBook,
-                )
+            if (selectedTab == KhatamTab.IN_PROGRESS) {
+                item(key = "marking-hint") {
+                    NimazBanner(
+                        title = stringResource(R.string.khatam_marking_hint),
+                        variant = NimazBannerVariant.INFO,
+                        icon = Icons.Default.MenuBook,
+                    )
+                }
             }
         }
     }

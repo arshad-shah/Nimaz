@@ -45,12 +45,12 @@ class QaidaVisualCheckTest(private val screen: String, private val theme: ThemeM
     companion object {
         @JvmStatic
         @ParameterizedRobolectricTestRunner.Parameters(name = "{0}-{1}-{2}")
-        fun screens(): List<Array<Any>> = (listOf(
+        fun screens(): List<Array<Any>> = listOf(
             "journey", "chapters", "review", "review-empty", "audio", "audio-empty",
             "clear-audio", "reset", "settings", "intro", "focus", "repeat", "practise", "self-check",
             "all-cards", "due-review", "reward", "letters", "letter-detail", "loading",
             "downloading", "audio-unavailable", "audio-error", "playback-error", "lesson-empty"
-        ) + (1..29).map { "articulation-%02d".format(it) }).flatMap { name -> (if (name.startsWith("articulation-")) listOf("en") else listOf("en", "tr", "id", "ms", "fr", "de")).flatMap { locale ->
+        ).flatMap { name -> listOf("en", "tr", "id", "ms", "fr", "de").flatMap { locale ->
             listOf(ThemeMode.LIGHT, ThemeMode.DARK).map { arrayOf<Any>(name, it, locale) }
         } }
     }
@@ -147,16 +147,6 @@ class QaidaVisualCheckTest(private val screen: String, private val theme: ThemeM
     }
     @Test fun render() {
         org.robolectric.RuntimeEnvironment.setQualifiers("$locale-w411dp-h900dp-mdpi")
-        if (screen.startsWith("articulation-")) {
-            val letter = previewLetters().first { it.id == screen.substringAfter("articulation-").toInt() }
-            rule.setContent { root = LocalView.current; PreviewTheme { QaidaLettersScreen({}, vm) } }
-            // The illustrated header is grid item zero. Scroll by index before looking up
-            // a letter whose row may not have been composed yet (notably the final hamza).
-            rule.onNodeWithTag("qaida-letter-board").performScrollToIndex(previewLetters().indexOf(letter) + 1)
-            rule.onNodeWithText(letter.letterArabic).performClick()
-            capture()
-            return
-        }
         when (screen) {
             "journey", "chapters", "review", "review-empty", "audio", "audio-empty", "clear-audio", "reset", "settings" -> {
                 if (screen == "review") every { vm.dueLessons } returns MutableStateFlow(setOf(1, 4))

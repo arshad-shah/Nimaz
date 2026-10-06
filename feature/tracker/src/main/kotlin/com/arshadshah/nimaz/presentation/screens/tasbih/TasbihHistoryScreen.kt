@@ -57,6 +57,8 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazLoadingState
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.viewmodel.tracker.TasbihViewModel
+import com.arshadshah.nimaz.presentation.components.molecules.NimazScrollbarBox
+import androidx.compose.foundation.lazy.rememberLazyListState
 
 private enum class HistoryTab { TODAY, THIS_WEEK, ALL_TIME }
 
@@ -98,63 +100,70 @@ fun TasbihHistoryScreen(
         if (historyState.isLoading) {
             NimazLoadingState(modifier = Modifier.padding(paddingValues))
         } else {
-            LazyColumn(
+            val scrollbarState = rememberLazyListState()
+            NimazScrollbarBox(
+                state = scrollbarState,
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues),
-                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                // Stats Summary
-                item(key = "stats_summary") {
-                    StatsSummaryCard(
-                        totalToday = liveTotalToday,
-                        completedSessions = statsState.completedSessions,
-                        totalThisWeek = statsState.totalThisWeek
-                    )
-                }
-
-                // Filter tabs
-                item(key = "tabs") {
-                    HistoryTabRow(
-                        selected = selectedTab,
-                        onSelect = { selectedTab = it }
-                    )
-                }
-
-                if (visibleSessions.isNotEmpty()) {
-                    items(
-                        items = visibleSessions,
-                        key = { "${selectedTab.name}_${it.id}" }
-                    ) { session ->
-                        SessionCard(session = session)
+                LazyColumn(
+                    state = scrollbarState,
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    // Stats Summary
+                    item(key = "stats_summary") {
+                        StatsSummaryCard(
+                            totalToday = liveTotalToday,
+                            completedSessions = statsState.completedSessions,
+                            totalThisWeek = statsState.totalThisWeek
+                        )
                     }
-                } else {
-                    item(key = "empty") {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 48.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                NimazIcon(
-                                    imageVector = Icons.Default.History,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
-                                    iconSize = 56.dp
-                                )
-                                Spacer(modifier = Modifier.height(12.dp))
-                                Text(
-                                    text = stringResource(R.string.no_sessions_yet),
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                                Text(
-                                    text = stringResource(R.string.start_counting_hint),
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-                                )
+
+                    // Filter tabs
+                    item(key = "tabs") {
+                        HistoryTabRow(
+                            selected = selectedTab,
+                            onSelect = { selectedTab = it }
+                        )
+                    }
+
+                    if (visibleSessions.isNotEmpty()) {
+                        items(
+                            items = visibleSessions,
+                            key = { "${selectedTab.name}_${it.id}" }
+                        ) { session ->
+                            SessionCard(session = session)
+                        }
+                    } else {
+                        item(key = "empty") {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 48.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    NimazIcon(
+                                        imageVector = Icons.Default.History,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
+                                        iconSize = 56.dp
+                                    )
+                                    Spacer(modifier = Modifier.height(12.dp))
+                                    Text(
+                                        text = stringResource(R.string.no_sessions_yet),
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                    Text(
+                                        text = stringResource(R.string.start_counting_hint),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                                    )
+                                }
                             }
                         }
                     }

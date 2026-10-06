@@ -76,6 +76,8 @@ import com.arshadshah.nimaz.presentation.viewmodel.quran.BookmarkSortOrder
 import com.arshadshah.nimaz.presentation.viewmodel.quran.BookmarkStatsUiState
 import com.arshadshah.nimaz.presentation.viewmodel.quran.BookmarksEvent
 import com.arshadshah.nimaz.presentation.viewmodel.quran.BookmarksViewModel
+import com.arshadshah.nimaz.presentation.components.molecules.NimazScrollbarBox
+import androidx.compose.foundation.lazy.rememberLazyListState
 
 /**
  * Everything the user has marked, whatever it is about.
@@ -296,85 +298,92 @@ fun SavedScreen(
             }
 
             else -> {
-                LazyColumn(
+                val scrollbarState = rememberLazyListState()
+                NimazScrollbarBox(
+                    state = scrollbarState,
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(paddingValues),
-                    contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    item {
-                        NimazSearchBar(
-                            query = state.searchQuery,
-                            onQueryChange = {
-                                viewModel.onEvent(BookmarksEvent.SetSearchQuery(it))
-                            },
-                            onClear = { viewModel.onEvent(BookmarksEvent.SetSearchQuery("")) },
-                            placeholder = stringResource(R.string.bookmarks_search_placeholder)
-                        )
-                    }
-
-                    // **One** tab row. Kind and corpus are still independent axes — "my notes
-                    // on hadith" is a real question — but two stacked segmented strips above a
-                    // search field is three rows of chrome before a single result, and on a
-                    // phone both scrolled horizontally with their ends cut off. Kind stays on
-                    // screen because it is the axis people actually browse by; corpus moves
-                    // into the app-bar menu beside sort, where it is one tap away and states
-                    // its current value.
-                    item {
-                        SavedKindTabs(
-                            selectedKind = state.selectedKind,
-                            allCount = statsState.totalBookmarks,
-                            bookmarkCount = statsState.bookmarkCount,
-                            favouriteCount = statsState.favouriteCount,
-                            noteCount = statsState.noteCount,
-                            onKindSelected = { viewModel.onEvent(BookmarksEvent.SetKind(it)) }
-                        )
-                    }
-
-                    if (state.filteredBookmarks.isEmpty()) {
+                    LazyColumn(
+                        state = scrollbarState,
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
                         item {
-                            NimazEmptyState(
-                                title = stringResource(R.string.bookmarks_no_matches),
-                                message = stringResource(R.string.bookmarks_no_matches_hint),
-                                icon = Icons.Default.Bookmark,
-                                iconTint = MaterialTheme.colorScheme.onSurfaceVariant
-                                    .copy(alpha = 0.5f),
-                                modifier = Modifier.padding(vertical = 32.dp)
+                            NimazSearchBar(
+                                query = state.searchQuery,
+                                onQueryChange = {
+                                    viewModel.onEvent(BookmarksEvent.SetSearchQuery(it))
+                                },
+                                onClear = { viewModel.onEvent(BookmarksEvent.SetSearchQuery("")) },
+                                placeholder = stringResource(R.string.bookmarks_search_placeholder)
                             )
                         }
-                    }
 
-                    items(
-                        items = state.filteredBookmarks,
-                        key = { it.id }
-                    ) { bookmark ->
-                        BookmarkSavedCard(
-                            bookmark = bookmark,
-                            onClick = {
-                                bookmark.navigate(
-                                    onNavigateToQuranAyah,
-                                    onNavigateToHadith,
-                                    onNavigateToDua
+                        // **One** tab row. Kind and corpus are still independent axes — "my notes
+                        // on hadith" is a real question — but two stacked segmented strips above a
+                        // search field is three rows of chrome before a single result, and on a
+                        // phone both scrolled horizontally with their ends cut off. Kind stays on
+                        // screen because it is the axis people actually browse by; corpus moves
+                        // into the app-bar menu beside sort, where it is one tap away and states
+                        // its current value.
+                        item {
+                            SavedKindTabs(
+                                selectedKind = state.selectedKind,
+                                allCount = statsState.totalBookmarks,
+                                bookmarkCount = statsState.bookmarkCount,
+                                favouriteCount = statsState.favouriteCount,
+                                noteCount = statsState.noteCount,
+                                onKindSelected = { viewModel.onEvent(BookmarksEvent.SetKind(it)) }
+                            )
+                        }
+
+                        if (state.filteredBookmarks.isEmpty()) {
+                            item {
+                                NimazEmptyState(
+                                    title = stringResource(R.string.bookmarks_no_matches),
+                                    message = stringResource(R.string.bookmarks_no_matches_hint),
+                                    icon = Icons.Default.Bookmark,
+                                    iconTint = MaterialTheme.colorScheme.onSurfaceVariant
+                                        .copy(alpha = 0.5f),
+                                    modifier = Modifier.padding(vertical = 32.dp)
                                 )
-                            },
-                            onDelete = { viewModel.onEvent(BookmarksEvent.DeleteBookmark(bookmark.id)) },
-                            onEditNote = { noteTarget = bookmark },
-                            onShare = {
-                                ContentShareManager.shareText(
-                                    context,
-                                    Shareables.bookmark(
-                                        context,
-                                        title = bookmark.title,
-                                        arabicText = bookmark.arabicText,
-                                        note = bookmark.note,
+                            }
+                        }
+
+                        items(
+                            items = state.filteredBookmarks,
+                            key = { it.id }
+                        ) { bookmark ->
+                            BookmarkSavedCard(
+                                bookmark = bookmark,
+                                onClick = {
+                                    bookmark.navigate(
+                                        onNavigateToQuranAyah,
+                                        onNavigateToHadith,
+                                        onNavigateToDua
                                     )
-                                )
-                            },
-                        )
-                    }
+                                },
+                                onDelete = { viewModel.onEvent(BookmarksEvent.DeleteBookmark(bookmark.id)) },
+                                onEditNote = { noteTarget = bookmark },
+                                onShare = {
+                                    ContentShareManager.shareText(
+                                        context,
+                                        Shareables.bookmark(
+                                            context,
+                                            title = bookmark.title,
+                                            arabicText = bookmark.arabicText,
+                                            note = bookmark.note,
+                                        )
+                                    )
+                                },
+                            )
+                        }
 
-                    item { Spacer(modifier = Modifier.height(8.dp)) }
+                        item { Spacer(modifier = Modifier.height(8.dp)) }
+                    }
                 }
             }
         }

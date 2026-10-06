@@ -62,6 +62,8 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuItem
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.viewmodel.about.updatePrompt
 import java.time.LocalDate
+import com.arshadshah.nimaz.presentation.components.molecules.NimazScrollbarBox
+import androidx.compose.foundation.lazy.rememberLazyListState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -95,56 +97,63 @@ fun AboutScreen(
             NimazBackTopAppBar(title = stringResource(R.string.about), onBackClick = onNavigateBack)
         }
     ) { paddingValues ->
-        LazyColumn(
+        val scrollbarState = rememberLazyListState()
+        NimazScrollbarBox(
+            state = scrollbarState,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues),
-            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            item { AppInfoHero() }
-            item {
-                QuickActionsRow(
-                    onRateApp = onRateApp,
-                    onShareApp = onShareApp
-                )
-            }
+            LazyColumn(
+                state = scrollbarState,
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                item { AppInfoHero() }
+                item {
+                    QuickActionsRow(
+                        onRateApp = onRateApp,
+                        onShareApp = onShareApp
+                    )
+                }
 
-            item {
-                NimazSectionTitle(
-                    text = stringResource(R.string.links),
-                    modifier = Modifier.padding(start = 5.dp)
-                )
-            }
-            item {
-                LinksCard(
-                    onContactUs = onContactUs,
-                    onNavigateToPrivacyPolicy = onNavigateToPrivacyPolicy,
-                    onNavigateToTerms = onNavigateToTerms,
-                    onNavigateToLicenses = onNavigateToLicenses,
-                    updateState = updateState,
-                    onUpdateClick = onUpdateClick
-                )
-            }
+                item {
+                    NimazSectionTitle(
+                        text = stringResource(R.string.links),
+                        modifier = Modifier.padding(start = 5.dp)
+                    )
+                }
+                item {
+                    LinksCard(
+                        onContactUs = onContactUs,
+                        onNavigateToPrivacyPolicy = onNavigateToPrivacyPolicy,
+                        onNavigateToTerms = onNavigateToTerms,
+                        onNavigateToLicenses = onNavigateToLicenses,
+                        updateState = updateState,
+                        onUpdateClick = onUpdateClick
+                    )
+                }
 
-            item {
-                NimazSectionTitle(
-                    text = stringResource(R.string.developer),
-                    modifier = Modifier.padding(start = 5.dp)
-                )
-            }
-            item { DeveloperCard() }
+                item {
+                    NimazSectionTitle(
+                        text = stringResource(R.string.developer),
+                        modifier = Modifier.padding(start = 5.dp)
+                    )
+                }
+                item { DeveloperCard() }
 
-            item {
-                NimazSectionTitle(
-                    text = stringResource(R.string.data_sources_credits),
-                    modifier = Modifier.padding(start = 5.dp)
-                )
-            }
-            item { CreditsGrid() }
+                item {
+                    NimazSectionTitle(
+                        text = stringResource(R.string.data_sources_credits),
+                        modifier = Modifier.padding(start = 5.dp)
+                    )
+                }
+                item { CreditsGrid() }
 
-            item { FooterSection() }
-            item { Spacer(modifier = Modifier.height(8.dp)) }
+                item { FooterSection() }
+                item { Spacer(modifier = Modifier.height(8.dp)) }
+            }
         }
     }
 }

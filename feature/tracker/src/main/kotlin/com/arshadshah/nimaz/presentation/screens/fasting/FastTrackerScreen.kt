@@ -64,6 +64,8 @@ import com.arshadshah.nimaz.presentation.viewmodel.tracker.FastingEvent
 import com.arshadshah.nimaz.presentation.viewmodel.tracker.FastingViewModel
 import java.time.LocalDate
 import java.time.YearMonth
+import com.arshadshah.nimaz.presentation.components.molecules.NimazScrollbarBox
+import androidx.compose.foundation.lazy.rememberLazyListState
 
 // Colour constants shared with MakeupFastsScreen.kt, which was cut out of this file — hence
 // `internal` rather than `private`. They are aliases onto the palette, not literals (rule 7).
@@ -145,133 +147,140 @@ fun FastTrackerScreen(
             )
         }
     ) { paddingValues ->
-        LazyColumn(
+        val scrollbarState = rememberLazyListState()
+        NimazScrollbarBox(
+            state = scrollbarState,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues),
-            contentPadding = PaddingValues(vertical = 20.dp),
-            verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-            if (ramadanState.isRamadan) {
-                item {
-                    RamadanBanner(
-                        fastedDays = ramadanState.fastedDays,
-                        totalDays = ramadanState.fastedDays +
-                                ramadanState.missedDays + ramadanState.remainingDays,
-                        currentDay = ramadanState.currentDay,
-                        missedDays = ramadanState.missedDays,
-                        remainingDays = ramadanState.remainingDays,
-                        modifier = Modifier.padding(horizontal = 20.dp),
-                    )
-                }
-            } else if (ramadanState.daysUntilRamadan <= RamadanCardWindowDays) {
-                ramadanState.ramadanStartsOn?.let { startsOn ->
+            LazyColumn(
+                state = scrollbarState,
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(vertical = 20.dp),
+                verticalArrangement = Arrangement.spacedBy(20.dp)
+            ) {
+                if (ramadanState.isRamadan) {
                     item {
-                        RamadanCountdownCard(
-                            daysAway = ramadanState.daysUntilRamadan,
-                            startsOn = startsOn,
+                        RamadanBanner(
+                            fastedDays = ramadanState.fastedDays,
+                            totalDays = ramadanState.fastedDays +
+                                    ramadanState.missedDays + ramadanState.remainingDays,
+                            currentDay = ramadanState.currentDay,
+                            missedDays = ramadanState.missedDays,
+                            remainingDays = ramadanState.remainingDays,
                             modifier = Modifier.padding(horizontal = 20.dp),
                         )
                     }
-                }
-            }
-
-            item {
-                FastingWeekRail(
-                    state = state,
-                    today = today,
-                    onSelectDate = { viewModel.onEvent(FastingEvent.SelectDate(it)) },
-                    modifier = Modifier.padding(horizontal = 20.dp),
-                )
-            }
-
-            item {
-                FastingDayCard(
-                    state = state,
-                    ramadanDay = ramadanState.currentDay.takeIf { ramadanState.isRamadan },
-                    onSetStatus = {
-                        viewModel.onEvent(FastingEvent.SetFastStatus(state.selectedDate, it))
-                    },
-                    onOpenExemption = { exemptionSheetOpen = true },
-                    onOpenNote = { noteSheetOpen = true },
-                    onBackToToday = { viewModel.onEvent(FastingEvent.SelectDate(today)) },
-                    modifier = Modifier.padding(horizontal = 20.dp),
-                )
-            }
-
-            item {
-                Column(modifier = Modifier.padding(horizontal = 20.dp)) {
-                    NimazSectionHeader(
-                        title = stringResource(R.string.fasting_your_month),
-                        trailingText = stringResource(
-                            R.string.fasting_fasted_count,
-                            calendarState.records.count { it.status == FastStatus.FASTED },
-                        ),
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    FastingCalendarSection(
-                        records = calendarState.records,
-                        selectedDate = state.selectedDate,
-                        selectedMonth = calendarState.selectedMonth,
-                        selectedYear = calendarState.selectedYear,
-                        onPreviousMonth = {
-                            val month = if (calendarState.selectedMonth == 1) 12
-                            else calendarState.selectedMonth - 1
-                            val year = if (calendarState.selectedMonth == 1)
-                                calendarState.selectedYear - 1 else calendarState.selectedYear
-                            viewModel.onEvent(FastingEvent.SelectMonth(month, year))
-                        },
-                        onNextMonth = {
-                            val month = if (calendarState.selectedMonth == 12) 1
-                            else calendarState.selectedMonth + 1
-                            val year = if (calendarState.selectedMonth == 12)
-                                calendarState.selectedYear + 1 else calendarState.selectedYear
-                            viewModel.onEvent(FastingEvent.SelectMonth(month, year))
-                        },
-                        // Selects the day rather than opening a sheet. The day card below is
-                        // where a day is edited now, so a calendar tap answers "show me that
-                        // day" — the question a calendar tap actually asks.
-                        onSelectDate = { viewModel.onEvent(FastingEvent.SelectDate(it)) },
-                        showRamadanIndicators = ramadanState.isRamadan,
-                    )
-                }
-            }
-
-            item {
-                Column {
-                    NimazSectionHeader(
-                        title = stringResource(R.string.fasting_coming_up),
-                        trailingText = stringResource(R.string.fasting_sunnah_virtuous),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 20.dp),
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    ComingUpRow(
-                        fasts = rememberComingUpFasts(
-                            records = calendarState.records,
-                            daysUntilAyyamAlBeed = ramadanState.daysUntilAyyamAlBeed,
-                            today = today,
-                        ),
-                        onLogFast = { date ->
-                            viewModel.onEvent(FastingEvent.SelectDate(date))
-                            viewModel.onEvent(
-                                FastingEvent.SetFastStatus(date, FastStatus.FASTED)
+                } else if (ramadanState.daysUntilRamadan <= RamadanCardWindowDays) {
+                    ramadanState.ramadanStartsOn?.let { startsOn ->
+                        item {
+                            RamadanCountdownCard(
+                                daysAway = ramadanState.daysUntilRamadan,
+                                startsOn = startsOn,
+                                modifier = Modifier.padding(horizontal = 20.dp),
                             )
-                        },
+                        }
+                    }
+                }
+
+                item {
+                    FastingWeekRail(
+                        state = state,
+                        today = today,
+                        onSelectDate = { viewModel.onEvent(FastingEvent.SelectDate(it)) },
+                        modifier = Modifier.padding(horizontal = 20.dp),
                     )
                 }
-            }
 
-            item {
-                MakeupFastsRow(
-                    pendingCount = makeupState.pendingCount,
-                    fidyaPaid = makeupState.totalFidyaPaid,
-                    currency = makeupState.currency,
-                    onClick = onNavigateToMakeup,
-                    modifier = Modifier.padding(horizontal = 20.dp),
-                )
+                item {
+                    FastingDayCard(
+                        state = state,
+                        ramadanDay = ramadanState.currentDay.takeIf { ramadanState.isRamadan },
+                        onSetStatus = {
+                            viewModel.onEvent(FastingEvent.SetFastStatus(state.selectedDate, it))
+                        },
+                        onOpenExemption = { exemptionSheetOpen = true },
+                        onOpenNote = { noteSheetOpen = true },
+                        onBackToToday = { viewModel.onEvent(FastingEvent.SelectDate(today)) },
+                        modifier = Modifier.padding(horizontal = 20.dp),
+                    )
+                }
+
+                item {
+                    Column(modifier = Modifier.padding(horizontal = 20.dp)) {
+                        NimazSectionHeader(
+                            title = stringResource(R.string.fasting_your_month),
+                            trailingText = stringResource(
+                                R.string.fasting_fasted_count,
+                                calendarState.records.count { it.status == FastStatus.FASTED },
+                            ),
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        FastingCalendarSection(
+                            records = calendarState.records,
+                            selectedDate = state.selectedDate,
+                            selectedMonth = calendarState.selectedMonth,
+                            selectedYear = calendarState.selectedYear,
+                            onPreviousMonth = {
+                                val month = if (calendarState.selectedMonth == 1) 12
+                                else calendarState.selectedMonth - 1
+                                val year = if (calendarState.selectedMonth == 1)
+                                    calendarState.selectedYear - 1 else calendarState.selectedYear
+                                viewModel.onEvent(FastingEvent.SelectMonth(month, year))
+                            },
+                            onNextMonth = {
+                                val month = if (calendarState.selectedMonth == 12) 1
+                                else calendarState.selectedMonth + 1
+                                val year = if (calendarState.selectedMonth == 12)
+                                    calendarState.selectedYear + 1 else calendarState.selectedYear
+                                viewModel.onEvent(FastingEvent.SelectMonth(month, year))
+                            },
+                            // Selects the day rather than opening a sheet. The day card below is
+                            // where a day is edited now, so a calendar tap answers "show me that
+                            // day" — the question a calendar tap actually asks.
+                            onSelectDate = { viewModel.onEvent(FastingEvent.SelectDate(it)) },
+                            showRamadanIndicators = ramadanState.isRamadan,
+                        )
+                    }
+                }
+
+                item {
+                    Column {
+                        NimazSectionHeader(
+                            title = stringResource(R.string.fasting_coming_up),
+                            trailingText = stringResource(R.string.fasting_sunnah_virtuous),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 20.dp),
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        ComingUpRow(
+                            fasts = rememberComingUpFasts(
+                                records = calendarState.records,
+                                daysUntilAyyamAlBeed = ramadanState.daysUntilAyyamAlBeed,
+                                today = today,
+                            ),
+                            onLogFast = { date ->
+                                viewModel.onEvent(FastingEvent.SelectDate(date))
+                                viewModel.onEvent(
+                                    FastingEvent.SetFastStatus(date, FastStatus.FASTED)
+                                )
+                            },
+                        )
+                    }
+                }
+
+                item {
+                    MakeupFastsRow(
+                        pendingCount = makeupState.pendingCount,
+                        fidyaPaid = makeupState.totalFidyaPaid,
+                        currency = makeupState.currency,
+                        onClick = onNavigateToMakeup,
+                        modifier = Modifier.padding(horizontal = 20.dp),
+                    )
+                }
             }
         }
     }

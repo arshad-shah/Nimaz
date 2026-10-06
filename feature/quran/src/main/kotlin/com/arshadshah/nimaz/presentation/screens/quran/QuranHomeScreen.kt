@@ -63,6 +63,8 @@ import com.arshadshah.nimaz.presentation.viewmodel.quran.QuranHomeUiState
 import com.arshadshah.nimaz.presentation.viewmodel.quran.QuranViewModel
 import java.time.DayOfWeek
 import java.time.LocalDate
+import com.arshadshah.nimaz.presentation.components.molecules.NimazScrollbarBox
+import androidx.compose.foundation.lazy.rememberLazyListState
 
 /**
  * The Qur'an section's front door.
@@ -150,118 +152,125 @@ private fun HomeContent(
 ) {
     val isFriday = remember { LocalDate.now().dayOfWeek == DayOfWeek.FRIDAY }
 
-    LazyColumn(
+    val scrollbarState = rememberLazyListState()
+    NimazScrollbarBox(
+        state = scrollbarState,
         modifier = modifier,
-        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        // 1. Resume first. Exactly one card on this screen carries the teal gradient:
-        // continue-reading when there is progress, otherwise the start-reading hero.
-        val progress = state.readingProgress
-        if (progress != null) {
-            item(key = "continue_reading") {
-                ContinueReadingCard(
-                    surahNumber = progress.lastSurah,
-                    ayahNumber = progress.lastAyah,
-                    juzNumber = progress.lastReadJuz,
-                    pageNumber = progress.lastReadPage,
-                    totalAyahsRead = progress.totalAyahsRead,
-                    surahName = state.surahs.find { it.number == progress.lastSurah },
-                    onClick = { onNavigateToQuranAyah(progress.lastSurah, progress.lastAyah) },
-                    totalPages = state.pagination.totalPages
-                )
-            }
-        } else {
-            item(key = "start_reading") {
-                StartReadingHero(
-                    enabled = state.surahs.isNotEmpty(),
-                    onClick = { onNavigateToSurah(1) }
-                )
-            }
-        }
-
-        // 2. The four destinations. Each carries a count or a status, because a row that only
-        // names a place cannot tell you whether it is worth opening — "Saved · 12" and
-        // "Khatam · 40%" are the difference between a menu and a dashboard.
-        item(key = "destinations") {
-            Destinations(
-                state = state,
-                savedCount = bookmarks.size,
-                onNavigateToBrowse = onNavigateToBrowse,
-                onNavigateToSaved = onNavigateToSaved,
-                onNavigateToTopics = onNavigateToTopics,
-                onNavigateToKhatam = onNavigateToKhatam,
-            )
-        }
-
-        // 3. Recommended surahs (contextual — Al-Kahf first on Fridays). Kept because it is
-        // the only surfaced way into Al-Kahf / Al-Mulk / Yasin by occasion, and the only thing
-        // on this screen that works for a reader with nothing saved.
-        item(key = "recommended_header") {
-            HomeSectionTitle(text = stringResource(R.string.quran_home_recommended))
-        }
-        item(key = "recommended_surahs") {
-            QuranRecommendedSurahs(
-                surahs = state.surahs,
-                isFriday = isFriday,
-                onSurahClick = onNavigateToSurah,
-                pagination = state.pagination,
-            )
-        }
-
-        // 4. Recently saved — the strip that used to be titled "Bookmarks" and pointed at a
-        // screen reached from an app-bar icon.
-        if (bookmarks.isNotEmpty()) {
-            item(key = "recently_saved_header") {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 4.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    HomeSectionTitle(text = stringResource(R.string.quran_home_recently_saved))
-                    Text(
-                        text = stringResource(R.string.quran_home_see_all),
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier
-                            .padding(4.dp)
-                            // rule 8's exemption: a text link inside a header row, not a card.
-                            .clickable(onClick = onNavigateToSaved)
+        LazyColumn(
+            state = scrollbarState,
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            // 1. Resume first. Exactly one card on this screen carries the teal gradient:
+            // continue-reading when there is progress, otherwise the start-reading hero.
+            val progress = state.readingProgress
+            if (progress != null) {
+                item(key = "continue_reading") {
+                    ContinueReadingCard(
+                        surahNumber = progress.lastSurah,
+                        ayahNumber = progress.lastAyah,
+                        juzNumber = progress.lastReadJuz,
+                        pageNumber = progress.lastReadPage,
+                        totalAyahsRead = progress.totalAyahsRead,
+                        surahName = state.surahs.find { it.number == progress.lastSurah },
+                        onClick = { onNavigateToQuranAyah(progress.lastSurah, progress.lastAyah) },
+                        totalPages = state.pagination.totalPages
+                    )
+                }
+            } else {
+                item(key = "start_reading") {
+                    StartReadingHero(
+                        enabled = state.surahs.isNotEmpty(),
+                        onClick = { onNavigateToSurah(1) }
                     )
                 }
             }
 
-            item(key = "recently_saved_row") {
-                LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    items(items = bookmarks, key = { quranBookmarkKey(it) }) { bookmark ->
-                        BookmarkCard(
-                            bookmark = bookmark,
-                            onClick = { onNavigateToSurah(bookmark.surahNumber) }
+            // 2. The four destinations. Each carries a count or a status, because a row that only
+            // names a place cannot tell you whether it is worth opening — "Saved · 12" and
+            // "Khatam · 40%" are the difference between a menu and a dashboard.
+            item(key = "destinations") {
+                Destinations(
+                    state = state,
+                    savedCount = bookmarks.size,
+                    onNavigateToBrowse = onNavigateToBrowse,
+                    onNavigateToSaved = onNavigateToSaved,
+                    onNavigateToTopics = onNavigateToTopics,
+                    onNavigateToKhatam = onNavigateToKhatam,
+                )
+            }
+
+            // 3. Recommended surahs (contextual — Al-Kahf first on Fridays). Kept because it is
+            // the only surfaced way into Al-Kahf / Al-Mulk / Yasin by occasion, and the only thing
+            // on this screen that works for a reader with nothing saved.
+            item(key = "recommended_header") {
+                HomeSectionTitle(text = stringResource(R.string.quran_home_recommended))
+            }
+            item(key = "recommended_surahs") {
+                QuranRecommendedSurahs(
+                    surahs = state.surahs,
+                    isFriday = isFriday,
+                    onSurahClick = onNavigateToSurah,
+                    pagination = state.pagination,
+                )
+            }
+
+            // 4. Recently saved — the strip that used to be titled "Bookmarks" and pointed at a
+            // screen reached from an app-bar icon.
+            if (bookmarks.isNotEmpty()) {
+                item(key = "recently_saved_header") {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 4.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        HomeSectionTitle(text = stringResource(R.string.quran_home_recently_saved))
+                        Text(
+                            text = stringResource(R.string.quran_home_see_all),
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier
+                                .padding(4.dp)
+                                // rule 8's exemption: a text link inside a header row, not a card.
+                                .clickable(onClick = onNavigateToSaved)
                         )
                     }
                 }
-            }
-        }
 
-        // 5. Verse of the Day — a daily nudge, not the headline.
-        val verse = state.verseOfTheDay
-        if (verse != null) {
-            item(key = "verse_of_the_day") {
-                val surahName = state.surahs.find { it.number == verse.surahNumber }?.nameEnglish
-                    ?: stringResource(R.string.quran_home_surah_fallback, verse.surahNumber)
-                VerseOfTheDayCard(
-                    arabicText = verse.textArabic,
-                    translation = verse.translation,
-                    reference = stringResource(
-                        R.string.quran_home_verse_reference,
-                        surahName,
-                        verse.surahNumber,
-                        verse.ayahNumber
-                    ),
-                    onClick = { onNavigateToQuranAyah(verse.surahNumber, verse.ayahNumber) }
-                )
+                item(key = "recently_saved_row") {
+                    LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        items(items = bookmarks, key = { quranBookmarkKey(it) }) { bookmark ->
+                            BookmarkCard(
+                                bookmark = bookmark,
+                                onClick = { onNavigateToSurah(bookmark.surahNumber) }
+                            )
+                        }
+                    }
+                }
+            }
+
+            // 5. Verse of the Day — a daily nudge, not the headline.
+            val verse = state.verseOfTheDay
+            if (verse != null) {
+                item(key = "verse_of_the_day") {
+                    val surahName = state.surahs.find { it.number == verse.surahNumber }?.nameEnglish
+                        ?: stringResource(R.string.quran_home_surah_fallback, verse.surahNumber)
+                    VerseOfTheDayCard(
+                        arabicText = verse.textArabic,
+                        translation = verse.translation,
+                        reference = stringResource(
+                            R.string.quran_home_verse_reference,
+                            surahName,
+                            verse.surahNumber,
+                            verse.ayahNumber
+                        ),
+                        onClick = { onNavigateToQuranAyah(verse.surahNumber, verse.ayahNumber) }
+                    )
+                }
             }
         }
     }

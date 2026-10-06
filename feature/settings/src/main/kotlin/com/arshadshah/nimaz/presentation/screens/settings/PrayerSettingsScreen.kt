@@ -77,6 +77,8 @@ import java.time.LocalDateTime
 import kotlin.math.abs
 import kotlin.math.roundToInt
 import com.arshadshah.nimaz.feature.settings.R as SettingsR
+import com.arshadshah.nimaz.presentation.components.molecules.NimazScrollbarBox
+import androidx.compose.foundation.lazy.rememberLazyListState
 
 /**
  * Latitude from which the summer sky can stay too light for Fajr and Isha, so the high-latitude
@@ -123,99 +125,105 @@ fun PrayerSettingsScreen(
             )
         }
     ) { paddingValues ->
-        LazyColumn(
+        val scrollbarState = rememberLazyListState()
+        NimazScrollbarBox(
+            state = scrollbarState,
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
-                .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .padding(paddingValues),
         ) {
-            item { Spacer(modifier = Modifier.height(4.dp)) }
+            LazyColumn(
+                state = scrollbarState,
+                modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                item { Spacer(modifier = Modifier.height(4.dp)) }
 
-            item { TodayPreviewCard(preview, prayerState.calculationMethod) }
+                item { TodayPreviewCard(preview, prayerState.calculationMethod) }
 
-            item { NimazSectionHeader(title = stringResource(R.string.prayer_settings_section_calculation)) }
-            item {
-                // Each row has its own icon — a globe for who calculates, a low sun for the
-                // afternoon shadow, a moon for the short summer night.
-                NimazMenuGroup {
-                    NimazSettingsItem(
-                        icon = Icons.Default.Public,
-                        tintIcon = true,
-                        title = stringResource(R.string.calculation_method),
-                        value = prayerState.calculationMethod.displayName(),
-                        onClick = { showMethodPicker = true }
-                    )
-                    NimazMenuDivider(inset = false)
-                    NimazSettingsItem(
-                        icon = Icons.Default.WbTwilight,
-                        tintIcon = true,
-                        title = stringResource(R.string.asr_calculation),
-                        value = asrLabel(prayerState.asrMethod),
-                        onClick = { showAsrPicker = true }
-                    )
-                    NimazMenuDivider(inset = false)
-                    NimazSettingsItem(
-                        icon = Icons.Outlined.Nightlight,
-                        tintIcon = true,
-                        title = stringResource(R.string.high_latitude_method),
-                        value = highLatitudeLabel(prayerState.highLatitudeRule),
-                        onClick = { showHighLatitudePicker = true }
-                    )
-                }
-            }
-
-            // Only where the rule actually matters, and only for a place the reader really has —
-            // naming a fallback city's latitude would be a claim about somewhere they are not.
-            val latitude = preview.latitude
-            val city = preview.locationName
-            if (latitude != null && city != null && abs(latitude) >= HIGH_LATITUDE_DEGREES) {
+                item { NimazSectionHeader(title = stringResource(R.string.prayer_settings_section_calculation)) }
                 item {
-                    NimazBanner(
-                        title = stringResource(
-                            R.string.prayer_settings_high_lat_notice,
-                            city,
-                            abs(latitude).roundToInt(),
-                            stringResource(if (latitude >= 0) R.string.prayer_latitude_north else R.string.prayer_latitude_south),
-                            highLatitudeLabel(prayerState.highLatitudeRule),
-                        ),
-                        variant = NimazBannerVariant.INFO,
-                    )
+                    // Each row has its own icon — a globe for who calculates, a low sun for the
+                    // afternoon shadow, a moon for the short summer night.
+                    NimazMenuGroup {
+                        NimazSettingsItem(
+                            icon = Icons.Default.Public,
+                            tintIcon = true,
+                            title = stringResource(R.string.calculation_method),
+                            value = prayerState.calculationMethod.displayName(),
+                            onClick = { showMethodPicker = true }
+                        )
+                        NimazMenuDivider(inset = false)
+                        NimazSettingsItem(
+                            icon = Icons.Default.WbTwilight,
+                            tintIcon = true,
+                            title = stringResource(R.string.asr_calculation),
+                            value = asrLabel(prayerState.asrMethod),
+                            onClick = { showAsrPicker = true }
+                        )
+                        NimazMenuDivider(inset = false)
+                        NimazSettingsItem(
+                            icon = Icons.Outlined.Nightlight,
+                            tintIcon = true,
+                            title = stringResource(R.string.high_latitude_method),
+                            value = highLatitudeLabel(prayerState.highLatitudeRule),
+                            onClick = { showHighLatitudePicker = true }
+                        )
+                    }
                 }
-            }
 
-            item { NimazSectionHeader(title = stringResource(R.string.prayer_settings_section_finetune)) }
-            item {
-                val adjusted = prayerState.adjustments().count { it.second != 0 }
-                NimazMenuGroup {
-                    NimazSettingsItem(
-                        icon = Icons.Default.Tune,
-                        tintIcon = true,
-                        title = stringResource(R.string.prayer_settings_adjust_title),
-                        value = if (adjusted == 0) {
-                            stringResource(R.string.prayer_settings_adjust_hint)
-                        } else {
-                            pluralStringResource(R.plurals.prayer_settings_adjusted_count, adjusted, adjusted)
-                        },
-                        onClick = { showAdjustments = true }
-                    )
+                // Only where the rule actually matters, and only for a place the reader really has —
+                // naming a fallback city's latitude would be a claim about somewhere they are not.
+                val latitude = preview.latitude
+                val city = preview.locationName
+                if (latitude != null && city != null && abs(latitude) >= HIGH_LATITUDE_DEGREES) {
+                    item {
+                        NimazBanner(
+                            title = stringResource(
+                                R.string.prayer_settings_high_lat_notice,
+                                city,
+                                abs(latitude).roundToInt(),
+                                stringResource(if (latitude >= 0) R.string.prayer_latitude_north else R.string.prayer_latitude_south),
+                                highLatitudeLabel(prayerState.highLatitudeRule),
+                            ),
+                            variant = NimazBannerVariant.INFO,
+                        )
+                    }
                 }
-            }
 
-            item { NimazSectionHeader(title = stringResource(R.string.prayer_settings_section_reminders)) }
-            item {
-                NimazMenuGroup {
-                    NimazSettingsItem(
-                        icon = Icons.Default.NotificationsActive,
-                        tintIcon = true,
-                        title = stringResource(R.string.prayer_settings_reminders_title),
-                        value = remindersSummary(notificationSummary),
-                        onClick = onNavigateToNotifications
-                    )
+                item { NimazSectionHeader(title = stringResource(R.string.prayer_settings_section_finetune)) }
+                item {
+                    val adjusted = prayerState.adjustments().count { it.second != 0 }
+                    NimazMenuGroup {
+                        NimazSettingsItem(
+                            icon = Icons.Default.Tune,
+                            tintIcon = true,
+                            title = stringResource(R.string.prayer_settings_adjust_title),
+                            value = if (adjusted == 0) {
+                                stringResource(R.string.prayer_settings_adjust_hint)
+                            } else {
+                                pluralStringResource(R.plurals.prayer_settings_adjusted_count, adjusted, adjusted)
+                            },
+                            onClick = { showAdjustments = true }
+                        )
+                    }
                 }
-            }
 
-            item { Spacer(modifier = Modifier.height(16.dp)) }
+                item { NimazSectionHeader(title = stringResource(R.string.prayer_settings_section_reminders)) }
+                item {
+                    NimazMenuGroup {
+                        NimazSettingsItem(
+                            icon = Icons.Default.NotificationsActive,
+                            tintIcon = true,
+                            title = stringResource(R.string.prayer_settings_reminders_title),
+                            value = remindersSummary(notificationSummary),
+                            onClick = onNavigateToNotifications
+                        )
+                    }
+                }
+
+                item { Spacer(modifier = Modifier.height(16.dp)) }
+            }
         }
     }
 

@@ -1,8 +1,6 @@
 package com.arshadshah.nimaz.presentation.screens.qaida
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.Image
-import androidx.compose.ui.res.painterResource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
@@ -29,6 +27,9 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazConfirmDialog
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.viewmodel.content.QaidaReaderEvent
 import com.arshadshah.nimaz.presentation.viewmodel.content.QaidaReaderViewModel
+import com.arshadshah.nimaz.presentation.components.molecules.NimazScrollbarBox
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.lazy.rememberLazyListState
 
 /** Shared by journey, lessons and the alphabet. Preferences persist on this device. */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -43,51 +44,53 @@ fun QaidaSettingsScreen(onNavigateBack: () -> Unit, viewModel: QaidaReaderViewMo
         NimazBackTopAppBar(title = stringResource(CoreR.string.qaida),
             subtitle = stringResource(R.string.qaida_settings), onBackClick = onNavigateBack)
     }) { padding ->
-        LazyColumn(Modifier.fillMaxSize().padding(padding), contentPadding = PaddingValues(20.dp),
-            verticalArrangement = Arrangement.spacedBy(24.dp, Alignment.CenterVertically)) {
-            item {
-                Image(painterResource(R.drawable.qaida_settings_art), null,
-                    Modifier.fillMaxWidth().height(130.dp))
-            }
-            item {
-                NimazSettingsSection(stringResource(R.string.qaida_settings_learning)) {
-                    NimazSettingsItem(title = stringResource(R.string.qaida_settings_transliteration),
-                        subtitle = stringResource(R.string.qaida_settings_transliteration_hint), icon = Icons.Default.Translate,
-                        checked = settings.showTransliteration,
-                        modifier = Modifier.semantics {
-                            role = Role.Switch
-                            toggleableState = ToggleableState(settings.showTransliteration)
-                        },
-                        onCheckedChange = { viewModel.onEvent(QaidaReaderEvent.SetTransliteration(it)) })
-                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-                    NimazSettingsItem(title = stringResource(R.string.qaida_settings_slow),
-                        subtitle = stringResource(R.string.qaida_settings_slow_hint), icon = Icons.Default.Speed,
-                        checked = settings.slowPlayback,
-                        modifier = Modifier.semantics {
-                            role = Role.Switch
-                            toggleableState = ToggleableState(settings.slowPlayback)
-                        },
-                        onCheckedChange = { viewModel.onEvent(QaidaReaderEvent.SetSlow(it)) })
+        val scrollbarState = rememberLazyListState()
+        NimazScrollbarBox(
+            state = scrollbarState,
+            modifier = Modifier.fillMaxSize().padding(padding),
+        ) {
+            LazyColumn(Modifier.fillMaxSize(), state = scrollbarState, contentPadding = PaddingValues(20.dp),
+                verticalArrangement = Arrangement.spacedBy(24.dp, Alignment.CenterVertically)) {
+                item {
+                    NimazSettingsSection(stringResource(R.string.qaida_settings_learning)) {
+                        NimazSettingsItem(title = stringResource(R.string.qaida_settings_transliteration),
+                            subtitle = stringResource(R.string.qaida_settings_transliteration_hint), icon = Icons.Default.Translate,
+                            checked = settings.showTransliteration,
+                            modifier = Modifier.semantics {
+                                role = Role.Switch
+                                toggleableState = ToggleableState(settings.showTransliteration)
+                            },
+                            onCheckedChange = { viewModel.onEvent(QaidaReaderEvent.SetTransliteration(it)) })
+                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                        NimazSettingsItem(title = stringResource(R.string.qaida_settings_slow),
+                            subtitle = stringResource(R.string.qaida_settings_slow_hint), icon = Icons.Default.Speed,
+                            checked = settings.slowPlayback,
+                            modifier = Modifier.semantics {
+                                role = Role.Switch
+                                toggleableState = ToggleableState(settings.slowPlayback)
+                            },
+                            onCheckedChange = { viewModel.onEvent(QaidaReaderEvent.SetSlow(it)) })
+                    }
                 }
-            }
-            item {
-                NimazSettingsSection(stringResource(R.string.qaida_settings_storage)) {
-                    Text(stringResource(R.string.qaida_downloads_description), Modifier.padding(16.dp),
-                        style = MaterialTheme.typography.bodyMedium)
-                    NimazSettingsItem(title = stringResource(R.string.qaida_clear_audio),
-                        subtitle = stringResource(R.string.qaida_cache_size, "%.1f".format(cacheBytes / 1048576.0)),
-                        icon = Icons.Default.DeleteOutline, enabled = cacheBytes > 0, onClick = { confirmation = 1 })
+                item {
+                    NimazSettingsSection(stringResource(R.string.qaida_settings_storage)) {
+                        Text(stringResource(R.string.qaida_downloads_description), Modifier.padding(16.dp),
+                            style = MaterialTheme.typography.bodyMedium)
+                        NimazSettingsItem(title = stringResource(R.string.qaida_clear_audio),
+                            subtitle = stringResource(R.string.qaida_cache_size, "%.1f".format(cacheBytes / 1048576.0)),
+                            icon = Icons.Default.DeleteOutline, enabled = cacheBytes > 0, onClick = { confirmation = 1 })
+                    }
                 }
-            }
-            item {
-                NimazSettingsSection(stringResource(R.string.qaida_settings_progress)) {
-                    NimazSettingsItem(title = stringResource(CoreR.string.qaida_reset_journey),
-                        subtitle = stringResource(R.string.qaida_settings_reset_hint), icon = Icons.Default.RestartAlt,
-                        onClick = { confirmation = 2 })
+                item {
+                    NimazSettingsSection(stringResource(R.string.qaida_settings_progress)) {
+                        NimazSettingsItem(title = stringResource(CoreR.string.qaida_reset_journey),
+                            subtitle = stringResource(R.string.qaida_settings_reset_hint), icon = Icons.Default.RestartAlt,
+                            onClick = { confirmation = 2 })
+                    }
                 }
+                item { Text(stringResource(R.string.qaida_settings_local), style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant) }
             }
-            item { Text(stringResource(R.string.qaida_settings_local), style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant) }
         }
     }
     if (confirmation != 0) {

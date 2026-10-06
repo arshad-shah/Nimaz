@@ -3,11 +3,11 @@
 Approved direction: follow the supplied three-screen reference through serif headings,
 compact chapter cards, a horizontal lesson path, circular playback, related sound tiles and
 a fuller completion checklist. All UI colours come from the existing Nimaz theme: no custom
-palette or raw colour values. Reuse the bundled Amiri font and book illustrations in light
-and dark modes; Arabic is rendered as text, never baked into artwork. The chapter grouping follows the
+palette or raw colour values. Reuse the bundled Amiri font in light and dark modes; the
+feature ships no raster illustrations, and Arabic is always rendered as text. The chapter grouping follows the
 real 17 lessons: 1–5 letters and sounds, 6–12 building reading, 13–17 confidence.
 
-[All screens and states in light and dark](PREVIEWS.md) · [Letter anatomy](ARTICULATION.md)
+[All screens and states in light and dark](PREVIEWS.md) · [Letter articulation](ARTICULATION.md)
 
 Every Qaida destination uses the unified `NimazBackTopAppBar` with the page name **Qaida**.
 The transparent `NimazScreenScaffold` allows the app-wide pattern and frosted top-bar effects
@@ -18,7 +18,7 @@ from the journey, reader and letter explorer; no independent theme is introduced
 
 | Page | Purpose and behaviour |
 | --- | --- |
-| Journey | Illustrated welcome, actual daily activity, persisted progress, continue pointer, three expandable chapter cards and a four-lesson window around the current lesson. See all expands the curriculum. Locked lessons explain how to unlock. |
+| Journey | Welcome, actual daily activity, persisted progress, continue pointer, three expandable chapter cards and a four-lesson window around the current lesson. See all expands the curriculum. Locked lessons explain how to unlock. |
 | Review | On-device queue from the learner’s confidence checks; an encouraging empty state. Open a lesson and choose its review action for due cards only. |
 | Audio | Download explanation, actual disk use, confirmed removal without resetting learning. |
 | Lesson introduction | Existing curriculum description and Arabic title, teacher guidance, begin/resume and due review. Opens only this lesson’s audio download. |
@@ -26,9 +26,9 @@ from the journey, reader and letter explorer; no independent theme is introduced
 | Repeat | The same focused sound, with the large play button repeating three times; normal playback and slower playback remain available. |
 | Practise | Read first, reveal the reminder, then record “Feeling confident” or “Needs practice”. This is explicitly a self-check, never speech recognition or a pronunciation score. |
 | All cards | Scrollable lesson overview; selecting a card returns to focused listening. |
-| Completion | Existing book illustration, unique heard or self-practised cards this visit, honest activity checklist, encouragement and quick review of those cards (the lesson if none were practised), or return. Browsing alone does not fabricate a practice count. |
+| Completion | Unique heard or self-practised cards this visit, honest activity checklist, encouragement and quick review of those cards (the lesson if none were practised), or return. Browsing alone does not fabricate a practice count. |
 | Settings | Existing settings sections and switch rows control persistent transliteration reminders and slower audio. Confirmed audio removal and progress reset are separate. Reset preserves learning preferences and audio; resetting from a reader exits that session. |
-| Letter explorer | Existing 29-letter grid, positional forms and a scrollable anatomy sheet with letter-specific tongue, lip, tooth and throat location guides; playback appears only when the lesson-one pack verifies. |
+| Letter explorer | Existing 29-letter grid, positional forms and a scrollable detail sheet with the letter's articulation area and its written makhraj description; playback appears only when the lesson-one pack verifies. |
 
 Download states: preparing with per-clip progress, saved/offline, unavailable recordings,
 failed/retry. Reading and explicit practice remain available in every state. Back navigation
@@ -42,8 +42,7 @@ ArabicText, HarakatArabicText, QaidaCourseHeader, QaidaLetterBoard and QaidaLett
 Extend ArabicTextSize with DISPLAY for the focus card. Keep the shared QaidaCoursePath and
 its Khatam consumer unchanged. No new general-purpose design system is introduced.
 
-Two decorative, text-free PNG assets provide the journey and reward illustrations. They
-have no accessibility description; the adjacent headings communicate the information.
+There is no decorative artwork: headings and text communicate every state.
 Controls use standard semantics and labels, and lesson cards announce number, name and state.
 Scroll containers accommodate compact screens and larger text. Manual device validation in
 light/dark, RTL, TalkBack and 200% text remains a release gate.

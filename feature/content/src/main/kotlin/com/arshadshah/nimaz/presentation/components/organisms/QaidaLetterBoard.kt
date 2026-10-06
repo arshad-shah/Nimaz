@@ -1,10 +1,5 @@
 package com.arshadshah.nimaz.presentation.components.organisms
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.lazy.grid.GridItemSpan
-import androidx.compose.ui.res.painterResource
-import com.arshadshah.nimaz.feature.content.R
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -26,6 +21,8 @@ import com.arshadshah.nimaz.presentation.components.molecules.QaidaLetterTile
 import com.arshadshah.nimaz.presentation.theme.NimazSpacing
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.theme.ThemeMode
+import com.arshadshah.nimaz.presentation.components.molecules.NimazScrollbarBox
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 
 /**
  * The alphabet board: every letter as a tappable tile in an RTL 4-column grid.
@@ -39,26 +36,27 @@ fun QaidaLetterBoard(
     modifier: Modifier = Modifier,
 ) {
     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(4),
+        val scrollbarState = rememberLazyGridState()
+        NimazScrollbarBox(
+            state = scrollbarState,
             modifier = modifier
-                .testTag("qaida-letter-board")
-                .fillMaxSize()
-                .padding(horizontal = NimazSpacing.Large),
-            horizontalArrangement = Arrangement.spacedBy(NimazSpacing.Small),
-            verticalArrangement = Arrangement.spacedBy(NimazSpacing.Small),
-            contentPadding = androidx.compose.foundation.layout.PaddingValues(vertical = NimazSpacing.Medium),
+                .fillMaxSize(),
         ) {
-            item(span = { GridItemSpan(maxLineSpan) }) {
-                Image(painterResource(R.drawable.qaida_letters_art), null,
-                    Modifier.fillMaxWidth().height(150.dp))
-            }
-            items(letters, key = { it.id }) { letter ->
-                QaidaLetterTile(
-                    letter = letter,
-                    heard = letter.id in heardLetterIds,
-                    onClick = onLetterClick,
-                )
+            LazyVerticalGrid(
+                state = scrollbarState,
+                columns = GridCells.Fixed(4),
+                modifier = Modifier.fillMaxSize().testTag("qaida-letter-board").padding(horizontal = NimazSpacing.Large),
+                horizontalArrangement = Arrangement.spacedBy(NimazSpacing.Small),
+                verticalArrangement = Arrangement.spacedBy(NimazSpacing.Small),
+                contentPadding = androidx.compose.foundation.layout.PaddingValues(vertical = NimazSpacing.Medium),
+            ) {
+                items(letters, key = { it.id }) { letter ->
+                    QaidaLetterTile(
+                        letter = letter,
+                        heard = letter.id in heardLetterIds,
+                        onClick = onLetterClick,
+                    )
+                }
             }
         }
     }

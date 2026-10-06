@@ -62,6 +62,8 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 import java.time.ZoneId
 import java.time.format.TextStyle
+import com.arshadshah.nimaz.presentation.components.molecules.NimazScrollbarBox
+import androidx.compose.foundation.lazy.rememberLazyListState
 
 /** How far back the review banner looks. One week is a period a user can actually remember. */
 private const val REVIEW_WINDOW_DAYS = 7L
@@ -147,116 +149,123 @@ fun PrayerTrackerScreen(
             )
         }
     ) { paddingValues ->
-        LazyColumn(
+        val scrollbarState = rememberLazyListState()
+        NimazScrollbarBox(
+            state = scrollbarState,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues),
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
-            verticalArrangement = Arrangement.spacedBy(18.dp),
         ) {
-            item {
-                DayRail(
-                    selectedDate = state.selectedDate,
-                    today = today,
-                    statusesOn = ::statusesOn,
-                    onSelect = { date ->
-                        expandedPrayer = null
-                        viewModel.onEvent(PrayerTrackerEvent.SelectDate(date))
-                    },
-                )
-            }
-
-            item {
-                PrayerTrackerDayCard(
-                    selectedDate = state.selectedDate,
-                    statuses = statusesOn(state.selectedDate),
-                    times = state.prayerTimes,
-                    now = now,
-                    streak = statsState.currentStreak,
-                    expandedPrayer = expandedPrayer,
-                    onExpandedChange = { expandedPrayer = it },
-                    // The row stays open. Closing it on the tap that set the status hid the one
-                    // piece of feedback the picker gives -- the chosen segment taking its colour --
-                    // and on a tap-to-clear it slammed shut over the note explaining what
-                    // "not recorded" means. The header is how a row closes.
-                    onSetStatus = { prayer, status ->
-                        viewModel.onEvent(PrayerTrackerEvent.SetPrayerStatus(prayer, status))
-                    },
-                    onBackToToday = {
-                        expandedPrayer = null
-                        viewModel.onEvent(PrayerTrackerEvent.SelectDate(today))
-                    },
-                )
-            }
-
-            if (unrecordedCount > 0) {
+            LazyColumn(
+                state = scrollbarState,
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
+                verticalArrangement = Arrangement.spacedBy(18.dp),
+            ) {
                 item {
-                    NimazBanner(
-                        title = pluralStringResource(
-                            R.plurals.prayer_unrecorded_banner,
-                            unrecordedCount,
-                            unrecordedCount,
-                        ),
-                        variant = NimazBannerVariant.WARNING,
-                        actionLabel = stringResource(R.string.prayer_unrecorded_banner_action),
-                        onAction = {
-                            viewModel.onEvent(
-                                PrayerTrackerEvent.ConfirmUnrecordedAsMissed(
-                                    from = today.minusDays(REVIEW_WINDOW_DAYS),
-                                    to = today.minusDays(1),
-                                )
-                            )
+                    DayRail(
+                        selectedDate = state.selectedDate,
+                        today = today,
+                        statusesOn = ::statusesOn,
+                        onSelect = { date ->
+                            expandedPrayer = null
+                            viewModel.onEvent(PrayerTrackerEvent.SelectDate(date))
                         },
                     )
                 }
-            }
 
-            item {
-                MonthSection(
-                    displayedMonth = displayedMonth,
-                    selectedDate = state.selectedDate,
-                    today = today,
-                    statusesOn = ::statusesOn,
-                    onMonthChange = { displayedMonth = it },
-                    onDateSelected = { date ->
-                        expandedPrayer = null
-                        viewModel.onEvent(PrayerTrackerEvent.SelectDate(date))
-                    },
-                )
-            }
-
-            item {
-                // Carded like every other section on this screen, rather than sitting flat on
-                // the page background -- NimazMenuGroup is the same FILLED, rounded NimazCard
-                // the day card and the month section already use.
-                NimazMenuGroup {
-                    NimazMenuItem(
-                        title = stringResource(R.string.qada_prayers),
-                        subtitle = if (qadaState.missedPrayers.isEmpty()) {
-                            stringResource(R.string.qada_summary_empty)
-                        } else {
-                            stringResource(R.string.qada_summary_subtitle)
+                item {
+                    PrayerTrackerDayCard(
+                        selectedDate = state.selectedDate,
+                        statuses = statusesOn(state.selectedDate),
+                        times = state.prayerTimes,
+                        now = now,
+                        streak = statsState.currentStreak,
+                        expandedPrayer = expandedPrayer,
+                        onExpandedChange = { expandedPrayer = it },
+                        // The row stays open. Closing it on the tap that set the status hid the one
+                        // piece of feedback the picker gives -- the chosen segment taking its colour --
+                        // and on a tap-to-clear it slammed shut over the note explaining what
+                        // "not recorded" means. The header is how a row closes.
+                        onSetStatus = { prayer, status ->
+                            viewModel.onEvent(PrayerTrackerEvent.SetPrayerStatus(prayer, status))
                         },
-                        icon = Icons.Default.Restore,
-                        // Qada is purple everywhere else in the tracker (the picker, the
-                        // timeline dot) -- NimazColors.StatusColors.Qada, not an invented tone.
-                        iconTint = NimazColors.StatusColors.Qada,
-                        onClick = onNavigateToQada,
-                        trailing = {
-                            if (qadaState.missedPrayers.isNotEmpty()) {
-                                // A filled purple count badge, not the default neutral/outlined
-                                // one -- NimazBadgeDefaults.feature is the same escape hatch
-                                // StatusBadge uses for this exact colour.
-                                NimazBadge(
-                                    text = qadaState.missedPrayers.size.toString(),
-                                    colors = NimazBadgeDefaults.feature(
-                                        color = NimazColors.StatusColors.Qada,
-                                        emphasis = NimazBadgeEmphasis.FILLED,
-                                    ),
-                                )
-                            }
+                        onBackToToday = {
+                            expandedPrayer = null
+                            viewModel.onEvent(PrayerTrackerEvent.SelectDate(today))
                         },
                     )
+                }
+
+                if (unrecordedCount > 0) {
+                    item {
+                        NimazBanner(
+                            title = pluralStringResource(
+                                R.plurals.prayer_unrecorded_banner,
+                                unrecordedCount,
+                                unrecordedCount,
+                            ),
+                            variant = NimazBannerVariant.WARNING,
+                            actionLabel = stringResource(R.string.prayer_unrecorded_banner_action),
+                            onAction = {
+                                viewModel.onEvent(
+                                    PrayerTrackerEvent.ConfirmUnrecordedAsMissed(
+                                        from = today.minusDays(REVIEW_WINDOW_DAYS),
+                                        to = today.minusDays(1),
+                                    )
+                                )
+                            },
+                        )
+                    }
+                }
+
+                item {
+                    MonthSection(
+                        displayedMonth = displayedMonth,
+                        selectedDate = state.selectedDate,
+                        today = today,
+                        statusesOn = ::statusesOn,
+                        onMonthChange = { displayedMonth = it },
+                        onDateSelected = { date ->
+                            expandedPrayer = null
+                            viewModel.onEvent(PrayerTrackerEvent.SelectDate(date))
+                        },
+                    )
+                }
+
+                item {
+                    // Carded like every other section on this screen, rather than sitting flat on
+                    // the page background -- NimazMenuGroup is the same FILLED, rounded NimazCard
+                    // the day card and the month section already use.
+                    NimazMenuGroup {
+                        NimazMenuItem(
+                            title = stringResource(R.string.qada_prayers),
+                            subtitle = if (qadaState.missedPrayers.isEmpty()) {
+                                stringResource(R.string.qada_summary_empty)
+                            } else {
+                                stringResource(R.string.qada_summary_subtitle)
+                            },
+                            icon = Icons.Default.Restore,
+                            // Qada is purple everywhere else in the tracker (the picker, the
+                            // timeline dot) -- NimazColors.StatusColors.Qada, not an invented tone.
+                            iconTint = NimazColors.StatusColors.Qada,
+                            onClick = onNavigateToQada,
+                            trailing = {
+                                if (qadaState.missedPrayers.isNotEmpty()) {
+                                    // A filled purple count badge, not the default neutral/outlined
+                                    // one -- NimazBadgeDefaults.feature is the same escape hatch
+                                    // StatusBadge uses for this exact colour.
+                                    NimazBadge(
+                                        text = qadaState.missedPrayers.size.toString(),
+                                        colors = NimazBadgeDefaults.feature(
+                                            color = NimazColors.StatusColors.Qada,
+                                            emphasis = NimazBadgeEmphasis.FILLED,
+                                        ),
+                                    )
+                                }
+                            },
+                        )
+                    }
                 }
             }
         }

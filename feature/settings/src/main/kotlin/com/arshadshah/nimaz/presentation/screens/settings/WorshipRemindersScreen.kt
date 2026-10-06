@@ -40,6 +40,8 @@ import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.viewmodel.settings.NotificationSettingsUiState
 import com.arshadshah.nimaz.presentation.viewmodel.settings.SettingsEvent
 import com.arshadshah.nimaz.presentation.viewmodel.settings.SettingsViewModel
+import com.arshadshah.nimaz.presentation.components.molecules.NimazScrollbarBox
+import androidx.compose.foundation.lazy.rememberLazyListState
 
 /**
  * Worship reminders subscreen (spec §3). Data-driven off [WorshipReminderType]: rows are generated
@@ -69,74 +71,80 @@ fun WorshipRemindersScreen(
             )
         }
     ) { padding ->
-        LazyColumn(
+        val scrollbarState = rememberLazyListState()
+        NimazScrollbarBox(
+            state = scrollbarState,
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
-                .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .padding(padding),
         ) {
-            item { Spacer(Modifier.height(4.dp)) }
+            LazyColumn(
+                state = scrollbarState,
+                modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                item { Spacer(Modifier.height(4.dp)) }
 
-            item {
-                NimazBanner(
-                    title = stringResource(R.string.worship_settings_intro),
-                    variant = NimazBannerVariant.INFO,
-                    modifier = Modifier
-                )
-            }
-
-            val onToggle: (String, Boolean) -> Unit =
-                { key, enabled ->
-                    viewModel.onEvent(
-                        SettingsEvent.SetWorshipReminderEnabled(
-                            key,
-                            enabled
-                        )
-                    )
-                }
-            val onOffset: (String, Int) -> Unit =
-                { key, min -> viewModel.onEvent(SettingsEvent.SetWorshipReminderOffset(key, min)) }
-            val onMode: (String, String) -> Unit =
-                { key, mode -> viewModel.onEvent(SettingsEvent.SetWorshipReminderMode(key, mode)) }
-
-            worshipSection(
-                titleRes = R.string.worship_settings_section_night,
-                types = WorshipReminderType.entries.filter { it.category == WorshipReminderCategory.NIGHT },
-                state = state, minutesFormat = minutesFormat,
-                onToggle = onToggle, onOffset = onOffset, onMode = onMode,
-            )
-
-            // Ramadan reminders are shown year-round rather than hidden. Hiding them made
-            // the app look like it had lost a feature outside Ramadan, and left no way to
-            // set them up in advance. Nothing depends on their absence — the scheduler
-            // gates them on the Hijri date itself (WorshipReminderCalculator), so one set
-            // outside Ramadan simply arms nothing until Ramadan arrives.
-            if (!isRamadan) {
-                item(key = "ramadan_notice") {
+                item {
                     NimazBanner(
-                        title = stringResource(R.string.worship_settings_ramadan_notice),
+                        title = stringResource(R.string.worship_settings_intro),
                         variant = NimazBannerVariant.INFO,
-                        icon = Icons.Default.Schedule,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier
                     )
                 }
+
+                val onToggle: (String, Boolean) -> Unit =
+                    { key, enabled ->
+                        viewModel.onEvent(
+                            SettingsEvent.SetWorshipReminderEnabled(
+                                key,
+                                enabled
+                            )
+                        )
+                    }
+                val onOffset: (String, Int) -> Unit =
+                    { key, min -> viewModel.onEvent(SettingsEvent.SetWorshipReminderOffset(key, min)) }
+                val onMode: (String, String) -> Unit =
+                    { key, mode -> viewModel.onEvent(SettingsEvent.SetWorshipReminderMode(key, mode)) }
+
+                worshipSection(
+                    titleRes = R.string.worship_settings_section_night,
+                    types = WorshipReminderType.entries.filter { it.category == WorshipReminderCategory.NIGHT },
+                    state = state, minutesFormat = minutesFormat,
+                    onToggle = onToggle, onOffset = onOffset, onMode = onMode,
+                )
+
+                // Ramadan reminders are shown year-round rather than hidden. Hiding them made
+                // the app look like it had lost a feature outside Ramadan, and left no way to
+                // set them up in advance. Nothing depends on their absence — the scheduler
+                // gates them on the Hijri date itself (WorshipReminderCalculator), so one set
+                // outside Ramadan simply arms nothing until Ramadan arrives.
+                if (!isRamadan) {
+                    item(key = "ramadan_notice") {
+                        NimazBanner(
+                            title = stringResource(R.string.worship_settings_ramadan_notice),
+                            variant = NimazBannerVariant.INFO,
+                            icon = Icons.Default.Schedule,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                }
+                worshipSection(
+                    titleRes = R.string.worship_settings_section_ramadan,
+                    types = WorshipReminderType.entries.filter { it.category == WorshipReminderCategory.RAMADAN },
+                    state = state, minutesFormat = minutesFormat,
+                    onToggle = onToggle, onOffset = onOffset, onMode = onMode,
+                )
+
+                worshipSection(
+                    titleRes = R.string.worship_settings_section_fasting,
+                    types = WorshipReminderType.entries.filter { it.category == WorshipReminderCategory.FASTING_DHIKR },
+                    state = state, minutesFormat = minutesFormat,
+                    onToggle = onToggle, onOffset = onOffset, onMode = onMode,
+                )
+
+                item { Spacer(Modifier.height(16.dp)) }
             }
-            worshipSection(
-                titleRes = R.string.worship_settings_section_ramadan,
-                types = WorshipReminderType.entries.filter { it.category == WorshipReminderCategory.RAMADAN },
-                state = state, minutesFormat = minutesFormat,
-                onToggle = onToggle, onOffset = onOffset, onMode = onMode,
-            )
-
-            worshipSection(
-                titleRes = R.string.worship_settings_section_fasting,
-                types = WorshipReminderType.entries.filter { it.category == WorshipReminderCategory.FASTING_DHIKR },
-                state = state, minutesFormat = minutesFormat,
-                onToggle = onToggle, onOffset = onOffset, onMode = onMode,
-            )
-
-            item { Spacer(Modifier.height(16.dp)) }
         }
     }
 }

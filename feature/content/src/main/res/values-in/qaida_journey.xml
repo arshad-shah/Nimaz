@@ -89,20 +89,5 @@
     <string name="qaida_settings_progress">Riwayat belajar</string>
     <string name="qaida_settings_local">Preferensi dan riwayat belajar tetap di perangkat ini. Tampilan mengikuti pengaturan Nimaz yang ada.</string>
     <string name="qaida_settings_reset_hint">Hapus kemajuan dan riwayat ulasan. Pertahankan preferensi dan audio unduhan.</string>
-    <string name="qaida_anatomy_front">Bibir · tampak depan</string>
-    <string name="qaida_anatomy_top">Lidah dan geraham atas · tampak atas</string>
-    <string name="qaida_anatomy_side">Mulut dan tenggorokan · tampak samping</string>
-    <string name="qaida_anatomy_description">Panduan artikulasi %1$s. %2$s. %3$s</string>
-    <string name="qaida_anatomy_key">Lingkaran emas menandai area artikulasi; panah hijau kebiruan menunjukkan aliran udara. Posisi bersifat skematis; ikuti contoh guru.</string>
-    <string name="qaida_anatomy_consonant">Panduan ini untuk konsonan. Sebagai vokal panjang, bunyi memanjang melalui mulut dan tenggorokan yang terbuka.</string>
-    <string name="qaida_anatomy_nasal">Huruf ini juga memiliki resonansi hidung (ghunnah); durasinya sesuai kaidah bacaan.</string>
-    <string name="qaida_anatomy_upper_lip">Bibir atas</string>
-    <string name="qaida_anatomy_lower_lip">Bibir bawah</string>
-    <string name="qaida_anatomy_tongue">Lidah</string>
-    <string name="qaida_anatomy_teeth">Gigi</string>
-    <string name="qaida_anatomy_throat">Tenggorokan</string>
-    <string name="qaida_anatomy_nose">Rongga hidung</string>
-    <string name="qaida_anatomy_molars">Geraham atas</string>
     <string name="qaida_downloads_empty">Belum ada audio tersimpan. Buka pelajaran untuk menyimpan rekaman yang tersedia.</string>
-    <string name="qaida_anatomy_side_front">Mulut · tampak samping dan bibir · tampak depan</string>
 </resources>

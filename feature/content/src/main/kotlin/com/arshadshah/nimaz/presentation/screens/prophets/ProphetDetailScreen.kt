@@ -46,6 +46,8 @@ import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.theme.NimazSpacing
 import com.arshadshah.nimaz.presentation.viewmodel.content.CatalogEvent
 import com.arshadshah.nimaz.presentation.viewmodel.content.ProphetViewModel
+import com.arshadshah.nimaz.presentation.components.molecules.NimazScrollbarBox
+import androidx.compose.foundation.lazy.rememberLazyListState
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -82,49 +84,97 @@ fun ProphetDetailScreen(
             NimazLoadingState(modifier = Modifier.padding(paddingValues))
         } else {
             val prophet = state.item!!
-            LazyColumn(
+            val scrollbarState = rememberLazyListState()
+            NimazScrollbarBox(
+                state = scrollbarState,
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues),
-                contentPadding = PaddingValues(
-                    horizontal = NimazSpacing.Large,
-                    vertical = NimazSpacing.Small
-                ),
-                verticalArrangement = Arrangement.spacedBy(NimazSpacing.Medium)
             ) {
-                // Calligraphic header (no number medallion for prophets)
-                item {
-                    NameDetailHeader(
-                        arabicName = prophet.nameArabic,
-                        accent = accent,
-                        number = null,
-                        primaryLabel = prophet.nameEnglish,
-                        secondaryLabel = prophet.titleEnglish,
-                    )
-                }
-
-                // Story Section
-                item {
-                    NameDetailSectionCard(
-                        title = stringResource(R.string.prophets_story),
-                        content = prophet.storySummary,
-                        titleColor = accent.contentTint
-                    )
-                }
-
-                // Key Lessons Section
-                if (prophet.keyLessons.isNotEmpty()) {
+                LazyColumn(
+                    state = scrollbarState,
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(
+                        horizontal = NimazSpacing.Large,
+                        vertical = NimazSpacing.Small
+                    ),
+                    verticalArrangement = Arrangement.spacedBy(NimazSpacing.Medium)
+                ) {
+                    // Calligraphic header (no number medallion for prophets)
                     item {
-                        BulletListCard(
-                            title = stringResource(R.string.prophets_key_lessons),
-                            items = prophet.keyLessons,
-                            accent = accent
+                        NameDetailHeader(
+                            arabicName = prophet.nameArabic,
+                            accent = accent,
+                            number = null,
+                            primaryLabel = prophet.nameEnglish,
+                            secondaryLabel = prophet.titleEnglish,
                         )
                     }
-                }
 
-                // Quran Mentions
-                if (prophet.quranMentions.isNotEmpty()) {
+                    // Story Section
+                    item {
+                        NameDetailSectionCard(
+                            title = stringResource(R.string.prophets_story),
+                            content = prophet.storySummary,
+                            titleColor = accent.contentTint
+                        )
+                    }
+
+                    // Key Lessons Section
+                    if (prophet.keyLessons.isNotEmpty()) {
+                        item {
+                            BulletListCard(
+                                title = stringResource(R.string.prophets_key_lessons),
+                                items = prophet.keyLessons,
+                                accent = accent
+                            )
+                        }
+                    }
+
+                    // Quran Mentions
+                    if (prophet.quranMentions.isNotEmpty()) {
+                        item {
+                            NimazCard(
+                                modifier = Modifier.fillMaxWidth(),
+                                style = NimazCardStyle.ELEVATED,
+                                tone = NimazTone.NEUTRAL
+                            ) {
+                                Column(
+                                    modifier = Modifier.padding(NimazSpacing.Large),
+                                    verticalArrangement = Arrangement.spacedBy(NimazSpacing.Small)
+                                ) {
+                                    Text(
+                                        text = stringResource(R.string.prophets_quran_mentions),
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.Bold,
+                                        color = accent.contentTint
+                                    )
+                                    FlowRow(
+                                        horizontalArrangement = Arrangement.spacedBy(NimazSpacing.Small),
+                                        verticalArrangement = Arrangement.spacedBy(NimazSpacing.Small)
+                                    ) {
+                                        prophet.quranMentions.forEach { verse ->
+                                            AssistChip(
+                                                onClick = {},
+                                                label = {
+                                                    Text(
+                                                        text = verse,
+                                                        style = MaterialTheme.typography.bodySmall
+                                                    )
+                                                },
+                                                colors = AssistChipDefaults.assistChipColors(
+                                                    containerColor = accent.chipContainer,
+                                                    labelColor = accent.onChipContainer
+                                                )
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // Timeline Section
                     item {
                         NimazCard(
                             modifier = Modifier.fillMaxWidth(),
@@ -133,105 +183,64 @@ fun ProphetDetailScreen(
                         ) {
                             Column(
                                 modifier = Modifier.padding(NimazSpacing.Large),
-                                verticalArrangement = Arrangement.spacedBy(NimazSpacing.Small)
+                                verticalArrangement = Arrangement.spacedBy(NimazSpacing.Medium)
                             ) {
                                 Text(
-                                    text = stringResource(R.string.prophets_quran_mentions),
+                                    text = stringResource(R.string.prophets_timeline),
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.Bold,
                                     color = accent.contentTint
                                 )
-                                FlowRow(
-                                    horizontalArrangement = Arrangement.spacedBy(NimazSpacing.Small),
-                                    verticalArrangement = Arrangement.spacedBy(NimazSpacing.Small)
+
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween
                                 ) {
-                                    prophet.quranMentions.forEach { verse ->
-                                        AssistChip(
-                                            onClick = {},
-                                            label = {
-                                                Text(
-                                                    text = verse,
-                                                    style = MaterialTheme.typography.bodySmall
-                                                )
-                                            },
-                                            colors = AssistChipDefaults.assistChipColors(
-                                                containerColor = accent.chipContainer,
-                                                labelColor = accent.onChipContainer
-                                            )
-                                        )
-                                    }
+                                    TimelineItem(
+                                        label = stringResource(R.string.prophets_era),
+                                        value = prophet.era,
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                    TimelineItem(
+                                        label = stringResource(R.string.prophets_lineage),
+                                        value = prophet.lineage,
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                }
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    TimelineItem(
+                                        label = stringResource(R.string.prophets_years_lived),
+                                        value = prophet.yearsLived,
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                    TimelineItem(
+                                        label = stringResource(R.string.prophets_place),
+                                        value = prophet.placeOfPreaching,
+                                        modifier = Modifier.weight(1f)
+                                    )
                                 }
                             }
                         }
                     }
-                }
 
-                // Timeline Section
-                item {
-                    NimazCard(
-                        modifier = Modifier.fillMaxWidth(),
-                        style = NimazCardStyle.ELEVATED,
-                        tone = NimazTone.NEUTRAL
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(NimazSpacing.Large),
-                            verticalArrangement = Arrangement.spacedBy(NimazSpacing.Medium)
-                        ) {
-                            Text(
-                                text = stringResource(R.string.prophets_timeline),
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = accent.contentTint
+                    // Miracles Section
+                    if (prophet.miracles.isNotEmpty()) {
+                        item {
+                            BulletListCard(
+                                title = stringResource(R.string.prophets_miracles),
+                                items = prophet.miracles,
+                                accent = accent
                             )
-
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                TimelineItem(
-                                    label = stringResource(R.string.prophets_era),
-                                    value = prophet.era,
-                                    modifier = Modifier.weight(1f)
-                                )
-                                TimelineItem(
-                                    label = stringResource(R.string.prophets_lineage),
-                                    value = prophet.lineage,
-                                    modifier = Modifier.weight(1f)
-                                )
-                            }
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                TimelineItem(
-                                    label = stringResource(R.string.prophets_years_lived),
-                                    value = prophet.yearsLived,
-                                    modifier = Modifier.weight(1f)
-                                )
-                                TimelineItem(
-                                    label = stringResource(R.string.prophets_place),
-                                    value = prophet.placeOfPreaching,
-                                    modifier = Modifier.weight(1f)
-                                )
-                            }
                         }
                     }
-                }
 
-                // Miracles Section
-                if (prophet.miracles.isNotEmpty()) {
+                    // Bottom spacer for FAB
                     item {
-                        BulletListCard(
-                            title = stringResource(R.string.prophets_miracles),
-                            items = prophet.miracles,
-                            accent = accent
-                        )
+                        Spacer(modifier = Modifier.height(72.dp))
                     }
-                }
-
-                // Bottom spacer for FAB
-                item {
-                    Spacer(modifier = Modifier.height(72.dp))
                 }
             }
         }

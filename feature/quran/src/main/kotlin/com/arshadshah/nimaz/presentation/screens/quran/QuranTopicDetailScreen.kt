@@ -74,6 +74,8 @@ import com.arshadshah.nimaz.presentation.viewmodel.quran.CitationGroup
 import com.arshadshah.nimaz.presentation.viewmodel.quran.QuranTopicsEvent
 import com.arshadshah.nimaz.presentation.viewmodel.quran.QuranTopicsViewModel
 import com.arshadshah.nimaz.presentation.viewmodel.quran.TopicDetailState
+import com.arshadshah.nimaz.presentation.components.molecules.NimazScrollbarBox
+import androidx.compose.foundation.lazy.rememberLazyListState
 
 /**
  * One subject: how much of the Qur'an speaks to it, where it sits, and every verse.
@@ -153,147 +155,154 @@ private fun SubjectBody(
     val firstSurah = state.citationGroups.firstOrNull()?.surahNumber
     fun isOpen(group: CitationGroup) = (group.surahNumber == firstSurah) != (group.surahNumber in toggled)
 
-    LazyColumn(
+    val scrollbarState = rememberLazyListState()
+    NimazScrollbarBox(
+        state = scrollbarState,
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(
-            start = 16.dp,
-            end = 16.dp,
-            top = contentPadding.calculateTopPadding() + 4.dp,
-            bottom = contentPadding.calculateBottomPadding() + 32.dp,
-        ),
     ) {
-        item(key = "hero") {
-            SubjectHero(
-                topic = topic,
-                icon = TopicIcons.forRoot(detail.breadcrumb.firstOrNull()?.id ?: topic.id, detail.tree),
-                verseCount = detail.citations.size,
-                surahCount = state.citationGroups.size,
-                subtopicCount = detail.children.size,
-            )
-        }
-
-        // How much of this subject is in the surah the reader came from. Beside the totals
-        // rather than instead of them: the point of the pair is the ratio — 12 of 153 is a
-        // passing mention, 12 of 14 is not.
-        state.surahContext?.let { context ->
-            item(key = "surah-context") {
-                NimazBadge(
-                    text = stringResource(R.string.quran_topic_in_surah, context.verseCount, context.surahName),
-                    tone = NimazTone.PROMINENT,
-                    modifier = Modifier.padding(top = 10.dp),
+        LazyColumn(
+            state = scrollbarState,
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(
+                start = 16.dp,
+                end = 16.dp,
+                top = contentPadding.calculateTopPadding() + 4.dp,
+                bottom = contentPadding.calculateBottomPadding() + 32.dp,
+            ),
+        ) {
+            item(key = "hero") {
+                SubjectHero(
+                    topic = topic,
+                    icon = TopicIcons.forRoot(detail.breadcrumb.firstOrNull()?.id ?: topic.id, detail.tree),
+                    verseCount = detail.citations.size,
+                    surahCount = state.citationGroups.size,
+                    subtopicCount = detail.children.size,
                 )
             }
-        }
 
-        if (detail.breadcrumb.isNotEmpty()) {
-            item(key = "path") {
-                SubjectPath(path = detail.breadcrumb, onOpenTopic = onOpenTopic)
+            // How much of this subject is in the surah the reader came from. Beside the totals
+            // rather than instead of them: the point of the pair is the ratio — 12 of 153 is a
+            // passing mention, 12 of 14 is not.
+            state.surahContext?.let { context ->
+                item(key = "surah-context") {
+                    NimazBadge(
+                        text = stringResource(R.string.quran_topic_in_surah, context.verseCount, context.surahName),
+                        tone = NimazTone.PROMINENT,
+                        modifier = Modifier.padding(top = 10.dp),
+                    )
+                }
             }
-        }
 
-        if (topic.hasDescription) {
-            item(key = "description") {
-                Description(
-                    html = topic.description,
-                    onLink = { link ->
-                        when (link) {
-                            is ThematicLink.Topic -> onOpenTopic(link.id)
-                            is ThematicLink.Verses -> onOpenAyah(link.surah, link.from ?: 1)
-                        }
-                    },
-                )
+            if (detail.breadcrumb.isNotEmpty()) {
+                item(key = "path") {
+                    SubjectPath(path = detail.breadcrumb, onOpenTopic = onOpenTopic)
+                }
             }
-        }
 
-        if (detail.children.isNotEmpty()) {
-            item(key = "subtopics") {
-                // Counted subtopics once the catalogue lands; the bare children until then, in
-                // the order the corpus gives them, so the row is never empty while it counts.
-                val subtopics = state.subtopics.ifEmpty { null }
-                Section(
-                    title = stringResource(R.string.quran_topic_subtopics),
-                    trailing = formatCount(detail.children.size),
-                )
-                LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    if (subtopics != null) {
-                        items(subtopics, key = { it.topic.id }) { sub ->
-                            SubtopicCard(sub.topic.name, sub.verseCount, onClick = { onOpenTopic(sub.topic.id) })
-                        }
-                    } else {
-                        items(detail.children, key = { it.id }) { child ->
-                            SubtopicCard(child.name, null, onClick = { onOpenTopic(child.id) })
+            if (topic.hasDescription) {
+                item(key = "description") {
+                    Description(
+                        html = topic.description,
+                        onLink = { link ->
+                            when (link) {
+                                is ThematicLink.Topic -> onOpenTopic(link.id)
+                                is ThematicLink.Verses -> onOpenAyah(link.surah, link.from ?: 1)
+                            }
+                        },
+                    )
+                }
+            }
+
+            if (detail.children.isNotEmpty()) {
+                item(key = "subtopics") {
+                    // Counted subtopics once the catalogue lands; the bare children until then, in
+                    // the order the corpus gives them, so the row is never empty while it counts.
+                    val subtopics = state.subtopics.ifEmpty { null }
+                    Section(
+                        title = stringResource(R.string.quran_topic_subtopics),
+                        trailing = formatCount(detail.children.size),
+                    )
+                    LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        if (subtopics != null) {
+                            items(subtopics, key = { it.topic.id }) { sub ->
+                                SubtopicCard(sub.topic.name, sub.verseCount, onClick = { onOpenTopic(sub.topic.id) })
+                            }
+                        } else {
+                            items(detail.children, key = { it.id }) { child ->
+                                SubtopicCard(child.name, null, onClick = { onOpenTopic(child.id) })
+                            }
                         }
                     }
                 }
             }
-        }
 
-        if (detail.related.isNotEmpty()) {
-            item(key = "related") {
-                Section(title = stringResource(R.string.quran_topic_related))
-                LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    items(detail.related, key = { it.id }) { related ->
-                        NimazChip(
-                            text = related.name,
-                            variant = NimazChipVariant.SUGGESTION,
-                            leadingIcon = Icons.Default.Link,
-                            onClick = { onOpenTopic(related.id) },
-                        )
+            if (detail.related.isNotEmpty()) {
+                item(key = "related") {
+                    Section(title = stringResource(R.string.quran_topic_related))
+                    LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        items(detail.related, key = { it.id }) { related ->
+                            NimazChip(
+                                text = related.name,
+                                variant = NimazChipVariant.SUGGESTION,
+                                leadingIcon = Icons.Default.Link,
+                                onClick = { onOpenTopic(related.id) },
+                            )
+                        }
                     }
                 }
             }
-        }
 
-        if (state.topSurahs.isNotEmpty()) {
-            item(key = "where") {
-                Section(
-                    title = stringResource(R.string.quran_topic_where_it_appears),
-                    trailing = stringResource(
-                        R.string.quran_topic_top_of,
-                        state.topSurahs.size,
-                        state.citationGroups.size,
-                    ),
-                )
-                SurahDistribution(groups = state.topSurahs)
+            if (state.topSurahs.isNotEmpty()) {
+                item(key = "where") {
+                    Section(
+                        title = stringResource(R.string.quran_topic_where_it_appears),
+                        trailing = stringResource(
+                            R.string.quran_topic_top_of,
+                            state.topSurahs.size,
+                            state.citationGroups.size,
+                        ),
+                    )
+                    SurahDistribution(groups = state.topSurahs)
+                }
             }
-        }
 
-        if (state.citationGroups.isEmpty()) {
-            item(key = "no-verses") {
-                Text(
-                    text = stringResource(R.string.quran_topic_no_verses),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(top = 24.dp),
-                )
-            }
-        } else {
-            item(key = "verses-title") {
-                Section(
-                    title = stringResource(R.string.quran_topic_verses_section),
-                    trailing = stringResource(
-                        R.string.quran_topic_verses_across,
-                        formatCount(detail.citations.size),
-                        state.citationGroups.size,
-                    ),
-                )
-            }
-            items(state.citationGroups, key = { "surah-${it.surahNumber}" }) { group ->
-                val open = isOpen(group)
-                val all = group.surahNumber in showingAll
-                SurahVerses(
-                    group = group,
-                    expanded = open,
-                    showAll = all,
-                    previews = state.previews,
-                    onExpandedChange = {
-                        toggled = if (group.surahNumber in toggled) toggled - group.surahNumber
-                        else toggled + group.surahNumber
-                    },
-                    onShowAll = { showingAll = showingAll + group.surahNumber },
-                    onOpenAyah = onOpenAyah,
-                    modifier = Modifier.padding(bottom = 8.dp),
-                )
+            if (state.citationGroups.isEmpty()) {
+                item(key = "no-verses") {
+                    Text(
+                        text = stringResource(R.string.quran_topic_no_verses),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(top = 24.dp),
+                    )
+                }
+            } else {
+                item(key = "verses-title") {
+                    Section(
+                        title = stringResource(R.string.quran_topic_verses_section),
+                        trailing = stringResource(
+                            R.string.quran_topic_verses_across,
+                            formatCount(detail.citations.size),
+                            state.citationGroups.size,
+                        ),
+                    )
+                }
+                items(state.citationGroups, key = { "surah-${it.surahNumber}" }) { group ->
+                    val open = isOpen(group)
+                    val all = group.surahNumber in showingAll
+                    SurahVerses(
+                        group = group,
+                        expanded = open,
+                        showAll = all,
+                        previews = state.previews,
+                        onExpandedChange = {
+                            toggled = if (group.surahNumber in toggled) toggled - group.surahNumber
+                            else toggled + group.surahNumber
+                        },
+                        onShowAll = { showingAll = showingAll + group.surahNumber },
+                        onOpenAyah = onOpenAyah,
+                        modifier = Modifier.padding(bottom = 8.dp),
+                    )
+                }
             }
         }
     }

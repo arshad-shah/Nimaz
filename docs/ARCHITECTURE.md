@@ -1341,6 +1341,23 @@ with no label and a touch target under 48dp fail the lane we already run. It can
       the twelve you are not (this is what the translation picker shipped as). `subtitleStyle`
       exists for the same rows, whose subtitle is often a **non-Latin endonym** — see the
       typography bullet below.
+    - a **scrollbar** is **`NimazScrollbarBox`** (`components/molecules/NimazScrollbar.kt`), which
+      wraps the scrolling content and overlays a themed Rail (`:core:rail`) thumb on its end edge.
+      It takes the same `LazyListState`, `LazyGridState` or `ScrollState` the content scrolls with.
+      `NimazScrollbarVariant.FastScroll` plus a `NimazScrollbarLabel` is for long, index-like lists
+      (the surah list); `Standard` is for everything else. Its colours come from the theme, so a
+      screen never passes one, and no screen imports `com.arshadshah.rail` directly.
+      Every variant has a 48 dp touch strip, and TalkBack announces Rail's translated
+      "Vertical scrollbar" unless the screen passes `contentDescription`. To take a newer Rail,
+      replace `core/rail/src/main` with upstream's `rail/src/main` and update `RAIL_VERSION`.
+      **Every vertically scrolling screen wears one.** A new `LazyColumn`, uniform-span
+      `LazyVerticalGrid` or `verticalScroll` column that fills a screen or pane goes inside a
+      `NimazScrollbarBox`; the box takes the layout modifiers (size, weight, scaffold padding) and
+      the list keeps `fillMaxSize()`, its test tag and its horizontal padding, so the thumb sits
+      on the screen edge. The deliberate exceptions: wheel pickers (`NimazListPicker`,
+      `NimazTimePicker`), Mushaf pages (a page fits the viewport), lists nested inside another
+      scrolling list, the A–Z Topics index (its letter rail owns that edge) and short bottom-sheet
+      grids.
     - the line between two rows of a `NimazMenuGroup` is **`NimazMenuDivider()`**
       (`components/molecules/NimazMenuItem.kt`), **never** a hand-written `NimazDivider` with its
       own padding and alpha. The same hairline had been spelled out at ~55 call sites in three
@@ -2009,8 +2026,8 @@ Requires JDK 21 and an Android SDK (compileSdk 37). Set `sdk.dir` in `local.prop
 
 ### Modules
 
-Nineteen modules plus `:baselineprofile`, the finished state of #551 — seven `:core:*`,
-eleven `:feature:*`, and `:app`:
+Twenty-one modules plus `:baselineprofile` — the finished state of #551 (seven `:core:*`,
+twelve `:feature:*` and `:app`) plus `:core:rail`, the vendored scrollbar library:
 
 | Module | Plugin | What it holds |
 |---|---|---|
@@ -2021,6 +2038,7 @@ eleven `:feature:*`, and `:app`:
 | **`:core:data`** | `nimaz.android.library` + `nimaz.android.hilt` | Eighteen of the nineteen repository implementations, the `data/device`, `data/text` and `data/ai` slices, and the announcement store's repository. It is the only module that sees both `:core:database` and `:core:datastore`, which is what lets every other module depend on a `:core:domain` interface instead of on a DAO. |
 | **`:core:ui`** | `nimaz.android.library` + `nimaz.android.compose` | The design system — 52 atoms, the generic `Nimaz*` molecules, `theme/`, `foundation/`, `presentation/model` and `core/share` — plus **`strings.xml` and its five translations, `colors.xml` and the eight fonts**. The first module to own `res/`, which is why every other module now spells resources `com.arshadshah.nimaz.core.ui.R`. |
 | **`:core:navigation`** | `nimaz.android.library` + `nimaz.android.compose` | The route vocabulary — `Routes.kt`, `ScreenTags`, `taggedComposable`, `ContentTargetRoutes`, and the announcement and help deep-link grammars. Every feature module needs it to declare its destinations. **It may not import `presentation.screens`, `presentation.viewmodel` or `:core:ui`** — a `Route` carries a destination's identity, never its label. `NavGraph.kt` itself is still in `:app`; it is decomposed in PR 12. |
+| **`:core:rail`** | `nimaz.android.library` + `nimaz.android.compose` | **Rail**, the Compose scrollbar library, vendored verbatim from `arshad-shah/rail` (commit in `core/rail/RAIL_VERSION`) so it can be validated in the real app before it is published. Compose foundation/UI/animation only. **Only `:core:ui` depends on it**, as `implementation`: screens use `NimazScrollbarBox`, never Rail directly. Do not edit it here — fix upstream and re-copy. |
 | **`:feature:widget`** | `nimaz.android.library` + `nimaz.android.hilt` + `nimaz.android.compose` | The six Glance widgets, their receivers, the tick receiver and six Workers — plus their manifest entries, `widget_colors.xml`, the `ic_widget_*` drawables, the preview layouts, the provider descriptors and the seventeen strings nothing else uses. **The first feature module**, chosen because it has zero `presentation/` imports. |
 | **`:feature:onboarding`** | `nimaz.android.feature` | The first-run flow — `screens/onboarding` and `viewmodel/onboarding`. **Extracted with nothing to unpick**, because `OnboardingViewModel` already took two settings *seams* and three domain ports rather than `SettingsRepository` and the Android APIs behind it. The reference shape for the modules still to come. |
 | **`:feature:about`** | `nimaz.android.feature` | About, Help and More — one module, because they are one destination: `AdaptiveMoreScreen` puts all three in a single list-detail scaffold and `aboutGraph` registers every route for all three. Six couplings to `:app` had to be unpicked; its build file lists them. **AboutLibraries stays in `:app`** — the plugin reads the applying project's runtime classpath, so applying it here would silently shorten the licence list. |

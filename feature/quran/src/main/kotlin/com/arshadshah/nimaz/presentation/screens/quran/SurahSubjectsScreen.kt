@@ -37,6 +37,8 @@ import com.arshadshah.nimaz.presentation.components.organisms.NimazSearchBar
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.viewmodel.quran.QuranTopicsEvent
 import com.arshadshah.nimaz.presentation.viewmodel.quran.QuranTopicsViewModel
+import com.arshadshah.nimaz.presentation.components.molecules.NimazScrollbarBox
+import androidx.compose.foundation.lazy.rememberLazyListState
 
 /**
  * What one surah speaks about — its own subjects, weightiest here first.
@@ -161,54 +163,61 @@ private fun SubjectList(
         return
     }
 
-    LazyColumn(
+    val scrollbarState = rememberLazyListState()
+    NimazScrollbarBox(
+        state = scrollbarState,
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(start = 8.dp, end = 8.dp, top = 4.dp, bottom = 24.dp),
     ) {
-        item(key = "count") {
-            NimazSectionHeader(
-                title = stringResource(R.string.surah_subjects_count, totalCount),
-                trailingText = stringResource(
-                    R.string.surah_subjects_citations,
-                    citations,
-                ),
-                modifier = Modifier.padding(start = 12.dp, end = 12.dp, top = 8.dp),
-            )
-        }
-
-        items(subjects, key = { it.topic.id }) { subject ->
-            NimazTreeRow(
-                label = subject.topic.name,
-                secondaryLabel = subject.topic.arabicName.takeIf { it.isNotBlank() },
-                supportingText = reachLabel(subject),
-                badgeText = subject.versesInSurah.toString(),
-                // The tree the subject actually sits in, not the tab that happened to be
-                // selected somewhere else — otherwise the 1,817 subjects the thematic outline
-                // does not place open with no breadcrumb and no subtopics.
-                onClick = { onOpenTopic(subject.topic.id, subject.topic.homeTree) },
-                // A chevron, because these rows go somewhere and nothing said so: the count
-                // badge reads as a fact about the row, not as an invitation to open it.
-                trailingContent = {
-                    NimazIcon(
-                        imageVector = NimazIcons.Forward,
-                        contentDescription = null,
-                        variant = NimazIconVariant.MUTED,
-                        size = NimazIconSize.SMALL,
-                    )
-                },
-            )
-        }
-
-        // The general question, kept reachable. Below the specific answer rather than instead
-        // of it, which is the whole of what this screen changes.
-        item(key = "browse-all") {
-            NimazMenuGroup(modifier = Modifier.padding(horizontal = 8.dp, vertical = 16.dp)) {
-                NimazMenuItem(
-                    title = stringResource(R.string.surah_subjects_browse_all),
-                    subtitle = stringResource(R.string.surah_subjects_browse_all_subtitle),
-                    icon = Icons.Default.AccountTree,
-                    onClick = onBrowseAllSubjects,
+        LazyColumn(
+            state = scrollbarState,
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(start = 8.dp, end = 8.dp, top = 4.dp, bottom = 24.dp),
+        ) {
+            item(key = "count") {
+                NimazSectionHeader(
+                    title = stringResource(R.string.surah_subjects_count, totalCount),
+                    trailingText = stringResource(
+                        R.string.surah_subjects_citations,
+                        citations,
+                    ),
+                    modifier = Modifier.padding(start = 12.dp, end = 12.dp, top = 8.dp),
                 )
+            }
+
+            items(subjects, key = { it.topic.id }) { subject ->
+                NimazTreeRow(
+                    label = subject.topic.name,
+                    secondaryLabel = subject.topic.arabicName.takeIf { it.isNotBlank() },
+                    supportingText = reachLabel(subject),
+                    badgeText = subject.versesInSurah.toString(),
+                    // The tree the subject actually sits in, not the tab that happened to be
+                    // selected somewhere else — otherwise the 1,817 subjects the thematic outline
+                    // does not place open with no breadcrumb and no subtopics.
+                    onClick = { onOpenTopic(subject.topic.id, subject.topic.homeTree) },
+                    // A chevron, because these rows go somewhere and nothing said so: the count
+                    // badge reads as a fact about the row, not as an invitation to open it.
+                    trailingContent = {
+                        NimazIcon(
+                            imageVector = NimazIcons.Forward,
+                            contentDescription = null,
+                            variant = NimazIconVariant.MUTED,
+                            size = NimazIconSize.SMALL,
+                        )
+                    },
+                )
+            }
+
+            // The general question, kept reachable. Below the specific answer rather than instead
+            // of it, which is the whole of what this screen changes.
+            item(key = "browse-all") {
+                NimazMenuGroup(modifier = Modifier.padding(horizontal = 8.dp, vertical = 16.dp)) {
+                    NimazMenuItem(
+                        title = stringResource(R.string.surah_subjects_browse_all),
+                        subtitle = stringResource(R.string.surah_subjects_browse_all_subtitle),
+                        icon = Icons.Default.AccountTree,
+                        onClick = onBrowseAllSubjects,
+                    )
+                }
             }
         }
     }

@@ -62,6 +62,8 @@ import com.arshadshah.nimaz.presentation.viewmodel.tools.ZakatEvent
 import com.arshadshah.nimaz.presentation.viewmodel.tools.ZakatViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
+import com.arshadshah.nimaz.presentation.components.molecules.NimazScrollbarBox
+import androidx.compose.foundation.lazy.rememberLazyListState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -121,43 +123,50 @@ fun ZakatHistoryScreen(
                     .padding(paddingValues)
             )
         } else {
-            LazyColumn(
+            val scrollbarState = rememberLazyListState()
+            NimazScrollbarBox(
+                state = scrollbarState,
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues),
-                contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                // Summary Card
-                item {
-                    TotalPaidSummaryCard(
-                        totalPaid = historyState.totalZakatPaid,
-                        totalEntries = historyState.history.size
-                    )
-                }
+                LazyColumn(
+                    state = scrollbarState,
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    // Summary Card
+                    item {
+                        TotalPaidSummaryCard(
+                            totalPaid = historyState.totalZakatPaid,
+                            totalEntries = historyState.history.size
+                        )
+                    }
 
-                item {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = stringResource(R.string.zakat_history_calculation_history),
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                }
+                    item {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = stringResource(R.string.zakat_history_calculation_history),
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
 
-                items(
-                    items = historyState.history,
-                    key = { it.id }
-                ) { entry ->
-                    HistoryEntryCard(
-                        entry = entry,
-                        onMarkAsPaid = { viewModel.onEvent(ZakatEvent.MarkAsPaid(entry.id)) },
-                        onDelete = { viewModel.onEvent(ZakatEvent.DeleteCalculation(entry.id)) }
-                    )
-                }
+                    items(
+                        items = historyState.history,
+                        key = { it.id }
+                    ) { entry ->
+                        HistoryEntryCard(
+                            entry = entry,
+                            onMarkAsPaid = { viewModel.onEvent(ZakatEvent.MarkAsPaid(entry.id)) },
+                            onDelete = { viewModel.onEvent(ZakatEvent.DeleteCalculation(entry.id)) }
+                        )
+                    }
 
-                item {
-                    Spacer(modifier = Modifier.height(80.dp))
+                    item {
+                        Spacer(modifier = Modifier.height(80.dp))
+                    }
                 }
             }
         }

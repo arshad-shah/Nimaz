@@ -62,6 +62,8 @@ import com.arshadshah.nimaz.presentation.components.molecules.SurahListItem
 import com.arshadshah.nimaz.presentation.components.molecules.parseColor
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.viewmodel.quran.TafseerChaptersViewModel
+import com.arshadshah.nimaz.presentation.components.molecules.NimazScrollbarBox
+import androidx.compose.foundation.lazy.rememberLazyListState
 
 /**
  * Surah picker shown before the Tafseer reader when entered from the More menu —
@@ -168,18 +170,27 @@ fun TafseerChaptersScreen(
                     details = error.details,
                 )
 
-                selectedTab == 0 -> LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    items(state.surahs, key = { it.number }) { surah ->
-                        SurahListItem(
-                            surah = surah,
-                            onClick = { onOpenTafseer(surah.number, 1) },
-                            showInfo = false,
-                            startPage = surah.startPage
-                        )
+                selectedTab == 0 -> {
+                    val scrollbarState = rememberLazyListState()
+                    NimazScrollbarBox(
+                        state = scrollbarState,
+                        modifier = Modifier.fillMaxSize(),
+                    ) {
+                        LazyColumn(
+                            state = scrollbarState,
+                            modifier = Modifier.fillMaxSize(),
+                            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            items(state.surahs, key = { it.number }) { surah ->
+                                SurahListItem(
+                                    surah = surah,
+                                    onClick = { onOpenTafseer(surah.number, 1) },
+                                    showInfo = false,
+                                    startPage = surah.startPage
+                                )
+                            }
+                        }
                     }
                 }
 
@@ -200,26 +211,33 @@ fun TafseerChaptersScreen(
                     val nameBySurah = remember(state.surahs) {
                         state.surahs.associate { it.number to it.nameEnglish }
                     }
-                    LazyColumn(
+                    val scrollbarState = rememberLazyListState()
+                    NimazScrollbarBox(
+                        state = scrollbarState,
                         modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        item {
-                            NimazSearchBar(query = query, onQueryChange = { query = it },
-                                onClear = { query = "" }, placeholder = stringResource(R.string.bookmarks_search_placeholder))
-                        }
-                        if (notes.isEmpty()) item {
-                            Text(stringResource(R.string.no_results_hint), modifier = Modifier.padding(20.dp))
-                        }
-                        items(notes, key = { it.key }) { note ->
-                            TafseerSavedNoteCard(
-                                note = note,
-                                surahName = nameBySurah[note.surahNumber] ?: note.surahNumber.toString(),
-                                onOpen = { onOpenNote(note) },
-                                onEdit = { viewModel.edit(note) },
-                                onDelete = { viewModel.delete(note) },
-                            )
+                        LazyColumn(
+                            state = scrollbarState,
+                            modifier = Modifier.fillMaxSize(),
+                            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            item {
+                                NimazSearchBar(query = query, onQueryChange = { query = it },
+                                    onClear = { query = "" }, placeholder = stringResource(R.string.bookmarks_search_placeholder))
+                            }
+                            if (notes.isEmpty()) item {
+                                Text(stringResource(R.string.no_results_hint), modifier = Modifier.padding(20.dp))
+                            }
+                            items(notes, key = { it.key }) { note ->
+                                TafseerSavedNoteCard(
+                                    note = note,
+                                    surahName = nameBySurah[note.surahNumber] ?: note.surahNumber.toString(),
+                                    onOpen = { onOpenNote(note) },
+                                    onEdit = { viewModel.edit(note) },
+                                    onDelete = { viewModel.delete(note) },
+                                )
+                            }
                         }
                     }
                 }

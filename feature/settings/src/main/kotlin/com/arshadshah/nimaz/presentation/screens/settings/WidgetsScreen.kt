@@ -75,6 +75,8 @@ import kotlin.time.Duration
 import kotlinx.coroutines.flow.first
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import com.arshadshah.nimaz.presentation.components.molecules.NimazScrollbarBox
+import androidx.compose.foundation.lazy.rememberLazyListState
 
 // Data classes for widget preview
 private data class WidgetPreviewData(
@@ -139,107 +141,114 @@ fun WidgetsScreen(
             )
         }
     ) { paddingValues ->
-        LazyColumn(
+        val scrollbarState = rememberLazyListState()
+        NimazScrollbarBox(
+            state = scrollbarState,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues),
-            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Intro text
-            item {
-                Text(
-                    text = stringResource(R.string.widgets_intro),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    lineHeight = 22.sp
-                )
-            }
+            LazyColumn(
+                state = scrollbarState,
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                // Intro text
+                item {
+                    Text(
+                        text = stringResource(R.string.widgets_intro),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        lineHeight = 22.sp
+                    )
+                }
 
-            // Next Prayer Widget (2x2)
-            item {
-                WidgetSection(
-                    title = stringResource(R.string.widget_next_prayer_title),
-                    infoName = stringResource(R.string.widget_next_prayer),
-                    infoSize = stringResource(R.string.widget_next_prayer_size),
-                    infoIcon = Icons.Default.Schedule,
-                    preview = { NextPrayerWidgetPreview(previewData) }
-                )
-            }
+                // Next Prayer Widget (2x2)
+                item {
+                    WidgetSection(
+                        title = stringResource(R.string.widget_next_prayer_title),
+                        infoName = stringResource(R.string.widget_next_prayer),
+                        infoSize = stringResource(R.string.widget_next_prayer_size),
+                        infoIcon = Icons.Default.Schedule,
+                        preview = { NextPrayerWidgetPreview(previewData) }
+                    )
+                }
 
-            // Prayer Times Widget (4x1)
-            item {
-                WidgetSection(
-                    title = stringResource(R.string.widget_prayer_times_title),
-                    infoName = stringResource(R.string.widget_prayer_times),
-                    infoSize = stringResource(R.string.widget_prayer_times_size),
-                    infoIcon = Icons.AutoMirrored.Filled.ListAlt,
-                    preview = { PrayerTimesWidgetPreview(previewData) }
-                )
-            }
+                // Prayer Times Widget (4x1)
+                item {
+                    WidgetSection(
+                        title = stringResource(R.string.widget_prayer_times_title),
+                        infoName = stringResource(R.string.widget_prayer_times),
+                        infoSize = stringResource(R.string.widget_prayer_times_size),
+                        infoIcon = Icons.AutoMirrored.Filled.ListAlt,
+                        preview = { PrayerTimesWidgetPreview(previewData) }
+                    )
+                }
 
-            // Hijri Date Widget (2x2)
-            item {
-                WidgetSection(
-                    title = stringResource(R.string.widget_hijri_date_title),
-                    infoName = stringResource(R.string.widget_hijri_date),
-                    infoSize = stringResource(R.string.widget_hijri_date_size),
-                    infoIcon = Icons.Default.CalendarMonth,
-                    preview = { HijriDateWidgetPreview(previewData) }
-                )
-            }
+                // Hijri Date Widget (2x2)
+                item {
+                    WidgetSection(
+                        title = stringResource(R.string.widget_hijri_date_title),
+                        infoName = stringResource(R.string.widget_hijri_date),
+                        infoSize = stringResource(R.string.widget_hijri_date_size),
+                        infoIcon = Icons.Default.CalendarMonth,
+                        preview = { HijriDateWidgetPreview(previewData) }
+                    )
+                }
 
-            // Prayer Tracker Widget (4x1)
-            item {
-                WidgetSection(
-                    title = stringResource(R.string.widget_prayer_tracker_title),
-                    infoName = stringResource(R.string.widget_prayer_tracker),
-                    infoSize = stringResource(R.string.widget_prayer_tracker_size),
-                    infoIcon = Icons.Default.CheckCircle,
-                    preview = { PrayerTrackerWidgetPreview() }
-                )
-            }
+                // Prayer Tracker Widget (4x1)
+                item {
+                    WidgetSection(
+                        title = stringResource(R.string.widget_prayer_tracker_title),
+                        infoName = stringResource(R.string.widget_prayer_tracker),
+                        infoSize = stringResource(R.string.widget_prayer_tracker_size),
+                        infoIcon = Icons.Default.CheckCircle,
+                        preview = { PrayerTrackerWidgetPreview() }
+                    )
+                }
 
-            // Hijri Calendar Widget (4x2)
-            item {
-                WidgetSection(
-                    title = stringResource(R.string.widget_hijri_calendar_title),
-                    infoName = stringResource(R.string.widget_hijri_calendar),
-                    infoSize = stringResource(R.string.widget_hijri_calendar_size),
-                    infoIcon = Icons.Default.CalendarMonth,
-                    preview = { HijriCalendarWidgetPreview(previewData) }
-                )
-            }
+                // Hijri Calendar Widget (4x2)
+                item {
+                    WidgetSection(
+                        title = stringResource(R.string.widget_hijri_calendar_title),
+                        infoName = stringResource(R.string.widget_hijri_calendar),
+                        infoSize = stringResource(R.string.widget_hijri_calendar_size),
+                        infoIcon = Icons.Default.CalendarMonth,
+                        preview = { HijriCalendarWidgetPreview(previewData) }
+                    )
+                }
 
-            // Khatam Widget (4x2)
-            item {
-                WidgetSection(
-                    // Reuses the localised widget strings rather than adding
-                    // screen-only copy that would exist in English alone.
-                    title = stringResource(R.string.khatam_widget_label),
-                    infoName = stringResource(R.string.khatam_widget_label),
-                    infoSize = stringResource(R.string.khatam_widget_description),
-                    infoIcon = Icons.Default.MenuBook,
-                    preview = { KhatamWidgetPreview() }
-                )
-            }
+                // Khatam Widget (4x2)
+                item {
+                    WidgetSection(
+                        // Reuses the localised widget strings rather than adding
+                        // screen-only copy that would exist in English alone.
+                        title = stringResource(R.string.khatam_widget_label),
+                        infoName = stringResource(R.string.khatam_widget_label),
+                        infoSize = stringResource(R.string.khatam_widget_description),
+                        infoIcon = Icons.Default.MenuBook,
+                        preview = { KhatamWidgetPreview() }
+                    )
+                }
 
-            // How to Add Widgets
-            item {
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = stringResource(R.string.widgets_how_to),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onBackground
-                )
-            }
+                // How to Add Widgets
+                item {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = stringResource(R.string.widgets_how_to),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                }
 
-            item {
-                HowToAddCard()
-            }
+                item {
+                    HowToAddCard()
+                }
 
-            item { Spacer(modifier = Modifier.height(16.dp)) }
+                item { Spacer(modifier = Modifier.height(16.dp)) }
+            }
         }
     }
 }

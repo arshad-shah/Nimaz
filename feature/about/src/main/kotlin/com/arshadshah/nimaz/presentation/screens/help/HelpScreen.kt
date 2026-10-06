@@ -45,6 +45,8 @@ import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.components.organisms.NimazSearchBar
 import com.arshadshah.nimaz.presentation.viewmodel.help.HelpEvent
 import com.arshadshah.nimaz.presentation.viewmodel.help.HelpViewModel
+import com.arshadshah.nimaz.presentation.components.molecules.NimazScrollbarBox
+import androidx.compose.foundation.lazy.rememberLazyListState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -64,77 +66,84 @@ fun HelpScreen(
             )
         }
     ) { padding ->
-        LazyColumn(
+        val scrollbarState = rememberLazyListState()
+        NimazScrollbarBox(
+            state = scrollbarState,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(11.dp)
         ) {
-            item {
-                NimazSearchBar(
-                    query = state.query,
-                    onQueryChange = { viewModel.onEvent(HelpEvent.Search(it)) },
-                    placeholder = stringResource(R.string.help_search_hint),
-                    onClear = { viewModel.onEvent(HelpEvent.Search("")) }
-                )
-            }
+            LazyColumn(
+                state = scrollbarState,
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(16.dp),
+                verticalArrangement = Arrangement.spacedBy(11.dp)
+            ) {
+                item {
+                    NimazSearchBar(
+                        query = state.query,
+                        onQueryChange = { viewModel.onEvent(HelpEvent.Search(it)) },
+                        placeholder = stringResource(R.string.help_search_hint),
+                        onClear = { viewModel.onEvent(HelpEvent.Search("")) }
+                    )
+                }
 
-            if (state.isSearching) {
-                if (state.results.isEmpty()) {
+                if (state.isSearching) {
+                    if (state.results.isEmpty()) {
+                        item {
+                            Text(
+                                text = stringResource(R.string.help_no_results),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(8.dp)
+                            )
+                        }
+                    } else {
+                        items(state.results, key = { "${it.topicId}:${it.itemId}" }) { result ->
+                            HelpResultRow(
+                                result = result,
+                                onClick = { onNavigateToTopic(result.topicId) })
+                        }
+                    }
+                } else if (state.error != null) {
+                    // SECTION, not FULLSCREEN, and inside the list so the search bar above it
+                    // stays usable: search reads a different code path, and a reader whose
+                    // topic list failed can still find a topic by name.
                     item {
-                        Text(
-                            text = stringResource(R.string.help_no_results),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(8.dp)
+                        val error = state.error!!
+                        NimazErrorState(
+                            title = stringResource(error.message),
+                            message = stringResource(R.string.help_load_failed_body),
+                            kind = error.kind,
+                            details = error.details,
+                            variant = NimazErrorVariant.SECTION,
+                            primaryAction = NimazErrorDefaults.retry(
+                                onRetry = { viewModel.onEvent(HelpEvent.Retry) },
+                                label = stringResource(R.string.try_again),
+                            ),
                         )
                     }
                 } else {
-                    items(state.results, key = { "${it.topicId}:${it.itemId}" }) { result ->
-                        HelpResultRow(
-                            result = result,
-                            onClick = { onNavigateToTopic(result.topicId) })
+                    item {
+                        NimazSectionTitle(
+                            text = stringResource(R.string.help_browse_topics),
+                            modifier = Modifier.padding(top = 4.dp)
+                        )
                     }
-                }
-            } else if (state.error != null) {
-                // SECTION, not FULLSCREEN, and inside the list so the search bar above it
-                // stays usable: search reads a different code path, and a reader whose
-                // topic list failed can still find a topic by name.
-                item {
-                    val error = state.error!!
-                    NimazErrorState(
-                        title = stringResource(error.message),
-                        message = stringResource(R.string.help_load_failed_body),
-                        kind = error.kind,
-                        details = error.details,
-                        variant = NimazErrorVariant.SECTION,
-                        primaryAction = NimazErrorDefaults.retry(
-                            onRetry = { viewModel.onEvent(HelpEvent.Retry) },
-                            label = stringResource(R.string.try_again),
-                        ),
-                    )
-                }
-            } else {
-                item {
-                    NimazSectionTitle(
-                        text = stringResource(R.string.help_browse_topics),
-                        modifier = Modifier.padding(top = 4.dp)
-                    )
-                }
-                items(state.topics.chunked(2), key = { row -> row.first().id }) { row ->
-                    Row(horizontalArrangement = Arrangement.spacedBy(11.dp)) {
-                        row.forEach { topic ->
-                            HelpTopicTile(
-                                topic = topic,
-                                modifier = Modifier.weight(1f),
-                                onClick = { onNavigateToTopic(topic.id) }
-                            )
+                    items(state.topics.chunked(2), key = { row -> row.first().id }) { row ->
+                        Row(horizontalArrangement = Arrangement.spacedBy(11.dp)) {
+                            row.forEach { topic ->
+                                HelpTopicTile(
+                                    topic = topic,
+                                    modifier = Modifier.weight(1f),
+                                    onClick = { onNavigateToTopic(topic.id) }
+                                )
+                            }
+                            if (row.size == 1) Spacer(Modifier.weight(1f))
                         }
-                        if (row.size == 1) Spacer(Modifier.weight(1f))
                     }
+                    item { HelpContactCard(onClick = onContact) }
                 }
-                item { HelpContactCard(onClick = onContact) }
             }
         }
     }

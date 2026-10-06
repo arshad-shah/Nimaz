@@ -40,6 +40,8 @@ import com.arshadshah.nimaz.presentation.foundation.reader.readerTypographySetti
 import com.arshadshah.nimaz.presentation.theme.QuranArabicFont
 import com.arshadshah.nimaz.presentation.viewmodel.settings.SettingsEvent
 import com.arshadshah.nimaz.presentation.viewmodel.settings.SettingsViewModel
+import com.arshadshah.nimaz.presentation.components.molecules.NimazScrollbarBox
+import androidx.compose.foundation.lazy.rememberLazyListState
 
 /**
  * Reading preferences for the Dua reader. Deliberately mirrors
@@ -67,76 +69,82 @@ fun DuaSettingsScreen(
             )
         }
     ) { paddingValues ->
-        LazyColumn(
+        val scrollbarState = rememberLazyListState()
+        NimazScrollbarBox(
+            state = scrollbarState,
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
-                .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .padding(paddingValues),
         ) {
-            item { Spacer(modifier = Modifier.height(4.dp)) }
+            LazyColumn(
+                state = scrollbarState,
+                modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                item { Spacer(modifier = Modifier.height(4.dp)) }
 
-            // Live preview
-            item {
-                DuaPreviewCard(
-                    arabicFontSize = duaState.arabicFontSize,
-                    arabicFontFamily = selectedFont.fontFamily,
-                    translationFontSize = duaState.translationFontSize,
-                    showArabic = duaState.showArabic,
-                    showTransliteration = duaState.showTransliteration,
-                    showTranslation = duaState.showTranslation
-                )
-            }
-
-            readerTypographySettings(
-                arabicFontSize = duaState.arabicFontSize,
-                onArabicFontSize = { viewModel.onEvent(SettingsEvent.SetDuaArabicFontSize(it)) },
-                selectedFont = selectedFont,
-                onArabicFont = { viewModel.onEvent(SettingsEvent.SetDuaArabicFont(it)) },
-                translationFontSize = duaState.translationFontSize,
-                onTranslationFontSize = {
-                    viewModel.onEvent(
-                        SettingsEvent.SetDuaTranslationFontSize(
-                            it
-                        )
-                    )
-                },
-            )
-
-            // Display options
-            item { NimazSectionHeader(title = stringResource(R.string.display_options)) }
-            item {
-                NimazMenuGroup {
-                    NimazSettingsItem(
-                        title = stringResource(R.string.show_arabic),
-                        subtitle = stringResource(R.string.show_arabic_subtitle),
-                        checked = duaState.showArabic,
-                        onCheckedChange = { viewModel.onEvent(SettingsEvent.SetDuaShowArabic(!duaState.showArabic)) }
-                    )
-                    NimazMenuDivider(inset = false)
-                    NimazSettingsItem(
-                        title = stringResource(R.string.show_transliteration),
-                        subtitle = stringResource(R.string.show_transliteration_subtitle),
-                        checked = duaState.showTransliteration,
-                        onCheckedChange = {
-                            viewModel.onEvent(
-                                SettingsEvent.SetDuaShowTransliteration(
-                                    !duaState.showTransliteration
-                                )
-                            )
-                        }
-                    )
-                    NimazMenuDivider(inset = false)
-                    NimazSettingsItem(
-                        title = stringResource(R.string.show_translation),
-                        subtitle = stringResource(R.string.show_translation_subtitle),
-                        checked = duaState.showTranslation,
-                        onCheckedChange = { viewModel.onEvent(SettingsEvent.SetDuaShowTranslation(!duaState.showTranslation)) }
+                // Live preview
+                item {
+                    DuaPreviewCard(
+                        arabicFontSize = duaState.arabicFontSize,
+                        arabicFontFamily = selectedFont.fontFamily,
+                        translationFontSize = duaState.translationFontSize,
+                        showArabic = duaState.showArabic,
+                        showTransliteration = duaState.showTransliteration,
+                        showTranslation = duaState.showTranslation
                     )
                 }
-            }
 
-            item { Spacer(modifier = Modifier.height(16.dp)) }
+                readerTypographySettings(
+                    arabicFontSize = duaState.arabicFontSize,
+                    onArabicFontSize = { viewModel.onEvent(SettingsEvent.SetDuaArabicFontSize(it)) },
+                    selectedFont = selectedFont,
+                    onArabicFont = { viewModel.onEvent(SettingsEvent.SetDuaArabicFont(it)) },
+                    translationFontSize = duaState.translationFontSize,
+                    onTranslationFontSize = {
+                        viewModel.onEvent(
+                            SettingsEvent.SetDuaTranslationFontSize(
+                                it
+                            )
+                        )
+                    },
+                )
+
+                // Display options
+                item { NimazSectionHeader(title = stringResource(R.string.display_options)) }
+                item {
+                    NimazMenuGroup {
+                        NimazSettingsItem(
+                            title = stringResource(R.string.show_arabic),
+                            subtitle = stringResource(R.string.show_arabic_subtitle),
+                            checked = duaState.showArabic,
+                            onCheckedChange = { viewModel.onEvent(SettingsEvent.SetDuaShowArabic(!duaState.showArabic)) }
+                        )
+                        NimazMenuDivider(inset = false)
+                        NimazSettingsItem(
+                            title = stringResource(R.string.show_transliteration),
+                            subtitle = stringResource(R.string.show_transliteration_subtitle),
+                            checked = duaState.showTransliteration,
+                            onCheckedChange = {
+                                viewModel.onEvent(
+                                    SettingsEvent.SetDuaShowTransliteration(
+                                        !duaState.showTransliteration
+                                    )
+                                )
+                            }
+                        )
+                        NimazMenuDivider(inset = false)
+                        NimazSettingsItem(
+                            title = stringResource(R.string.show_translation),
+                            subtitle = stringResource(R.string.show_translation_subtitle),
+                            checked = duaState.showTranslation,
+                            onCheckedChange = { viewModel.onEvent(SettingsEvent.SetDuaShowTranslation(!duaState.showTranslation)) }
+                        )
+                    }
+                }
+
+                item { Spacer(modifier = Modifier.height(16.dp)) }
+            }
         }
     }
 }

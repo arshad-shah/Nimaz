@@ -54,6 +54,8 @@ import com.arshadshah.nimaz.presentation.theme.asLanguageLabel
 import com.arshadshah.nimaz.presentation.theme.asTranslationText
 import com.arshadshah.nimaz.presentation.viewmodel.settings.SettingsEvent
 import com.arshadshah.nimaz.presentation.viewmodel.settings.SettingsViewModel
+import com.arshadshah.nimaz.presentation.components.molecules.NimazScrollbarBox
+import androidx.compose.foundation.lazy.rememberLazyListState
 
 /**
  * Picks the Quran translation, as a dedicated screen in the shape of [SelectReciterScreen]:
@@ -105,117 +107,124 @@ fun SelectTranslationScreen(
             )
         }
     ) { paddingValues ->
-        LazyColumn(
+        val listState = rememberLazyListState()
+        NimazScrollbarBox(
+            state = listState,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues),
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            item {
-                NimazSearchBar(
-                    query = searchQuery,
-                    onQueryChange = { searchQuery = it },
-                    onClear = { searchQuery = "" },
-                    placeholder = stringResource(R.string.select_translation_search_hint)
-                )
-            }
-
-            item {
-                Text(
-                    text = stringResource(R.string.select_translation_currently_selected),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
-                )
-            }
-
-            item {
-                SelectedTranslationCard(
-                    translation = selected,
-                    previewTranslation = quranState.previewTranslation,
-                    arabicFontFamily = arabicFont.fontFamily
-                )
-            }
-
-            item {
-                Text(
-                    text = stringResource(R.string.select_translation_all),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(top = 16.dp, bottom = 4.dp)
-                )
-            }
-
-            if (grouped.isEmpty()) {
+            LazyColumn(
+                state = listState,
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
                 item {
-                    NimazEmptyState(
-                        title = stringResource(R.string.picker_no_matches),
-                        message = stringResource(R.string.no_results_hint),
-                        icon = Icons.Default.Translate,
-                        iconTint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.fillMaxWidth()
+                    NimazSearchBar(
+                        query = searchQuery,
+                        onQueryChange = { searchQuery = it },
+                        onClear = { searchQuery = "" },
+                        placeholder = stringResource(R.string.select_translation_search_hint)
                     )
                 }
-            }
 
-            grouped.forEach { (language, translations) ->
-                item(key = "lang-${language.code}") {
-                    // The endonym half of this header is written in its own script — "اردو"
-                    // in a Latin body font falls back to whatever Naskh face the system has.
-                    // Splitting it in two lets each half carry its own face rather than
-                    // relying on glyph fallback inside a single run.
-                    Row(
-                        modifier = Modifier.padding(top = 6.dp, bottom = 2.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = language.englishName,
-                            style = MaterialTheme.typography.labelMedium,
-                            fontWeight = FontWeight.SemiBold,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Text(
-                            text = " · ",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Text(
-                            text = language.nativeName,
-                            style = MaterialTheme.typography.labelMedium
-                                .asLanguageLabel(language),
-                            fontWeight = FontWeight.SemiBold,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                item {
+                    Text(
+                        text = stringResource(R.string.select_translation_currently_selected),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
+                    )
+                }
+
+                item {
+                    SelectedTranslationCard(
+                        translation = selected,
+                        previewTranslation = quranState.previewTranslation,
+                        arabicFontFamily = arabicFont.fontFamily
+                    )
+                }
+
+                item {
+                    Text(
+                        text = stringResource(R.string.select_translation_all),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(top = 16.dp, bottom = 4.dp)
+                    )
+                }
+
+                if (grouped.isEmpty()) {
+                    item {
+                        NimazEmptyState(
+                            title = stringResource(R.string.picker_no_matches),
+                            message = stringResource(R.string.no_results_hint),
+                            icon = Icons.Default.Translate,
+                            iconTint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.fillMaxWidth()
                         )
                     }
                 }
-                item(key = "group-${language.code}") {
-                    NimazMenuGroup {
-                        translations.forEachIndexed { index, translation ->
-                            NimazMenuItem(
-                                title = translation.translator,
-                                subtitle = language.nativeName,
-                                // The endonym again — Urdu needs Nastaliq and the extra
-                                // leading that comes with it, even at subtitle size.
-                                subtitleStyle = MaterialTheme.typography.bodySmall
-                                    .asLanguageLabel(language),
-                                trailingIcon = null,
-                                selected = translation == selected,
-                                onClick = {
-                                    viewModel.onEvent(
-                                        SettingsEvent.SetTranslator(translation.id)
-                                    )
-                                }
+
+                grouped.forEach { (language, translations) ->
+                    item(key = "lang-${language.code}") {
+                        // The endonym half of this header is written in its own script — "اردو"
+                        // in a Latin body font falls back to whatever Naskh face the system has.
+                        // Splitting it in two lets each half carry its own face rather than
+                        // relying on glyph fallback inside a single run.
+                        Row(
+                            modifier = Modifier.padding(top = 6.dp, bottom = 2.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = language.englishName,
+                                style = MaterialTheme.typography.labelMedium,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
-                            if (index < translations.lastIndex) {
-                                NimazMenuDivider(inset = false)
+                            Text(
+                                text = " · ",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Text(
+                                text = language.nativeName,
+                                style = MaterialTheme.typography.labelMedium
+                                    .asLanguageLabel(language),
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                    item(key = "group-${language.code}") {
+                        NimazMenuGroup {
+                            translations.forEachIndexed { index, translation ->
+                                NimazMenuItem(
+                                    title = translation.translator,
+                                    subtitle = language.nativeName,
+                                    // The endonym again — Urdu needs Nastaliq and the extra
+                                    // leading that comes with it, even at subtitle size.
+                                    subtitleStyle = MaterialTheme.typography.bodySmall
+                                        .asLanguageLabel(language),
+                                    trailingIcon = null,
+                                    selected = translation == selected,
+                                    onClick = {
+                                        viewModel.onEvent(
+                                            SettingsEvent.SetTranslator(translation.id)
+                                        )
+                                    }
+                                )
+                                if (index < translations.lastIndex) {
+                                    NimazMenuDivider(inset = false)
+                                }
                             }
                         }
                     }
                 }
-            }
 
-            item { Spacer(modifier = Modifier.height(8.dp)) }
+                item { Spacer(modifier = Modifier.height(8.dp)) }
+            }
         }
     }
 }

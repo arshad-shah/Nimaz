@@ -94,6 +94,8 @@ import com.arshadshah.nimaz.presentation.viewmodel.prayer.MonthlyPrayerTimesView
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.TextStyle
+import com.arshadshah.nimaz.presentation.components.molecules.NimazScrollbarBox
+import androidx.compose.foundation.lazy.rememberLazyListState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -219,31 +221,38 @@ fun MonthlyPrayerTimesScreen(
             )
 
             val today = LocalDate.now()
-            LazyColumn(
+            val scrollbarState = rememberLazyListState()
+            NimazScrollbarBox(
+                state = scrollbarState,
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f),
-                contentPadding = PaddingValues(
-                    horizontal = NimazSpacing.Large,
-                    vertical = NimazSpacing.Small
-                ),
-                verticalArrangement = Arrangement.spacedBy(NimazSpacing.Small)
             ) {
-                items(state.dayPrayerTimes, key = { it.date.toEpochDay() }) { dayTimes ->
-                    DayPrayerCard(
-                        dayTimes = dayTimes,
-                        isToday = dayTimes.date == today,
-                        isExpanded = dayTimes.date == state.expandedDay,
-                        onClick = {
-                            viewModel.onEvent(
-                                MonthlyPrayerTimesEvent.ToggleDayExpanded(dayTimes.date)
-                            )
-                        }
-                    )
-                }
+                LazyColumn(
+                    state = scrollbarState,
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(
+                        horizontal = NimazSpacing.Large,
+                        vertical = NimazSpacing.Small
+                    ),
+                    verticalArrangement = Arrangement.spacedBy(NimazSpacing.Small)
+                ) {
+                    items(state.dayPrayerTimes, key = { it.date.toEpochDay() }) { dayTimes ->
+                        DayPrayerCard(
+                            dayTimes = dayTimes,
+                            isToday = dayTimes.date == today,
+                            isExpanded = dayTimes.date == state.expandedDay,
+                            onClick = {
+                                viewModel.onEvent(
+                                    MonthlyPrayerTimesEvent.ToggleDayExpanded(dayTimes.date)
+                                )
+                            }
+                        )
+                    }
 
-                item {
-                    Spacer(modifier = Modifier.height(NimazSpacing.Large))
+                    item {
+                        Spacer(modifier = Modifier.height(NimazSpacing.Large))
+                    }
                 }
             }
         }

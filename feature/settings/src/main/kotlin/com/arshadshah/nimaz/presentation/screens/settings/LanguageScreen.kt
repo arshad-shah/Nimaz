@@ -43,6 +43,8 @@ import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.viewmodel.settings.AppLanguage
 import com.arshadshah.nimaz.presentation.viewmodel.settings.SettingsEvent
 import com.arshadshah.nimaz.presentation.viewmodel.settings.SettingsViewModel
+import com.arshadshah.nimaz.presentation.components.molecules.NimazScrollbarBox
+import androidx.compose.foundation.lazy.rememberLazyListState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -60,65 +62,72 @@ fun LanguageScreen(
             )
         }
     ) { paddingValues ->
-        LazyColumn(
+        val listState = rememberLazyListState()
+        NimazScrollbarBox(
+            state = listState,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues),
-            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp)
         ) {
-            // Section Title
-            item {
-                Text(
-                    text = stringResource(R.string.app_language_section),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    letterSpacing = 1.sp,
-                    modifier = Modifier.padding(start = 5.dp, bottom = 12.dp)
-                )
-            }
+            LazyColumn(
+                state = listState,
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp)
+            ) {
+                // Section Title
+                item {
+                    Text(
+                        text = stringResource(R.string.app_language_section),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        letterSpacing = 1.sp,
+                        modifier = Modifier.padding(start = 5.dp, bottom = 12.dp)
+                    )
+                }
 
-            // Language Card
-            item {
-                NimazCard(
-                    style = NimazCardStyle.ELEVATED,
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
-                    tone = NimazTone.NEUTRAL
-                ) {
-                    Column {
-                        AppLanguage.entries.forEachIndexed { index, language ->
-                            LanguageItem(
-                                language = language,
-                                isSelected = generalState.language == language,
-                                onClick = { viewModel.onEvent(SettingsEvent.SetLanguage(language)) }
-                            )
-
-                            if (index < AppLanguage.entries.size - 1) {
-                                HorizontalDivider(
-                                    color = MaterialTheme.colorScheme.outlineVariant,
-                                    thickness = 1.dp,
-                                    modifier = Modifier.padding(start = 67.dp)
+                // Language Card
+                item {
+                    NimazCard(
+                        style = NimazCardStyle.ELEVATED,
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(16.dp),
+                        tone = NimazTone.NEUTRAL
+                    ) {
+                        Column {
+                            AppLanguage.entries.forEachIndexed { index, language ->
+                                LanguageItem(
+                                    language = language,
+                                    isSelected = generalState.language == language,
+                                    onClick = { viewModel.onEvent(SettingsEvent.SetLanguage(language)) }
                                 )
+
+                                if (index < AppLanguage.entries.size - 1) {
+                                    HorizontalDivider(
+                                        color = MaterialTheme.colorScheme.outlineVariant,
+                                        thickness = 1.dp,
+                                        modifier = Modifier.padding(start = 67.dp)
+                                    )
+                                }
                             }
                         }
                     }
                 }
-            }
 
-            // Info Text
-            item {
-                Spacer(modifier = Modifier.height(20.dp))
-                Text(
-                    text = stringResource(R.string.language_change_info),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    lineHeight = 20.sp,
-                    modifier = Modifier.padding(horizontal = 5.dp)
-                )
-            }
+                // Info Text
+                item {
+                    Spacer(modifier = Modifier.height(20.dp))
+                    Text(
+                        text = stringResource(R.string.language_change_info),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        lineHeight = 20.sp,
+                        modifier = Modifier.padding(horizontal = 5.dp)
+                    )
+                }
 
-            item {
-                Spacer(modifier = Modifier.height(32.dp))
+                item {
+                    Spacer(modifier = Modifier.height(32.dp))
+                }
             }
         }
     }

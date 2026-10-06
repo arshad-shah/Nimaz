@@ -50,6 +50,8 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuItem
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.viewmodel.settings.SettingsEvent
 import com.arshadshah.nimaz.presentation.viewmodel.settings.SettingsViewModel
+import com.arshadshah.nimaz.presentation.components.molecules.NimazScrollbarBox
+import androidx.compose.foundation.lazy.rememberLazyListState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -87,144 +89,152 @@ fun SettingsScreen(
             )
         }
     ) { paddingValues ->
-        LazyColumn(
+        val listState = rememberLazyListState()
+        NimazScrollbarBox(
+            state = listState,
             modifier = Modifier
                 .fillMaxSize()
-                .testTag(ScreenTags.SettingsList)
-                .padding(paddingValues)
-                .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .padding(paddingValues),
         ) {
-            item { Spacer(modifier = Modifier.height(4.dp)) }
+            LazyColumn(
+                state = listState,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .testTag(ScreenTags.SettingsList)
+                    .padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                item { Spacer(modifier = Modifier.height(4.dp)) }
 
-            // Prayer Settings
-            item { NimazSectionHeader(title = stringResource(R.string.prayer_settings)) }
-            item {
-                NimazMenuGroup {
-                    NimazMenuItem(
-                        title = stringResource(R.string.prayer_settings_row_title),
-                        subtitle = stringResource(R.string.calculation_method_subtitle),
-                        icon = Icons.Default.Calculate,
-                        onClick = onNavigateToPrayerSettings
-                    )
-                    NimazMenuDivider()
-                    NimazMenuItem(
-                        title = stringResource(R.string.location),
-                        subtitle = stringResource(R.string.location_subtitle),
-                        icon = Icons.Default.LocationOn,
-                        onClick = onNavigateToLocation
-                    )
-                    NimazMenuDivider()
-                    NimazMenuItem(
-                        title = stringResource(R.string.notifications),
-                        subtitle = stringResource(R.string.notifications_subtitle),
-                        icon = Icons.Default.Notifications,
-                        onClick = onNavigateToNotifications
-                    )
+                // Prayer Settings
+                item { NimazSectionHeader(title = stringResource(R.string.prayer_settings)) }
+                item {
+                    NimazMenuGroup {
+                        NimazMenuItem(
+                            title = stringResource(R.string.prayer_settings_row_title),
+                            subtitle = stringResource(R.string.calculation_method_subtitle),
+                            icon = Icons.Default.Calculate,
+                            onClick = onNavigateToPrayerSettings
+                        )
+                        NimazMenuDivider()
+                        NimazMenuItem(
+                            title = stringResource(R.string.location),
+                            subtitle = stringResource(R.string.location_subtitle),
+                            icon = Icons.Default.LocationOn,
+                            onClick = onNavigateToLocation
+                        )
+                        NimazMenuDivider()
+                        NimazMenuItem(
+                            title = stringResource(R.string.notifications),
+                            subtitle = stringResource(R.string.notifications_subtitle),
+                            icon = Icons.Default.Notifications,
+                            onClick = onNavigateToNotifications
+                        )
+                    }
                 }
-            }
 
-            // Quran
-            item { NimazSectionHeader(title = stringResource(R.string.quran)) }
-            item {
-                NimazMenuGroup {
-                    NimazMenuItem(
-                        title = stringResource(R.string.quran_settings),
-                        subtitle = stringResource(R.string.quran_settings_subtitle),
-                        icon = Icons.AutoMirrored.Filled.MenuBook,
-                        onClick = onNavigateToQuranSettings
-                    )
+                // Quran
+                item { NimazSectionHeader(title = stringResource(R.string.quran)) }
+                item {
+                    NimazMenuGroup {
+                        NimazMenuItem(
+                            title = stringResource(R.string.quran_settings),
+                            subtitle = stringResource(R.string.quran_settings_subtitle),
+                            icon = Icons.AutoMirrored.Filled.MenuBook,
+                            onClick = onNavigateToQuranSettings
+                        )
+                    }
                 }
-            }
 
-            // Zakat — the nisab basis, the metal prices and the currency. These were an
-            // accordion inside the calculator's form; they are preferences, so they belong
-            // here alongside the other per-feature settings.
-            item { NimazSectionHeader(title = stringResource(R.string.zakat)) }
-            item {
-                NimazMenuGroup {
-                    NimazMenuItem(
-                        title = stringResource(R.string.zakat_settings),
-                        subtitle = stringResource(R.string.zakat_settings_subtitle),
-                        icon = Icons.Default.Savings,
-                        onClick = onNavigateToZakatSettings
-                    )
+                // Zakat — the nisab basis, the metal prices and the currency. These were an
+                // accordion inside the calculator's form; they are preferences, so they belong
+                // here alongside the other per-feature settings.
+                item { NimazSectionHeader(title = stringResource(R.string.zakat)) }
+                item {
+                    NimazMenuGroup {
+                        NimazMenuItem(
+                            title = stringResource(R.string.zakat_settings),
+                            subtitle = stringResource(R.string.zakat_settings_subtitle),
+                            icon = Icons.Default.Savings,
+                            onClick = onNavigateToZakatSettings
+                        )
+                    }
                 }
-            }
 
-            // Search & AI
-            item { NimazSectionHeader(title = stringResource(R.string.search_settings)) }
-            item {
-                NimazMenuGroup {
-                    NimazMenuItem(
-                        title = stringResource(R.string.search_settings),
-                        subtitle = stringResource(R.string.search_settings_subtitle),
-                        icon = Icons.Default.Search,
-                        onClick = onNavigateToSearchSettings
-                    )
+                // Search & AI
+                item { NimazSectionHeader(title = stringResource(R.string.search_settings)) }
+                item {
+                    NimazMenuGroup {
+                        NimazMenuItem(
+                            title = stringResource(R.string.search_settings),
+                            subtitle = stringResource(R.string.search_settings_subtitle),
+                            icon = Icons.Default.Search,
+                            onClick = onNavigateToSearchSettings
+                        )
+                    }
                 }
-            }
 
-            // App Settings
-            item { NimazSectionHeader(title = stringResource(R.string.app_settings)) }
-            item {
-                NimazMenuGroup {
-                    NimazMenuItem(
-                        title = stringResource(R.string.appearance),
-                        subtitle = stringResource(R.string.appearance_subtitle),
-                        icon = Icons.Default.DarkMode,
-                        onClick = onNavigateToAppearance
-                    )
-                    NimazMenuDivider()
-                    NimazMenuItem(
-                        title = stringResource(R.string.language),
-                        subtitle = stringResource(R.string.language_subtitle),
-                        icon = Icons.Default.Language,
-                        onClick = onNavigateToLanguage
-                    )
-                    NimazMenuDivider()
-                    NimazMenuItem(
-                        title = stringResource(R.string.widgets),
-                        subtitle = stringResource(R.string.widgets_subtitle),
-                        icon = Icons.Default.Widgets,
-                        onClick = onNavigateToWidgets
-                    )
+                // App Settings
+                item { NimazSectionHeader(title = stringResource(R.string.app_settings)) }
+                item {
+                    NimazMenuGroup {
+                        NimazMenuItem(
+                            title = stringResource(R.string.appearance),
+                            subtitle = stringResource(R.string.appearance_subtitle),
+                            icon = Icons.Default.DarkMode,
+                            onClick = onNavigateToAppearance
+                        )
+                        NimazMenuDivider()
+                        NimazMenuItem(
+                            title = stringResource(R.string.language),
+                            subtitle = stringResource(R.string.language_subtitle),
+                            icon = Icons.Default.Language,
+                            onClick = onNavigateToLanguage
+                        )
+                        NimazMenuDivider()
+                        NimazMenuItem(
+                            title = stringResource(R.string.widgets),
+                            subtitle = stringResource(R.string.widgets_subtitle),
+                            icon = Icons.Default.Widgets,
+                            onClick = onNavigateToWidgets
+                        )
+                    }
                 }
-            }
 
-            // Data
-            item { NimazSectionHeader(title = stringResource(R.string.data)) }
-            item {
-                NimazMenuGroup {
-                    NimazMenuItem(
-                        title = stringResource(R.string.sync_data),
-                        subtitle = stringResource(R.string.settings_sync_subtitle),
-                        icon = Icons.Default.Sync,
-                        onClick = onNavigateToSync
-                    )
-                    NimazMenuDivider()
-                    NimazMenuItem(
-                        title = stringResource(R.string.reset_settings),
-                        subtitle = stringResource(R.string.reset_settings_subtitle),
-                        icon = Icons.Default.Restore,
-                        iconTint = MaterialTheme.colorScheme.error,
-                        onClick = { showResetDialog = true }
-                    )
-                    NimazMenuDivider()
-                    NimazMenuItem(
-                        title = stringResource(R.string.delete_all_data),
-                        subtitle = stringResource(R.string.delete_all_data_subtitle),
-                        icon = Icons.Default.Delete,
-                        iconTint = MaterialTheme.colorScheme.error,
-                        onClick = { showDeleteDialog = true }
-                    )
+                // Data
+                item { NimazSectionHeader(title = stringResource(R.string.data)) }
+                item {
+                    NimazMenuGroup {
+                        NimazMenuItem(
+                            title = stringResource(R.string.sync_data),
+                            subtitle = stringResource(R.string.settings_sync_subtitle),
+                            icon = Icons.Default.Sync,
+                            onClick = onNavigateToSync
+                        )
+                        NimazMenuDivider()
+                        NimazMenuItem(
+                            title = stringResource(R.string.reset_settings),
+                            subtitle = stringResource(R.string.reset_settings_subtitle),
+                            icon = Icons.Default.Restore,
+                            iconTint = MaterialTheme.colorScheme.error,
+                            onClick = { showResetDialog = true }
+                        )
+                        NimazMenuDivider()
+                        NimazMenuItem(
+                            title = stringResource(R.string.delete_all_data),
+                            subtitle = stringResource(R.string.delete_all_data_subtitle),
+                            icon = Icons.Default.Delete,
+                            iconTint = MaterialTheme.colorScheme.error,
+                            onClick = { showDeleteDialog = true }
+                        )
+                    }
                 }
+
+                // Version Info
+                item { AppVersionInfo() }
+
+                item { Spacer(modifier = Modifier.height(16.dp)) }
             }
-
-            // Version Info
-            item { AppVersionInfo() }
-
-            item { Spacer(modifier = Modifier.height(16.dp)) }
         }
     }
 

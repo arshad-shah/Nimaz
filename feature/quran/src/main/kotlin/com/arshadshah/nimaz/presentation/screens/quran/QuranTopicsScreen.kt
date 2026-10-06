@@ -80,6 +80,8 @@ import com.arshadshah.nimaz.presentation.viewmodel.quran.TopicBrowseState
 import com.arshadshah.nimaz.presentation.viewmodel.quran.TopicIndexSort
 import com.arshadshah.nimaz.presentation.viewmodel.quran.TopicTally
 import kotlinx.coroutines.launch
+import com.arshadshah.nimaz.presentation.components.molecules.NimazScrollbarBox
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 
 /**
  * Browsing the Qur'an's 2,512 subjects — three hierarchies, three shapes.
@@ -197,31 +199,45 @@ private fun ThemesTab(state: TopicBrowseState, onOpen: (QuranTopic, TopicTree) -
     val byId = remember(state.themes) {
         state.themes.flatMap { listOf(it.root) + it.branches }.associate { it.topic.id to it.topic }
     }
-    LazyColumn(
+    val scrollbarState = rememberLazyListState()
+    NimazScrollbarBox(
+        state = scrollbarState,
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 24.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-        items(state.themes, key = { it.root.topic.id }) { card ->
-            ThemeChapterCard(
-                card = card,
-                onOpenTopic = { id -> byId[id]?.let { onOpen(it, TopicTree.THEMATIC) } },
-            )
+        LazyColumn(
+            state = scrollbarState,
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 24.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            items(state.themes, key = { it.root.topic.id }) { card ->
+                ThemeChapterCard(
+                    card = card,
+                    onOpenTopic = { id -> byId[id]?.let { onOpen(it, TopicTree.THEMATIC) } },
+                )
+            }
         }
     }
 }
 
 @Composable
 private fun KindsTab(state: TopicBrowseState, onOpen: (QuranTopic, TopicTree) -> Unit) {
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(2),
+    val scrollbarState = rememberLazyGridState()
+    NimazScrollbarBox(
+        state = scrollbarState,
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 24.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        items(state.kinds, key = { it.topic.id }) { tally ->
-            KindTile(tally = tally, onClick = { onOpen(tally.topic, TopicTree.ONTOLOGY) })
+        LazyVerticalGrid(
+            state = scrollbarState,
+            columns = GridCells.Fixed(2),
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 24.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            items(state.kinds, key = { it.topic.id }) { tally ->
+                KindTile(tally = tally, onClick = { onOpen(tally.topic, TopicTree.ONTOLOGY) })
+            }
         }
     }
 }
@@ -510,27 +526,34 @@ private fun SearchResults(
         return
     }
     val treeLabels = TREES.associate { it.first to stringResource(it.second) }
-    LazyColumn(
+    val scrollbarState = rememberLazyListState()
+    NimazScrollbarBox(
+        state = scrollbarState,
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 24.dp),
     ) {
-        itemsIndexed(state.searchResults, key = { _, it -> it.topic.id }) { i, hit ->
-            GroupedRow(isFirst = i == 0, isLast = i == state.searchResults.lastIndex) {
-                NimazMenuItem(
-                    title = hit.topic.name,
-                    subtitle = (hit.path.map { it.name } + treeLabels.getValue(hit.tree))
-                        .joinToString(" › "),
-                    trailingIcon = null,
-                    trailing = {
-                        Text(
-                            text = formatCount(hit.verseCount),
-                            style = MaterialTheme.typography.labelLarge,
-                            fontWeight = FontWeight.SemiBold,
-                            color = MaterialTheme.colorScheme.primary,
-                        )
-                    },
-                    onClick = { onOpen(hit.topic, hit.tree) },
-                )
+        LazyColumn(
+            state = scrollbarState,
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 24.dp),
+        ) {
+            itemsIndexed(state.searchResults, key = { _, it -> it.topic.id }) { i, hit ->
+                GroupedRow(isFirst = i == 0, isLast = i == state.searchResults.lastIndex) {
+                    NimazMenuItem(
+                        title = hit.topic.name,
+                        subtitle = (hit.path.map { it.name } + treeLabels.getValue(hit.tree))
+                            .joinToString(" › "),
+                        trailingIcon = null,
+                        trailing = {
+                            Text(
+                                text = formatCount(hit.verseCount),
+                                style = MaterialTheme.typography.labelLarge,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.primary,
+                            )
+                        },
+                        onClick = { onOpen(hit.topic, hit.tree) },
+                    )
+                }
             }
         }
     }

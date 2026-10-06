@@ -1,8 +1,5 @@
 package com.arshadshah.nimaz.presentation.components.molecules
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.height
-import androidx.compose.ui.res.painterResource
 import com.arshadshah.nimaz.feature.content.R as FeatureR
 import com.arshadshah.nimaz.presentation.components.atoms.NimazProgressTrack
 import androidx.compose.foundation.layout.Arrangement
@@ -36,7 +33,7 @@ import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.theme.ThemeMode
 
 /**
- * Illustrated course welcome with theme-backed progress and an optional resume action.
+ * Course welcome with theme-backed progress and an optional resume action.
  * Reuses the bundled serif face; no feature-specific palette is introduced.
  */
 @Composable
@@ -63,8 +60,6 @@ fun QaidaCourseHeader(
             color = MaterialTheme.colorScheme.onSurface)
         Text(stringResource(FeatureR.string.qaida_gentle_intro), style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Image(painterResource(FeatureR.drawable.qaida_journey_book), contentDescription = null,
-            modifier = Modifier.fillMaxWidth().height(140.dp))
         com.arshadshah.nimaz.presentation.components.atoms.NimazCard(Modifier.fillMaxWidth()) {
             Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(stringResource(FeatureR.string.qaida_daily_title), style = MaterialTheme.typography.titleMedium.copy(

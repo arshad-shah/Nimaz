@@ -89,6 +89,7 @@ import com.arshadshah.nimaz.presentation.viewmodel.tools.ZakatCalculatorUiState
 import com.arshadshah.nimaz.presentation.viewmodel.tools.ZakatEvent
 import com.arshadshah.nimaz.presentation.viewmodel.tools.ZakatViewModel
 import kotlinx.coroutines.launch
+import com.arshadshah.nimaz.presentation.components.molecules.NimazScrollbarBox
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -215,80 +216,85 @@ private fun ZakatCompactContent(
             modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp),
         )
 
-        LazyColumn(
+        NimazScrollbarBox(
             state = listState,
             modifier = Modifier.weight(1f),
-            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            // Each accordion header carries its running subtotal, so the shape of the
-            // calculation is legible before anything is opened.
-            item {
-                NimazAccordion(
-                    title = stringResource(R.string.assets),
-                    subtitle = stringResource(R.string.zakat_section_assets_subtitle),
-                    initiallyExpanded = true,
-                    trailing = {
-                        SubtotalLabel(
-                            amount = state.assetsTotal(),
-                            currency = state.currency,
-                            color = MaterialTheme.colorScheme.primary,
-                        )
-                    },
-                ) {
-                    AssetInputCards(state = state, viewModel = viewModel)
-                }
-            }
-            item {
-                NimazAccordion(
-                    title = stringResource(R.string.zakat_section_deducted),
-                    subtitle = stringResource(R.string.zakat_section_deducted_subtitle),
-                    trailing = {
-                        SubtotalLabel(
-                            amount = state.liabilities.total,
-                            currency = state.currency,
-                            color = MaterialTheme.colorScheme.error,
-                        )
-                    },
-                ) {
-                    LiabilityInputCards(state = state, viewModel = viewModel)
-                }
-            }
-
-            // INLINE, and above the result rather than in place of the form: every figure the
-            // user typed is still on screen and still valid, and losing an afternoon of asset
-            // entries to report a failed sum would be far worse than the failure.
-            state.error?.let { error ->
+            LazyColumn(
+                state = listState,
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                // Each accordion header carries its running subtotal, so the shape of the
+                // calculation is legible before anything is opened.
                 item {
-                    NimazErrorState(
-                        title = stringResource(error.message),
-                        kind = error.kind,
-                        variant = NimazErrorVariant.INLINE,
-                        primaryAction = NimazErrorDefaults.retry(
-                            onRetry = { viewModel.onEvent(ZakatEvent.Recalculate) },
-                            label = stringResource(R.string.try_again),
-                        ),
-                        modifier = Modifier.padding(vertical = 8.dp),
-                    )
+                    NimazAccordion(
+                        title = stringResource(R.string.assets),
+                        subtitle = stringResource(R.string.zakat_section_assets_subtitle),
+                        initiallyExpanded = true,
+                        trailing = {
+                            SubtotalLabel(
+                                amount = state.assetsTotal(),
+                                currency = state.currency,
+                                color = MaterialTheme.colorScheme.primary,
+                            )
+                        },
+                    ) {
+                        AssetInputCards(state = state, viewModel = viewModel)
+                    }
                 }
-            }
-
-            state.calculation?.let { calculation ->
                 item {
-                    BreakdownCard(
-                        totalAssets = calculation.totalAssets,
-                        totalLiabilities = calculation.totalLiabilities,
-                        netWorth = calculation.netWorth,
-                        nisabValue = calculation.nisabValue,
-                        isAboveNisab = calculation.isAboveNisab,
-                        zakatDue = calculation.zakatDue,
-                        currency = state.currency,
-                        expanded = state.showBreakdown,
-                        onToggleExpanded = { viewModel.onEvent(ZakatEvent.ToggleBreakdown) },
-                    )
+                    NimazAccordion(
+                        title = stringResource(R.string.zakat_section_deducted),
+                        subtitle = stringResource(R.string.zakat_section_deducted_subtitle),
+                        trailing = {
+                            SubtotalLabel(
+                                amount = state.liabilities.total,
+                                currency = state.currency,
+                                color = MaterialTheme.colorScheme.error,
+                            )
+                        },
+                    ) {
+                        LiabilityInputCards(state = state, viewModel = viewModel)
+                    }
                 }
+
+                // INLINE, and above the result rather than in place of the form: every figure the
+                // user typed is still on screen and still valid, and losing an afternoon of asset
+                // entries to report a failed sum would be far worse than the failure.
+                state.error?.let { error ->
+                    item {
+                        NimazErrorState(
+                            title = stringResource(error.message),
+                            kind = error.kind,
+                            variant = NimazErrorVariant.INLINE,
+                            primaryAction = NimazErrorDefaults.retry(
+                                onRetry = { viewModel.onEvent(ZakatEvent.Recalculate) },
+                                label = stringResource(R.string.try_again),
+                            ),
+                            modifier = Modifier.padding(vertical = 8.dp),
+                        )
+                    }
+                }
+
+                state.calculation?.let { calculation ->
+                    item {
+                        BreakdownCard(
+                            totalAssets = calculation.totalAssets,
+                            totalLiabilities = calculation.totalLiabilities,
+                            netWorth = calculation.netWorth,
+                            nisabValue = calculation.nisabValue,
+                            isAboveNisab = calculation.isAboveNisab,
+                            zakatDue = calculation.zakatDue,
+                            currency = state.currency,
+                            expanded = state.showBreakdown,
+                            onToggleExpanded = { viewModel.onEvent(ZakatEvent.ToggleBreakdown) },
+                        )
+                    }
+                }
+                item { Spacer(modifier = Modifier.height(8.dp)) }
             }
-            item { Spacer(modifier = Modifier.height(8.dp)) }
         }
 
         // Save and share live here because the screen had nowhere good for them, and the
@@ -428,93 +434,98 @@ private fun ZakatTabletContent(
 ) {
     val onShareCalculation = rememberZakatShareAction(state)
 
-    Column(
-        modifier = modifier
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = 32.dp, vertical = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+    val scrollbarScrollState = rememberScrollState()
+    NimazScrollbarBox(
+        state = scrollbarScrollState,
+        modifier = modifier,
     ) {
-        // Result card spans full width
-        ZakatResultSummaryCard(
-            zakatDue = state.calculation?.zakatDue ?: 0.0,
-            // Falls back to the derived threshold, not zero: `nisabValue` is computed on the
-            // state even with an empty form, and "Nisab · Gold — 0.00" tells the reader nothing
-            // about why their total is zero. This fallback came from the basis row that used to
-            // sit on the form; it moved here rather than being dropped with it.
-            nisabValue = state.calculation?.nisabValue ?: state.nisabValue,
-            netWealth = state.calculation?.netWorth ?: 0.0,
-            isAboveNisab = state.calculation?.isAboveNisab ?: false,
-            nisabType = state.nisabType,
-            currency = state.currency
-        )
-
-        // Two columns: Assets left, Liabilities right
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(20.dp)
+        Column(
+            modifier = Modifier.fillMaxWidth().verticalScroll(scrollbarScrollState)
+                .padding(horizontal = 32.dp, vertical = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Assets column
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                NimazSectionHeader(
-                    title = stringResource(R.string.assets),
-                    trailingContent = {
-                        SubtotalLabel(
-                            amount = state.assetsTotal(),
-                            currency = state.currency,
-                            color = MaterialTheme.colorScheme.primary,
-                        )
-                    }
-                )
-                AssetInputCards(state = state, viewModel = viewModel)
-            }
-
-            // Liabilities column
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                NimazSectionHeader(
-                    title = stringResource(R.string.liabilities),
-                    trailingContent = {
-                        SubtotalLabel(
-                            amount = state.liabilities.total,
-                            currency = state.currency,
-                            color = MaterialTheme.colorScheme.error,
-                        )
-                    }
-                )
-                LiabilityInputCards(state = state, viewModel = viewModel)
-            }
-        }
-
-        // Breakdown spans full width
-        state.calculation?.let { calculation ->
-            BreakdownCard(
-                totalAssets = calculation.totalAssets,
-                totalLiabilities = calculation.totalLiabilities,
-                netWorth = calculation.netWorth,
-                nisabValue = calculation.nisabValue,
-                isAboveNisab = calculation.isAboveNisab,
-                zakatDue = calculation.zakatDue,
-                currency = state.currency,
-                expanded = state.showBreakdown,
-                onToggleExpanded = { viewModel.onEvent(ZakatEvent.ToggleBreakdown) },
+            // Result card spans full width
+            ZakatResultSummaryCard(
+                zakatDue = state.calculation?.zakatDue ?: 0.0,
+                // Falls back to the derived threshold, not zero: `nisabValue` is computed on the
+                // state even with an empty form, and "Nisab · Gold — 0.00" tells the reader nothing
+                // about why their total is zero. This fallback came from the basis row that used to
+                // sit on the form; it moved here rather than being dropped with it.
+                nisabValue = state.calculation?.nisabValue ?: state.nisabValue,
+                netWealth = state.calculation?.netWorth ?: 0.0,
+                isAboveNisab = state.calculation?.isAboveNisab ?: false,
+                nisabType = state.nisabType,
+                currency = state.currency
             )
+
+            // Two columns: Assets left, Liabilities right
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(20.dp)
+            ) {
+                // Assets column
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    NimazSectionHeader(
+                        title = stringResource(R.string.assets),
+                        trailingContent = {
+                            SubtotalLabel(
+                                amount = state.assetsTotal(),
+                                currency = state.currency,
+                                color = MaterialTheme.colorScheme.primary,
+                            )
+                        }
+                    )
+                    AssetInputCards(state = state, viewModel = viewModel)
+                }
+
+                // Liabilities column
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    NimazSectionHeader(
+                        title = stringResource(R.string.liabilities),
+                        trailingContent = {
+                            SubtotalLabel(
+                                amount = state.liabilities.total,
+                                currency = state.currency,
+                                color = MaterialTheme.colorScheme.error,
+                            )
+                        }
+                    )
+                    LiabilityInputCards(state = state, viewModel = viewModel)
+                }
+            }
+
+            // Breakdown spans full width
+            state.calculation?.let { calculation ->
+                BreakdownCard(
+                    totalAssets = calculation.totalAssets,
+                    totalLiabilities = calculation.totalLiabilities,
+                    netWorth = calculation.netWorth,
+                    nisabValue = calculation.nisabValue,
+                    isAboveNisab = calculation.isAboveNisab,
+                    zakatDue = calculation.zakatDue,
+                    currency = state.currency,
+                    expanded = state.showBreakdown,
+                    onToggleExpanded = { viewModel.onEvent(ZakatEvent.ToggleBreakdown) },
+                )
+            }
+
+            // The tablet layout does not collapse its hero — there is no scroll pressure on a wide
+            // screen where the whole form fits — but save and share live in the same bar, so there is
+            // one place to look for them whatever the size class.
+            ZakatActionBar(
+                enabled = state.calculation != null,
+                onSave = { viewModel.onEvent(ZakatEvent.SaveCalculation) },
+                onShare = onShareCalculation,
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
         }
-
-        // The tablet layout does not collapse its hero — there is no scroll pressure on a wide
-        // screen where the whole form fits — but save and share live in the same bar, so there is
-        // one place to look for them whatever the size class.
-        ZakatActionBar(
-            enabled = state.calculation != null,
-            onSave = { viewModel.onEvent(ZakatEvent.SaveCalculation) },
-            onShare = onShareCalculation,
-        )
-
-        Spacer(modifier = Modifier.height(24.dp))
     }
 }
 

@@ -52,6 +52,8 @@ import com.arshadshah.nimaz.presentation.viewmodel.settings.SettingsEvent
 import com.arshadshah.nimaz.presentation.viewmodel.settings.SettingsViewModel
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import com.arshadshah.nimaz.presentation.components.molecules.NimazScrollbarBox
+import androidx.compose.foundation.lazy.rememberLazyListState
 
 /** The lead times the reminder picker offers. Null is "no reminder". */
 private val REMINDER_CHOICES = listOf(null, 5, 10, 15, 20, 30, 45, 60)
@@ -108,63 +110,69 @@ fun PrayerNotificationsScreen(
             )
         }
     ) { padding ->
-        LazyColumn(
+        val scrollbarState = rememberLazyListState()
+        NimazScrollbarBox(
+            state = scrollbarState,
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
-                .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+                .padding(padding),
         ) {
-            item { Spacer(Modifier.height(4.dp)) }
-            item {
-                NimazSectionHeader(title = stringResource(R.string.notif_all_prayers_section))
-            }
-            item {
-                NimazMenuGroup {
-                    NimazSettingsItem(
-                        title = stringResource(R.string.notif_all_prayers_reminder_title),
-                        subtitle = stringResource(R.string.notif_all_prayers_reminder_subtitle),
-                        checked = notificationState.showReminderBefore,
-                        onCheckedChange = { enabled ->
-                            viewModel.applyReminderToAllPrayers(
-                                enabled = enabled,
-                                minutes = notificationState.reminderMinutes,
-                            )
-                        }
-                    )
-                    NimazMenuDivider(inset = false)
-                    NimazSettingsItem(
-                        title = stringResource(R.string.notif_all_prayers_lead_title),
-                        value = reminderLabel(
-                            notificationState.reminderMinutes
-                                .takeIf { notificationState.showReminderBefore }
-                        ),
-                        onClick = { openSheet = PrayerSettingSheet.AllPrayersReminder },
-                        showArrow = true,
+            LazyColumn(
+                state = scrollbarState,
+                modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                item { Spacer(Modifier.height(4.dp)) }
+                item {
+                    NimazSectionHeader(title = stringResource(R.string.notif_all_prayers_section))
+                }
+                item {
+                    NimazMenuGroup {
+                        NimazSettingsItem(
+                            title = stringResource(R.string.notif_all_prayers_reminder_title),
+                            subtitle = stringResource(R.string.notif_all_prayers_reminder_subtitle),
+                            checked = notificationState.showReminderBefore,
+                            onCheckedChange = { enabled ->
+                                viewModel.applyReminderToAllPrayers(
+                                    enabled = enabled,
+                                    minutes = notificationState.reminderMinutes,
+                                )
+                            }
+                        )
+                        NimazMenuDivider(inset = false)
+                        NimazSettingsItem(
+                            title = stringResource(R.string.notif_all_prayers_lead_title),
+                            value = reminderLabel(
+                                notificationState.reminderMinutes
+                                    .takeIf { notificationState.showReminderBefore }
+                            ),
+                            onClick = { openSheet = PrayerSettingSheet.AllPrayersReminder },
+                            showArrow = true,
+                        )
+                    }
+                }
+                item {
+                    NimazSectionHeader(title = stringResource(R.string.notif_prayers_section))
+                }
+
+                items(rows.size, key = { rows[it].key }) { index ->
+                    val row = rows[index]
+                    PrayerAccordion(
+                        row = row,
+                        sunriseEnabled = notificationState.sunriseNotification,
+                        onToggle = { enabled ->
+                            viewModel.onEvent(SettingsEvent.SetPrayerNotification(row.key, enabled))
+                        },
+                        onToggleSunrise = { enabled ->
+                            viewModel.onEvent(SettingsEvent.SetPrayerNotification("sunrise", enabled))
+                        },
+                        onOpenAlertStyle = { openSheet = PrayerSettingSheet.AlertStyle(row.key) },
+                        onOpenReminder = { openSheet = PrayerSettingSheet.Reminder(row.key) }
                     )
                 }
-            }
-            item {
-                NimazSectionHeader(title = stringResource(R.string.notif_prayers_section))
-            }
 
-            items(rows.size, key = { rows[it].key }) { index ->
-                val row = rows[index]
-                PrayerAccordion(
-                    row = row,
-                    sunriseEnabled = notificationState.sunriseNotification,
-                    onToggle = { enabled ->
-                        viewModel.onEvent(SettingsEvent.SetPrayerNotification(row.key, enabled))
-                    },
-                    onToggleSunrise = { enabled ->
-                        viewModel.onEvent(SettingsEvent.SetPrayerNotification("sunrise", enabled))
-                    },
-                    onOpenAlertStyle = { openSheet = PrayerSettingSheet.AlertStyle(row.key) },
-                    onOpenReminder = { openSheet = PrayerSettingSheet.Reminder(row.key) }
-                )
+                item { Spacer(Modifier.height(16.dp)) }
             }
-
-            item { Spacer(Modifier.height(16.dp)) }
         }
     }
 

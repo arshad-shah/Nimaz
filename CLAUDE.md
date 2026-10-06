@@ -27,6 +27,11 @@ in a feature module; what keeps the ones in `:app` there is the app's `R`, not t
 
 The eighteen modules that came out of it, and what each one owns:
 
+- **`:core:rail`** (`core/rail/`) — **not** part of #551: Rail, the Compose scrollbar library,
+  vendored verbatim from `arshad-shah/rail` (commit in `core/rail/RAIL_VERSION`) to validate it
+  in the real app. Only `:core:ui` depends on it; screens use **`NimazScrollbarBox`**, never
+  `com.arshadshah.rail` directly. Fix bugs upstream and re-copy — never edit it here.
+
 - **`:core:domain`** (`core/domain/`) — the whole domain layer, a pure JVM module. No Android SDK
   on its classpath, so `import android.*` there is a compile error, and `androidFreeClasspath`
   (wired into `check`) fails on any `androidx` artifact someone adds later.

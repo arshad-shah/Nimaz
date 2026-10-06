@@ -64,6 +64,8 @@ import com.arshadshah.nimaz.presentation.viewmodel.tracker.FastingViewModel
 import com.arshadshah.nimaz.presentation.viewmodel.tracker.MakeupFastsUiState
 import java.time.Instant
 import java.time.ZoneId
+import com.arshadshah.nimaz.presentation.components.molecules.NimazScrollbarBox
+import androidx.compose.foundation.lazy.rememberLazyListState
 
 /**
  * Make-up fasts: what is owed, and what has been settled by fasting or by fidya.
@@ -93,25 +95,32 @@ fun MakeupFastsScreen(
             )
         }
     ) { paddingValues ->
-        LazyColumn(
+        val scrollbarState = rememberLazyListState()
+        NimazScrollbarBox(
+            state = scrollbarState,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues),
-            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 20.dp),
         ) {
-            item {
-                MakeupFastsContent(
-                    makeupState = makeupState,
-                    onCompleteMakeupFast = {
-                        viewModel.onEvent(FastingEvent.CompleteMakeupFast(it))
-                    },
-                    onUpdateMakeupFast = {
-                        viewModel.onEvent(FastingEvent.UpdateMakeupFast(it))
-                    },
-                    onPayFidya = { id, amount ->
-                        viewModel.onEvent(FastingEvent.PayFidya(id, amount))
-                    },
-                )
+            LazyColumn(
+                state = scrollbarState,
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(horizontal = 20.dp, vertical = 20.dp),
+            ) {
+                item {
+                    MakeupFastsContent(
+                        makeupState = makeupState,
+                        onCompleteMakeupFast = {
+                            viewModel.onEvent(FastingEvent.CompleteMakeupFast(it))
+                        },
+                        onUpdateMakeupFast = {
+                            viewModel.onEvent(FastingEvent.UpdateMakeupFast(it))
+                        },
+                        onPayFidya = { id, amount ->
+                            viewModel.onEvent(FastingEvent.PayFidya(id, amount))
+                        },
+                    )
+                }
             }
         }
     }

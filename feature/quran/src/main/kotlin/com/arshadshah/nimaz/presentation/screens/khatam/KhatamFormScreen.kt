@@ -75,6 +75,8 @@ import com.arshadshah.nimaz.presentation.viewmodel.quran.KhatamFormMode
 import com.arshadshah.nimaz.presentation.viewmodel.quran.KhatamFormUiState
 import com.arshadshah.nimaz.presentation.viewmodel.quran.KhatamPacePreset
 import com.arshadshah.nimaz.presentation.viewmodel.quran.KhatamViewModel
+import com.arshadshah.nimaz.presentation.components.molecules.NimazScrollbarBox
+import androidx.compose.foundation.lazy.rememberLazyListState
 
 /**
  * One form, two modes.
@@ -251,57 +253,136 @@ private fun KhatamFormContent(
         )
     }
 
-    LazyColumn(
+    val scrollbarState = rememberLazyListState()
+    NimazScrollbarBox(
+        state = scrollbarState,
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(
-            start = NimazSpacing.Large,
-            end = NimazSpacing.Large,
-            top = contentPadding.calculateTopPadding() + NimazSpacing.Small,
-            bottom = contentPadding.calculateBottomPadding() + NimazSpacing.ExtraLarge,
-        ),
-        verticalArrangement = Arrangement.spacedBy(NimazSpacing.Small),
     ) {
-        if (!state.isEdit) {
-            item(key = "introduction") {
-                Column(verticalArrangement = Arrangement.spacedBy(NimazSpacing.Small)) {
-                    Text(stringResource(R.string.khatam_form_intro), style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
-                    Text(stringResource(R.string.khatam_form_intro_detail), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        LazyColumn(
+            state = scrollbarState,
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(
+                start = NimazSpacing.Large,
+                end = NimazSpacing.Large,
+                top = contentPadding.calculateTopPadding() + NimazSpacing.Small,
+                bottom = contentPadding.calculateBottomPadding() + NimazSpacing.ExtraLarge,
+            ),
+            verticalArrangement = Arrangement.spacedBy(NimazSpacing.Small),
+        ) {
+            if (!state.isEdit) {
+                item(key = "introduction") {
+                    Column(verticalArrangement = Arrangement.spacedBy(NimazSpacing.Small)) {
+                        Text(stringResource(R.string.khatam_form_intro), style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.khatam_form_intro_detail), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
                 }
             }
-        }
-        // On edit, lead with progress and state plainly that editing won't touch it.
-        if (state.isEdit) {
-            item(key = "progress-note") {
-                NimazCard(
-                    modifier = Modifier.fillMaxWidth(),
-                    tone = NimazTone.NEUTRAL,
-                    style = NimazCardStyle.ELEVATED,
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(NimazSpacing.Medium),
-                        verticalAlignment = Alignment.CenterVertically,
+            // On edit, lead with progress and state plainly that editing won't touch it.
+            if (state.isEdit) {
+                item(key = "progress-note") {
+                    NimazCard(
+                        modifier = Modifier.fillMaxWidth(),
+                        tone = NimazTone.NEUTRAL,
+                        style = NimazCardStyle.ELEVATED,
                     ) {
-                        KhatamProgressRing(
-                            progress = state.totalAyahsRead.toFloat() /
-                                    Khatam.TOTAL_QURAN_AYAHS,
-                            size = 44.dp,
-                            strokeWidth = 5.dp,
-                        )
-                        Spacer(Modifier.width(NimazSpacing.Medium))
-                        Column {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(NimazSpacing.Medium),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            KhatamProgressRing(
+                                progress = state.totalAyahsRead.toFloat() /
+                                        Khatam.TOTAL_QURAN_AYAHS,
+                                size = 44.dp,
+                                strokeWidth = 5.dp,
+                            )
+                            Spacer(Modifier.width(NimazSpacing.Medium))
+                            Column {
+                                Text(
+                                    text = pluralStringResource(
+                                        R.plurals.khatam_ayahs_read_plural,
+                                        state.totalAyahsRead,
+                                        state.totalAyahsRead,
+                                    ),
+                                    style = MaterialTheme.typography.titleSmall,
+                                    fontWeight = FontWeight.SemiBold,
+                                )
+                                Text(
+                                    text = stringResource(R.string.khatam_edit_progress_note),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+            item(key = "name") {
+                // This is the field that made the mismatch visible: an OutlinedTextField with a
+                // notched border and a floating label, directly above a NimazDropdownField with a
+                // label above an outlined card. Same form, two ideas of what a field is.
+                NimazTextField(
+                    value = state.name,
+                    onValueChange = { onEvent(KhatamEvent.UpdateName(it)) },
+                    label = stringResource(R.string.khatam_name_label),
+                    required = true,
+                    placeholder = stringResource(R.string.khatam_name_placeholder),
+                    error = state.errorRes?.let { stringResource(it) },
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+
+            item(key = "pace") {
+                // A dropdown rather than a chip row: four options, each wanting a subtitle,
+                // do not fit one line of chips at larger font scales.
+                NimazDropdownField(
+                    items = presetItems,
+                    selected = state.preset,
+                    onSelected = { onEvent(KhatamEvent.SelectPreset(it)) },
+                    label = stringResource(R.string.khatam_field_pace),
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                Spacer(Modifier.height(NimazSpacing.Small))
+                // No formatValue on purpose: the stepper's editable field parses its own
+                // display text back to an Int, so a formatted "208 ayahs / day" made direct
+                // entry impossible. The unit lives in the label and the field stays numeric,
+                // which is also what gets the number keyboard on tap.
+                NimazNumberStepper(
+                    value = state.dailyTarget,
+                    onValueChange = { onEvent(KhatamEvent.UpdateDailyTarget(it)) },
+                    modifier = Modifier.fillMaxWidth(),
+                    variant = NimazNumberStepperVariant.SPREAD,
+                    label = stringResource(R.string.khatam_ayahs_per_day_label),
+                    minValue = 1,
+                    maxValue = 1000,
+                )
+            }
+
+            item(key = "projection") {
+                val days = state.projectedDays
+                if (days != null) {
+                    NimazCard(
+                        modifier = Modifier.fillMaxWidth(),
+                        tone = NimazTone.NEUTRAL,
+                        style = NimazCardStyle.ELEVATED,
+                    ) {
+                        Column(Modifier.padding(NimazSpacing.Medium)) {
                             Text(
-                                text = pluralStringResource(
-                                    R.plurals.khatam_ayahs_read_plural,
-                                    state.totalAyahsRead,
-                                    state.totalAyahsRead,
+                                text = stringResource(
+                                    R.string.khatam_projected_finish,
+                                    formatter.format(System.currentTimeMillis() + days * DAY_MILLIS),
                                 ),
-                                style = MaterialTheme.typography.titleSmall,
+                                style = MaterialTheme.typography.bodyMedium,
                                 fontWeight = FontWeight.SemiBold,
                             )
                             Text(
-                                text = stringResource(R.string.khatam_edit_progress_note),
+                                text = pluralStringResource(
+                                    R.plurals.khatam_ayahs_remaining,
+                                    state.remainingAyahs,
+                                    state.remainingAyahs,
+                                ),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
@@ -309,162 +390,90 @@ private fun KhatamFormContent(
                     }
                 }
             }
-        }
 
-        item(key = "name") {
-            // This is the field that made the mismatch visible: an OutlinedTextField with a
-            // notched border and a floating label, directly above a NimazDropdownField with a
-            // label above an outlined card. Same form, two ideas of what a field is.
-            NimazTextField(
-                value = state.name,
-                onValueChange = { onEvent(KhatamEvent.UpdateName(it)) },
-                label = stringResource(R.string.khatam_name_label),
-                required = true,
-                placeholder = stringResource(R.string.khatam_name_placeholder),
-                error = state.errorRes?.let { stringResource(it) },
-                modifier = Modifier.fillMaxWidth(),
-            )
-        }
-
-        item(key = "pace") {
-            // A dropdown rather than a chip row: four options, each wanting a subtitle,
-            // do not fit one line of chips at larger font scales.
-            NimazDropdownField(
-                items = presetItems,
-                selected = state.preset,
-                onSelected = { onEvent(KhatamEvent.SelectPreset(it)) },
-                label = stringResource(R.string.khatam_field_pace),
-                modifier = Modifier.fillMaxWidth(),
-            )
-            Spacer(Modifier.height(NimazSpacing.Small))
-            // No formatValue on purpose: the stepper's editable field parses its own
-            // display text back to an Int, so a formatted "208 ayahs / day" made direct
-            // entry impossible. The unit lives in the label and the field stays numeric,
-            // which is also what gets the number keyboard on tap.
-            NimazNumberStepper(
-                value = state.dailyTarget,
-                onValueChange = { onEvent(KhatamEvent.UpdateDailyTarget(it)) },
-                modifier = Modifier.fillMaxWidth(),
-                variant = NimazNumberStepperVariant.SPREAD,
-                label = stringResource(R.string.khatam_ayahs_per_day_label),
-                minValue = 1,
-                maxValue = 1000,
-            )
-        }
-
-        item(key = "projection") {
-            val days = state.projectedDays
-            if (days != null) {
-                NimazCard(
-                    modifier = Modifier.fillMaxWidth(),
-                    tone = NimazTone.NEUTRAL,
-                    style = NimazCardStyle.ELEVATED,
-                ) {
-                    Column(Modifier.padding(NimazSpacing.Medium)) {
-                        Text(
-                            text = stringResource(
-                                R.string.khatam_projected_finish,
-                                formatter.format(System.currentTimeMillis() + days * DAY_MILLIS),
-                            ),
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.SemiBold,
-                        )
-                        Text(
-                            text = pluralStringResource(
-                                R.plurals.khatam_ayahs_remaining,
-                                state.remainingAyahs,
-                                state.remainingAyahs,
-                            ),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            item(key = "deadline") {
+                // A button, not a field — but it answers a form question, so it wears the family's
+                // label rather than a screen-local imitation of one.
+                NimazFieldLabel(
+                    text = stringResource(R.string.khatam_field_deadline),
+                    optionalLabel = stringResource(R.string.khatam_optional),
+                    modifier = Modifier.padding(bottom = NimazFieldDefaults.LabelGap),
+                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    NimazButton(
+                        text = state.deadline?.let { formatter.format(it) }
+                            ?: stringResource(R.string.khatam_deadline_not_set),
+                        onClick = { showDatePicker = true },
+                        variant = NimazButtonVariant.OUTLINED,
+                        leadingIcon = Icons.Default.CalendarMonth,
+                        modifier = Modifier.weight(1f),
+                    )
+                    if (state.deadline != null) {
+                        NimazIconButton(
+                            icon = Icons.Default.Close,
+                            onClick = { onEvent(KhatamEvent.UpdateDeadline(null)) },
+                            contentDescription = stringResource(R.string.khatam_deadline_clear),
                         )
                     }
                 }
             }
-        }
 
-        item(key = "deadline") {
-            // A button, not a field — but it answers a form question, so it wears the family's
-            // label rather than a screen-local imitation of one.
-            NimazFieldLabel(
-                text = stringResource(R.string.khatam_field_deadline),
-                optionalLabel = stringResource(R.string.khatam_optional),
-                modifier = Modifier.padding(bottom = NimazFieldDefaults.LabelGap),
-            )
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                NimazButton(
-                    text = state.deadline?.let { formatter.format(it) }
-                        ?: stringResource(R.string.khatam_deadline_not_set),
-                    onClick = { showDatePicker = true },
-                    variant = NimazButtonVariant.OUTLINED,
-                    leadingIcon = Icons.Default.CalendarMonth,
-                    modifier = Modifier.weight(1f),
+            item(key = "reminder") {
+                NimazFieldLabel(
+                    text = stringResource(R.string.khatam_field_reminder),
+                    modifier = Modifier.padding(bottom = NimazFieldDefaults.LabelGap),
                 )
-                if (state.deadline != null) {
-                    NimazIconButton(
-                        icon = Icons.Default.Close,
-                        onClick = { onEvent(KhatamEvent.UpdateDeadline(null)) },
-                        contentDescription = stringResource(R.string.khatam_deadline_clear),
-                    )
-                }
-            }
-        }
-
-        item(key = "reminder") {
-            NimazFieldLabel(
-                text = stringResource(R.string.khatam_field_reminder),
-                modifier = Modifier.padding(bottom = NimazFieldDefaults.LabelGap),
-            )
-            NimazCard(
-                modifier = Modifier.fillMaxWidth(),
-                tone = NimazTone.NEUTRAL,
-                style = NimazCardStyle.OUTLINED,
-                elevation = 0.dp,
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(NimazSpacing.Medium),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                ) {
-                    NimazButton(
-                        text = state.reminderTime ?: DEFAULT_REMINDER_TIME,
-                        onClick = { showTimePicker = true },
-                        variant = NimazButtonVariant.TEXT,
-                        enabled = state.reminderEnabled,
-                    )
-                    NimazSwitch(
-                        checked = state.reminderEnabled,
-                        onCheckedChange = { enabled ->
-                            onEvent(KhatamEvent.UpdateReminderEnabled(enabled))
-                            if (enabled && state.reminderTime == null) {
-                                onEvent(KhatamEvent.UpdateReminderTime(DEFAULT_REMINDER_TIME))
-                            }
-                        },
-                    )
-                }
-            }
-        }
-
-        item(key = "notes") {
-            NimazAccordion(
-                title = stringResource(R.string.field_notes),
-                subtitle = if (state.notes.isBlank()) stringResource(R.string.khatam_optional) else state.notes,
-                expanded = notesExpanded,
-                onExpandedChange = { notesExpanded = it },
-            ) {
-                NimazTextField(
-                    value = state.notes,
-                    onValueChange = { onEvent(KhatamEvent.UpdateNotes(it)) },
-                    label = stringResource(R.string.field_notes),
-                    variant = NimazFieldVariant.NOTE,
-                    placeholder = stringResource(R.string.khatam_notes_placeholder),
+                NimazCard(
                     modifier = Modifier.fillMaxWidth(),
-                )
+                    tone = NimazTone.NEUTRAL,
+                    style = NimazCardStyle.OUTLINED,
+                    elevation = 0.dp,
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(NimazSpacing.Medium),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                    ) {
+                        NimazButton(
+                            text = state.reminderTime ?: DEFAULT_REMINDER_TIME,
+                            onClick = { showTimePicker = true },
+                            variant = NimazButtonVariant.TEXT,
+                            enabled = state.reminderEnabled,
+                        )
+                        NimazSwitch(
+                            checked = state.reminderEnabled,
+                            onCheckedChange = { enabled ->
+                                onEvent(KhatamEvent.UpdateReminderEnabled(enabled))
+                                if (enabled && state.reminderTime == null) {
+                                    onEvent(KhatamEvent.UpdateReminderTime(DEFAULT_REMINDER_TIME))
+                                }
+                            },
+                        )
+                    }
+                }
             }
-        }
 
+            item(key = "notes") {
+                NimazAccordion(
+                    title = stringResource(R.string.field_notes),
+                    subtitle = if (state.notes.isBlank()) stringResource(R.string.khatam_optional) else state.notes,
+                    expanded = notesExpanded,
+                    onExpandedChange = { notesExpanded = it },
+                ) {
+                    NimazTextField(
+                        value = state.notes,
+                        onValueChange = { onEvent(KhatamEvent.UpdateNotes(it)) },
+                        label = stringResource(R.string.field_notes),
+                        variant = NimazFieldVariant.NOTE,
+                        placeholder = stringResource(R.string.khatam_notes_placeholder),
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
+            }
+
+        }
     }
 
     if (showDatePicker) {

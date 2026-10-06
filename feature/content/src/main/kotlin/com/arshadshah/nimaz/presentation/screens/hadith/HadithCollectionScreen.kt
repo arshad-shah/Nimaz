@@ -77,6 +77,8 @@ import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.viewmodel.content.HadithEvent
 import com.arshadshah.nimaz.presentation.viewmodel.content.HadithViewModel
 import kotlinx.coroutines.launch
+import com.arshadshah.nimaz.presentation.components.molecules.NimazScrollbarBox
+import androidx.compose.foundation.lazy.rememberLazyListState
 
 /**
  * The grades a reader can browse by. Mawḍūʿ (fabricated) is deliberately absent: it is a
@@ -141,98 +143,106 @@ fun HadithCollectionScreen(
                 modifier = Modifier.padding(paddingValues),
             )
 
-            else -> LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .testTag(ScreenTags.HadithBookList),
-                contentPadding = PaddingValues(bottom = 24.dp)
-            ) {
-                item {
-                    NimazStatsGrid(
-                        stats = listOf(
-                            NimazStatData(value = "0", label = stringResource(R.string.read_today)),
-                            NimazStatData(
-                                value = "${bookmarksState.bookmarks.size}",
-                                label = stringResource(R.string.bookmarked)
-                            ),
-                            NimazStatData(value = "0", label = stringResource(R.string.day_streak))
-                        ),
-                        modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp)
-                    )
-                }
+            else -> {
+                val listState = rememberLazyListState()
+                NimazScrollbarBox(
+                    state = listState,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues),
+                ) {
+                    LazyColumn(
+                        state = listState,
+                        modifier = Modifier.fillMaxSize().testTag(ScreenTags.HadithBookList),
+                        contentPadding = PaddingValues(bottom = 24.dp)
+                    ) {
+                        item {
+                            NimazStatsGrid(
+                                stats = listOf(
+                                    NimazStatData(value = "0", label = stringResource(R.string.read_today)),
+                                    NimazStatData(
+                                        value = "${bookmarksState.bookmarks.size}",
+                                        label = stringResource(R.string.bookmarked)
+                                    ),
+                                    NimazStatData(value = "0", label = stringResource(R.string.day_streak))
+                                ),
+                                modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp)
+                            )
+                        }
 
-                item {
-                    val hadithOfTheDay = state.hadithOfTheDay
-                    val fallbackArabic = stringResource(R.string.hadith_fallback_arabic)
-                    val fallbackEnglish = stringResource(R.string.hadith_fallback_english)
-                    val fallbackSource = stringResource(R.string.hadith_fallback_source)
-                    HadithOfTheDayCard(
-                        hadith = hadithOfTheDay,
-                        onBookmarkClick = {
-                            hadithOfTheDay?.let { hadith ->
-                                viewModel.onEvent(
-                                    HadithEvent.ToggleBookmark(
-                                        hadithId = hadith.id,
-                                        bookId = hadith.bookId,
-                                        hadithNumber = hadith.hadithNumberInBook
-                                    )
-                                )
-                            }
-                        },
-                        onShareClick = {
-                            shareScope.launch {
-                                if (hadithOfTheDay != null) {
-                                    ContentShareManager.shareBranded(
-                                        context,
-                                        Shareables.hadith(context, hadithOfTheDay)
-                                    )
-                                } else {
-                                    val fallbackBody = buildString {
-                                        appendLine(fallbackArabic)
-                                        appendLine()
-                                        appendLine(fallbackEnglish)
-                                        appendLine()
-                                        append(fallbackSource)
+                        item {
+                            val hadithOfTheDay = state.hadithOfTheDay
+                            val fallbackArabic = stringResource(R.string.hadith_fallback_arabic)
+                            val fallbackEnglish = stringResource(R.string.hadith_fallback_english)
+                            val fallbackSource = stringResource(R.string.hadith_fallback_source)
+                            HadithOfTheDayCard(
+                                hadith = hadithOfTheDay,
+                                onBookmarkClick = {
+                                    hadithOfTheDay?.let { hadith ->
+                                        viewModel.onEvent(
+                                            HadithEvent.ToggleBookmark(
+                                                hadithId = hadith.id,
+                                                bookId = hadith.bookId,
+                                                hadithNumber = hadith.hadithNumberInBook
+                                            )
+                                        )
                                     }
-                                    ContentShareManager.shareText(
-                                        context,
-                                        Shareables.text(fallbackBody)
-                                    )
-                                }
-                            }
-                        },
-                        modifier = Modifier.padding(horizontal = 20.dp)
-                    )
-                }
+                                },
+                                onShareClick = {
+                                    shareScope.launch {
+                                        if (hadithOfTheDay != null) {
+                                            ContentShareManager.shareBranded(
+                                                context,
+                                                Shareables.hadith(context, hadithOfTheDay)
+                                            )
+                                        } else {
+                                            val fallbackBody = buildString {
+                                                appendLine(fallbackArabic)
+                                                appendLine()
+                                                appendLine(fallbackEnglish)
+                                                appendLine()
+                                                append(fallbackSource)
+                                            }
+                                            ContentShareManager.shareText(
+                                                context,
+                                                Shareables.text(fallbackBody)
+                                            )
+                                        }
+                                    }
+                                },
+                                modifier = Modifier.padding(horizontal = 20.dp)
+                            )
+                        }
 
-                item {
-                    NimazSectionHeader(
-                        title = stringResource(R.string.hadith_browse_by_grade),
-                        modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)
-                    )
-                }
+                        item {
+                            NimazSectionHeader(
+                                title = stringResource(R.string.hadith_browse_by_grade),
+                                modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)
+                            )
+                        }
 
-                item {
-                    GradeFilterRow(
-                        onGradeClick = onNavigateToGrade,
-                        modifier = Modifier.padding(horizontal = 20.dp)
-                    )
-                }
+                        item {
+                            GradeFilterRow(
+                                onGradeClick = onNavigateToGrade,
+                                modifier = Modifier.padding(horizontal = 20.dp)
+                            )
+                        }
 
-                item {
-                    NimazSectionHeader(
-                        title = stringResource(R.string.kutub_al_sittah),
-                        modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)
-                    )
-                }
+                        item {
+                            NimazSectionHeader(
+                                title = stringResource(R.string.kutub_al_sittah),
+                                modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)
+                            )
+                        }
 
-                item {
-                    BooksGrid(
-                        books = state.books,
-                        onBookClick = onNavigateToBook,
-                        modifier = Modifier.padding(horizontal = 20.dp)
-                    )
+                        item {
+                            BooksGrid(
+                                books = state.books,
+                                onBookClick = onNavigateToBook,
+                                modifier = Modifier.padding(horizontal = 20.dp)
+                            )
+                        }
+                    }
                 }
             }
         }

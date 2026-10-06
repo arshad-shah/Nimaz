@@ -73,6 +73,8 @@ import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.TextStyle
 import java.util.Locale
+import com.arshadshah.nimaz.presentation.components.molecules.NimazScrollbarBox
+import androidx.compose.foundation.lazy.rememberLazyListState
 
 /** How far a horizontal drag must travel before it counts as paging a day. */
 private val PageThreshold = 64.dp
@@ -176,7 +178,9 @@ fun PrayerTimesScreen(
         modifier = Modifier.navigationBarsPadding(),
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
     ) { paddingValues ->
-        LazyColumn(
+        val scrollbarState = rememberLazyListState()
+        NimazScrollbarBox(
+            state = scrollbarState,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
@@ -194,104 +198,109 @@ fun PrayerTimesScreen(
                         },
                     ) { _, dragAmount -> total += dragAmount }
                 },
-            contentPadding = PaddingValues(bottom = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(18.dp),
         ) {
-            // 1. The living sky. Full bleed, so it takes no horizontal padding.
-            item {
-                PrayerSkyScene(
-                    timeOfDay = sky.timeOfDay,
-                    timeLabel = sky.timeLabel,
-                    statusLabel = sky.statusLabel,
-                    moonFraction = state.moonFraction,
-                    sunriseFraction = state.sunriseFraction,
-                    sunsetFraction = state.sunsetFraction,
-                    shape = RoundedCornerShape(bottomStart = 28.dp, bottomEnd = 28.dp),
-                    // Never assert a city the reader has not chosen: with no location set the
-                    // times below come from FallbackLocation, and the header says so.
-                    locationName = if (state.isUsingFallbackLocation) {
-                        stringResource(R.string.location_using_default)
-                    } else {
-                        state.locationName
-                    },
-                    onBack = onNavigateBack,
-                    onSettings = onNavigateToSettings,
-                    // The way back to today, as a third glass pill rather than a badge floating
-                    // at a hand-measured offset below the bar.
-                    trailingAction = if (!state.isToday) {
-                        {
-                            NimazBadge(
-                                text = stringResource(R.string.today),
-                                size = NimazBadgeSize.LARGE,
-                                colors = NimazBadgeDefaults.colors(
-                                    tone = NimazTone.ACCENT,
-                                    emphasis = NimazBadgeEmphasis.FILLED,
-                                ),
-                                onClick = { viewModel.onEvent(PrayerTimesEvent.GoToToday) },
-                            )
-                        }
-                    } else {
-                        null
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(260.dp + statusBarTop),
-                )
-            }
-
-            // 2. A week, and a way out of it.
-            item {
-                DayRailRow(
-                    selectedDate = selectedDate,
-                    today = today,
-                    onSelect = { viewModel.onEvent(PrayerTimesEvent.SelectDate(it)) },
-                    onJump = { showMonthSheet = true },
-                    modifier = Modifier.padding(horizontal = 20.dp),
-                )
-            }
-
-            // 3. The day, drawn.
-            item {
-                SolarDayCard(
-                    state = state,
-                    prayers = sky.prayers,
-                    modifier = Modifier.padding(horizontal = 20.dp),
-                )
-            }
-
-            // 4. The six prayers, as rows in one card.
-            item {
-                Column(modifier = Modifier.padding(horizontal = 20.dp)) {
-                    // No trailing daylight: the card directly above states it in bold, and the
-                    // About-this-day table states it again. Three times in one scroll, twice of
-                    // them 20dp apart.
-                    NimazSectionHeader(
-                        title = selectedDate.formatWeekdayDayMonth(),
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    PrayerRowsCard(
-                        prayers = sky.prayers,
-                        selectedDate = selectedDate,
-                        isToday = state.isToday,
+            LazyColumn(
+                state = scrollbarState,
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(bottom = 24.dp),
+                verticalArrangement = Arrangement.spacedBy(18.dp),
+            ) {
+                // 1. The living sky. Full bleed, so it takes no horizontal padding.
+                item {
+                    PrayerSkyScene(
+                        timeOfDay = sky.timeOfDay,
+                        timeLabel = sky.timeLabel,
+                        statusLabel = sky.statusLabel,
+                        moonFraction = state.moonFraction,
+                        sunriseFraction = state.sunriseFraction,
+                        sunsetFraction = state.sunsetFraction,
+                        shape = RoundedCornerShape(bottomStart = 28.dp, bottomEnd = 28.dp),
+                        // Never assert a city the reader has not chosen: with no location set the
+                        // times below come from FallbackLocation, and the header says so.
+                        locationName = if (state.isUsingFallbackLocation) {
+                            stringResource(R.string.location_using_default)
+                        } else {
+                            state.locationName
+                        },
+                        onBack = onNavigateBack,
+                        onSettings = onNavigateToSettings,
+                        // The way back to today, as a third glass pill rather than a badge floating
+                        // at a hand-measured offset below the bar.
+                        trailingAction = if (!state.isToday) {
+                            {
+                                NimazBadge(
+                                    text = stringResource(R.string.today),
+                                    size = NimazBadgeSize.LARGE,
+                                    colors = NimazBadgeDefaults.colors(
+                                        tone = NimazTone.ACCENT,
+                                        emphasis = NimazBadgeEmphasis.FILLED,
+                                    ),
+                                    onClick = { viewModel.onEvent(PrayerTimesEvent.GoToToday) },
+                                )
+                            }
+                        } else {
+                            null
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(260.dp + statusBarTop),
                     )
                 }
-            }
 
-            // 5. The facts that are not times.
-            item {
-                Column(modifier = Modifier.padding(horizontal = 20.dp)) {
-                    NimazSectionHeader(
-                        title = stringResource(R.string.prayer_about_this_day),
-                        modifier = Modifier.fillMaxWidth(),
+                // 2. A week, and a way out of it.
+                item {
+                    DayRailRow(
+                        selectedDate = selectedDate,
+                        today = today,
+                        onSelect = { viewModel.onEvent(PrayerTimesEvent.SelectDate(it)) },
+                        onJump = { showMonthSheet = true },
+                        modifier = Modifier.padding(horizontal = 20.dp),
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    DayInfoCard(
-                        sunrise = state.sunriseAt?.let { clockTimeText(it) } ?: Placeholder,
-                        sunset = state.sunsetAt?.let { clockTimeText(it) } ?: Placeholder,
-                        daylight = state.daylight,
-                        method = state.methodLabel,
+                }
+
+                // 3. The day, drawn.
+                item {
+                    SolarDayCard(
+                        state = state,
+                        prayers = sky.prayers,
+                        modifier = Modifier.padding(horizontal = 20.dp),
                     )
+                }
+
+                // 4. The six prayers, as rows in one card.
+                item {
+                    Column(modifier = Modifier.padding(horizontal = 20.dp)) {
+                        // No trailing daylight: the card directly above states it in bold, and the
+                        // About-this-day table states it again. Three times in one scroll, twice of
+                        // them 20dp apart.
+                        NimazSectionHeader(
+                            title = selectedDate.formatWeekdayDayMonth(),
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        PrayerRowsCard(
+                            prayers = sky.prayers,
+                            selectedDate = selectedDate,
+                            isToday = state.isToday,
+                        )
+                    }
+                }
+
+                // 5. The facts that are not times.
+                item {
+                    Column(modifier = Modifier.padding(horizontal = 20.dp)) {
+                        NimazSectionHeader(
+                            title = stringResource(R.string.prayer_about_this_day),
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        DayInfoCard(
+                            sunrise = state.sunriseAt?.let { clockTimeText(it) } ?: Placeholder,
+                            sunset = state.sunsetAt?.let { clockTimeText(it) } ?: Placeholder,
+                            daylight = state.daylight,
+                            method = state.methodLabel,
+                        )
+                    }
                 }
             }
         }

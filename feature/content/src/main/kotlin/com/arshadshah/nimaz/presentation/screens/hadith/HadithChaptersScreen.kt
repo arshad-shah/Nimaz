@@ -52,6 +52,8 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazLoadingState
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.viewmodel.content.HadithEvent
 import com.arshadshah.nimaz.presentation.viewmodel.content.HadithViewModel
+import com.arshadshah.nimaz.presentation.components.molecules.NimazScrollbarBox
+import androidx.compose.foundation.lazy.rememberLazyListState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -115,27 +117,34 @@ fun HadithChaptersScreen(
             }
 
             else -> {
-                LazyColumn(
+                val scrollbarState = rememberLazyListState()
+                NimazScrollbarBox(
+                    state = scrollbarState,
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(paddingValues),
-                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    state.book?.let { book ->
-                        item(key = "header") {
-                            BookHeaderCard(book = book, chapterCount = state.chapters.size)
-                            Spacer(modifier = Modifier.height(8.dp))
+                    LazyColumn(
+                        state = scrollbarState,
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        state.book?.let { book ->
+                            item(key = "header") {
+                                BookHeaderCard(book = book, chapterCount = state.chapters.size)
+                                Spacer(modifier = Modifier.height(8.dp))
+                            }
                         }
-                    }
-                    items(
-                        items = state.filteredChapters,
-                        key = { it.id }
-                    ) { chapter ->
-                        ChapterItem(
-                            chapter = chapter,
-                            onClick = { onNavigateToChapter(bookId, chapter.id) }
-                        )
+                        items(
+                            items = state.filteredChapters,
+                            key = { it.id }
+                        ) { chapter ->
+                            ChapterItem(
+                                chapter = chapter,
+                                onClick = { onNavigateToChapter(bookId, chapter.id) }
+                            )
+                        }
                     }
                 }
             }
