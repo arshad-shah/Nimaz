@@ -19,6 +19,7 @@ fun ScrollbarBox(
     style: ScrollbarStyle = ScrollbarStyle(),
     thumb: (@Composable (ThumbState) -> Unit)? = null,
     label: (@Composable (progress: Float) -> Unit)? = null,
+    contentDescription: String? = null,
     content: @Composable BoxScope.() -> Unit,
 ) {
     Box(modifier) {
@@ -29,9 +30,9 @@ fun ScrollbarBox(
             contentAlignment = if (orientation == Orientation.Vertical) Alignment.CenterEnd else Alignment.BottomCenter,
         ) {
             if (orientation == Orientation.Vertical) {
-                VerticalScrollbar(adapter, style = style, thumb = thumb, label = label)
+                VerticalScrollbar(adapter, style = style, thumb = thumb, label = label, contentDescription = contentDescription)
             } else {
-                HorizontalScrollbar(adapter, style = style, thumb = thumb, label = label)
+                HorizontalScrollbar(adapter, style = style, thumb = thumb, label = label, contentDescription = contentDescription)
             }
         }
     }

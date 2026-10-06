@@ -57,8 +57,11 @@ data class ScrollbarStyle(
     val minThumbLength: Dp = 40.dp,
     /** Thumb never gets longer than this. Set equal to min for a fixed-size "fast scroll" handle. */
     val maxThumbLength: Dp = Dp.Infinity,
-    /** How wide the touchable strip is. Bigger than the visible thumb so it's easy to grab. */
-    val touchTargetWidth: Dp = 24.dp,
+    /**
+     * How wide the touchable strip is. Bigger than the visible thumb so it is easy to grab.
+     * 48 dp is Android's minimum accessible touch target; go narrower only on purpose.
+     */
+    val touchTargetWidth: Dp = 48.dp,
     /** Gap between the thumb and the screen edge. */
     val edgePadding: Dp = 3.dp,
     /** Gap at both ends of the bar. */
@@ -107,7 +110,6 @@ data class ScrollbarStyle(
             activeThickness = 12.dp,
             minThumbLength = 52.dp,
             maxThumbLength = 52.dp,
-            touchTargetWidth = 36.dp,
         )
 
         /** Desktop feel: always visible, with a track, tap to page. */

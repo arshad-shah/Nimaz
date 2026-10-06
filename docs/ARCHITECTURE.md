@@ -1347,6 +1347,9 @@ with no label and a touch target under 48dp fail the lane we already run. It can
       `NimazScrollbarVariant.FastScroll` plus a `NimazScrollbarLabel` is for long, index-like lists
       (the surah list); `Standard` is for everything else. Its colours come from the theme, so a
       screen never passes one, and no screen imports `com.arshadshah.rail` directly.
+      Every variant has a 48 dp touch strip, and TalkBack announces Rail's translated
+      "Vertical scrollbar" unless the screen passes `contentDescription`. To take a newer Rail,
+      replace `core/rail/src/main` with upstream's `rail/src/main` and update `RAIL_VERSION`.
     - the line between two rows of a `NimazMenuGroup` is **`NimazMenuDivider()`**
       (`components/molecules/NimazMenuItem.kt`), **never** a hand-written `NimazDivider` with its
       own padding and alpha. The same hairline had been spelled out at ~55 call sites in three

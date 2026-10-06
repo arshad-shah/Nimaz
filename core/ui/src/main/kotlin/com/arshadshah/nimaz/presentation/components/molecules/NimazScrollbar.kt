@@ -39,6 +39,8 @@ enum class NimazScrollbarVariant { Standard, FastScroll }
  *
  * @param label shown beside the thumb while it is dragged; receives the drag position from 0 to
  *   1. Use [NimazScrollbarLabel] for the standard bubble.
+ * @param contentDescription what TalkBack calls the bar. Null keeps Rail's own translated
+ *   "Vertical scrollbar"; pass a resolved string to name the list instead.
  */
 @Composable
 fun NimazScrollbarBox(
@@ -46,8 +48,9 @@ fun NimazScrollbarBox(
     modifier: Modifier = Modifier,
     variant: NimazScrollbarVariant = NimazScrollbarVariant.Standard,
     label: (@Composable (progress: Float) -> Unit)? = null,
+    contentDescription: String? = null,
     content: @Composable BoxScope.() -> Unit,
-) = ThemedScrollbarBox(rememberScrollbarAdapter(state), modifier, variant, label, content)
+) = ThemedScrollbarBox(rememberScrollbarAdapter(state), modifier, variant, label, contentDescription, content)
 
 /** [NimazScrollbarBox] for a `LazyVerticalGrid` (uniform-span grids). */
 @Composable
@@ -56,8 +59,9 @@ fun NimazScrollbarBox(
     modifier: Modifier = Modifier,
     variant: NimazScrollbarVariant = NimazScrollbarVariant.Standard,
     label: (@Composable (progress: Float) -> Unit)? = null,
+    contentDescription: String? = null,
     content: @Composable BoxScope.() -> Unit,
-) = ThemedScrollbarBox(rememberScrollbarAdapter(state), modifier, variant, label, content)
+) = ThemedScrollbarBox(rememberScrollbarAdapter(state), modifier, variant, label, contentDescription, content)
 
 /** [NimazScrollbarBox] for a `Column` with `Modifier.verticalScroll`. */
 @Composable
@@ -67,12 +71,14 @@ fun NimazScrollbarBox(
     reverseScrolling: Boolean = false,
     variant: NimazScrollbarVariant = NimazScrollbarVariant.Standard,
     label: (@Composable (progress: Float) -> Unit)? = null,
+    contentDescription: String? = null,
     content: @Composable BoxScope.() -> Unit,
 ) = ThemedScrollbarBox(
     rememberScrollbarAdapter(state, reverseScrolling = reverseScrolling),
     modifier,
     variant,
     label,
+    contentDescription,
     content,
 )
 
@@ -107,6 +113,7 @@ private fun ThemedScrollbarBox(
     modifier: Modifier,
     variant: NimazScrollbarVariant,
     label: (@Composable (progress: Float) -> Unit)?,
+    contentDescription: String?,
     content: @Composable BoxScope.() -> Unit,
 ) {
     ScrollbarBox(
@@ -114,6 +121,7 @@ private fun ThemedScrollbarBox(
         modifier = modifier,
         style = nimazScrollbarStyle(variant),
         label = label,
+        contentDescription = contentDescription,
         content = content,
     )
 }

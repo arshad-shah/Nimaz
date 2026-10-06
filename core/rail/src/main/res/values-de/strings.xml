@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="rail_vertical_scrollbar">Vertikale Bildlaufleiste</string>
+    <string name="rail_horizontal_scrollbar">Horizontale Bildlaufleiste</string>
+</resources>

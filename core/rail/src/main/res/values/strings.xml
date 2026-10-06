@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Announced by accessibility services for the scrollbar. Override in an app to rename. -->
+    <string name="rail_vertical_scrollbar">Vertical scrollbar</string>
+    <string name="rail_horizontal_scrollbar">Horizontal scrollbar</string>
+</resources>

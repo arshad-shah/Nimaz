@@ -105,6 +105,18 @@ class NimazScrollbarTest {
     }
 
     @Test
+    fun `a caller description names the bar`() {
+        composeRule.setThemedContent {
+            val state = rememberLazyListState()
+            NimazScrollbarBox(state = state, modifier = Modifier.size(200.dp, 300.dp), contentDescription = "Surahs") {
+                LazyColumn(state = state) { items(200) { Text("Row $it", Modifier.height(40.dp)) } }
+            }
+        }
+        composeRule.onNodeWithContentDescription("Surahs").assertExists()
+        composeRule.onNodeWithContentDescription(scrollbar).assertDoesNotExist()
+    }
+
+    @Test
     fun `content that fits shows no scrollbar`() {
         composeRule.setThemedContent {
             val state = rememberLazyListState()

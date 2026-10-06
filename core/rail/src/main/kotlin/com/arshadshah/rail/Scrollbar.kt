@@ -47,6 +47,7 @@ import androidx.compose.ui.semantics.progressBarRangeInfo
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.setProgress
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.LayoutDirection
@@ -62,6 +63,9 @@ import kotlin.math.roundToInt
  * @param thumb draw your own thumb. Fills the thumb's area; leave null for the default pill.
  * @param label a bubble shown beside the thumb while dragging (e.g. "A", "B", "C" for contacts).
  *              Gets how far along the bar the thumb is, from 0 to 1.
+ * @param contentDescription what accessibility services announce for the bar. Null uses Rail's
+ *              own string, "Vertical scrollbar" / "Horizontal scrollbar", which ships translated
+ *              and which an app can override like any library string resource.
  */
 @Composable
 fun VerticalScrollbar(
@@ -70,7 +74,8 @@ fun VerticalScrollbar(
     style: ScrollbarStyle = ScrollbarStyle(),
     thumb: (@Composable (ThumbState) -> Unit)? = null,
     label: (@Composable (progress: Float) -> Unit)? = null,
-) = Scrollbar(adapter, Orientation.Vertical, modifier, style, thumb, label)
+    contentDescription: String? = null,
+) = Scrollbar(adapter, Orientation.Vertical, modifier, style, thumb, label, contentDescription)
 
 /** Same as [VerticalScrollbar], but for sideways scrolling. Place it along the bottom. */
 @Composable
@@ -80,7 +85,8 @@ fun HorizontalScrollbar(
     style: ScrollbarStyle = ScrollbarStyle(),
     thumb: (@Composable (ThumbState) -> Unit)? = null,
     label: (@Composable (progress: Float) -> Unit)? = null,
-) = Scrollbar(adapter, Orientation.Horizontal, modifier, style, thumb, label)
+    contentDescription: String? = null,
+) = Scrollbar(adapter, Orientation.Horizontal, modifier, style, thumb, label, contentDescription)
 
 // ---------------------------------------------------------------------------
 
@@ -95,8 +101,12 @@ private fun Scrollbar(
     style: ScrollbarStyle,
     thumb: (@Composable (ThumbState) -> Unit)?,
     label: (@Composable (Float) -> Unit)?,
+    contentDescription: String?,
 ) {
     val vertical = orientation == Orientation.Vertical
+    val description = contentDescription ?: stringResource(
+        if (vertical) R.string.rail_vertical_scrollbar else R.string.rail_horizontal_scrollbar,
+    )
     val density = LocalDensity.current
     val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
     val haptics = LocalHapticFeedback.current
@@ -200,7 +210,7 @@ private fun Scrollbar(
             .then(if (vertical) Modifier.fillMaxHeight().width(touch) else Modifier.fillMaxWidth().height(touch))
             .semantics {
                 if (geometry.canScroll) {
-                    contentDescription = if (vertical) "Vertical scrollbar" else "Horizontal scrollbar"
+                    contentDescription = description
                     val maximum = adapter.maxScrollOffset
                     val progress = if (maximum > 0 && adapter.scrollOffset.isFinite()) (adapter.scrollOffset / maximum).toFloat().coerceIn(0f, 1f) else 0f
                     progressBarRangeInfo = ProgressBarRangeInfo(progress, 0f..1f)
