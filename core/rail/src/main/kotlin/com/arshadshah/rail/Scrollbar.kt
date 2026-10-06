@@ -75,7 +75,7 @@ fun VerticalScrollbar(
     thumb: (@Composable (ThumbState) -> Unit)? = null,
     label: (@Composable (progress: Float) -> Unit)? = null,
     contentDescription: String? = null,
-) = Scrollbar(adapter, Orientation.Vertical, modifier, style, thumb, label, contentDescription)
+) = Scrollbar(adapter, Orientation.Vertical, modifier, style, thumb, label, descriptionOverride = contentDescription)
 
 /** Same as [VerticalScrollbar], but for sideways scrolling. Place it along the bottom. */
 @Composable
@@ -86,7 +86,7 @@ fun HorizontalScrollbar(
     thumb: (@Composable (ThumbState) -> Unit)? = null,
     label: (@Composable (progress: Float) -> Unit)? = null,
     contentDescription: String? = null,
-) = Scrollbar(adapter, Orientation.Horizontal, modifier, style, thumb, label, contentDescription)
+) = Scrollbar(adapter, Orientation.Horizontal, modifier, style, thumb, label, descriptionOverride = contentDescription)
 
 // ---------------------------------------------------------------------------
 
@@ -101,10 +101,12 @@ private fun Scrollbar(
     style: ScrollbarStyle,
     thumb: (@Composable (ThumbState) -> Unit)?,
     label: (@Composable (Float) -> Unit)?,
-    contentDescription: String?,
+    // Not `contentDescription`: inside `semantics {}` that name would shadow the semantics
+    // property, and the assignment below would try to reassign this parameter.
+    descriptionOverride: String?,
 ) {
     val vertical = orientation == Orientation.Vertical
-    val description = contentDescription ?: stringResource(
+    val description = descriptionOverride ?: stringResource(
         if (vertical) R.string.rail_vertical_scrollbar else R.string.rail_horizontal_scrollbar,
     )
     val density = LocalDensity.current
