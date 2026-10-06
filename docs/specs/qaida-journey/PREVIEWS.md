@@ -1,7 +1,7 @@
 # Qaida screen previews
 
 Native Compose screens captured with Roborazzi on Robolectric.
-Source commit: `9a51a9c34a957bbaeaf4c2c46016b8901a647aeb`. 358 captures: 25 flows in six languages and both themes, plus 29 letter details in both themes.
+Source commit: `9a51a9c34a957bbaeaf4c2c46016b8901a647aeb`. 300 captures: 25 flows in six languages and both themes.
 
 Progress and audio availability are test fixtures; these are actual app layouts, not browser reconstructions.
 
@@ -187,6 +187,4 @@ Progress and audio availability are test fixtures; these are actual app layouts,
 
 ## Regeneration
 
-Run `bash scripts/record_qaida_previews.sh` with JDK 21 and the project Android SDK available. Only a complete successful capture run replaces these documents.
-
-[All 29 letter details](ARTICULATION.md)
+Run `bash scripts/record_qaida_previews.sh` with JDK 21 and the project Android SDK available. Only a complete successful capture run replaces this document.

@@ -26,11 +26,12 @@ android {
 }
 
 // **2 GB for this module's unit-test JVM, where every other module keeps Gradle's 512 MB default.**
-// `QaidaVisualCheckTest` renders 358 full-screen captures under `GraphicsMode.NATIVE` — each an
-// ARGB bitmap plus Roborazzi's AWT copy of it — and the Qaida screens decode two 1536×1024
-// raster illustrations. On its own (`scripts/record_qaida_previews.sh`) that fits in 512 MB; in
-// the same JVM as the rest of the module's Robolectric suite it does not. PR #647's `check` died
-// with `OutOfMemoryError at DataBufferInt` in `QaidaReaderScreenTest`, every later class in the
+// `QaidaVisualCheckTest` renders 300 full-screen captures under `GraphicsMode.NATIVE` — each an
+// ARGB bitmap plus Roborazzi's AWT copy of it. (The Qaida screens no longer decode raster
+// illustrations; those were removed, and this limit was set while they still shipped — it has
+// not been re-measured without them.) On its own (`scripts/record_qaida_previews.sh`) that fits
+// in 512 MB; in the same JVM as the rest of the module's Robolectric suite it does not. PR #647's
+// `check` died with `OutOfMemoryError at DataBufferInt` in `QaidaReaderScreenTest`, every later class in the
 // fork failed the same way, and the JVM then thrashed in GC until the job's 45-minute timeout.
 // The captures stay in the suite on purpose: they are what drives the Qaida states the screen
 // tests no longer enumerate, so taking them out would move this module's coverage, not its heap.

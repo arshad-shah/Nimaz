@@ -1,7 +1,6 @@
 package com.arshadshah.nimaz.presentation.screens.qaida
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -22,7 +21,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.unit.dp
@@ -193,7 +191,6 @@ fun QaidaHomeScreen(
                 1 -> {
                     item {
                         Column(Modifier.padding(horizontal = 24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                            Image(painterResource(if (due.isEmpty()) FeatureR.drawable.qaida_empty_art else FeatureR.drawable.qaida_review_art), null, Modifier.fillMaxWidth().height(180.dp))
                             Text(stringResource(FeatureR.string.qaida_review_title), style = MaterialTheme.typography.headlineSmall)
                             Text(stringResource(FeatureR.string.qaida_review_description))
                             if (due.isEmpty()) NimazBanner(maxTitleLines = Int.MAX_VALUE,

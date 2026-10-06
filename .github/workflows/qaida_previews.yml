@@ -36,7 +36,6 @@ jobs:
           name: qaida-roborazzi-${{ github.sha }}
           path: |
             docs/specs/qaida-journey/PREVIEWS.md
-            docs/specs/qaida-journey/ARTICULATION.md
             docs/specs/qaida-journey/previews/
           if-no-files-found: error
       - name: Push generated preview documents and images
@@ -49,7 +48,7 @@ jobs:
             echo 'Branch advanced; leaving these captures in the artifact.'
             exit 0
           fi
-          git add docs/specs/qaida-journey/PREVIEWS.md docs/specs/qaida-journey/ARTICULATION.md docs/specs/qaida-journey/previews
+          git add docs/specs/qaida-journey/PREVIEWS.md docs/specs/qaida-journey/previews
           if git diff --cached --quiet; then exit 0; fi
           git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'docs(qaida): refresh Roborazzi preview images'
           git push origin "HEAD:$QAIDA_BRANCH"

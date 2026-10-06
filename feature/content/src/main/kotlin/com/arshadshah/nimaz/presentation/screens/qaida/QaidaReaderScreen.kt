@@ -1,7 +1,6 @@
 package com.arshadshah.nimaz.presentation.screens.qaida
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.Image
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -16,7 +15,6 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -97,16 +95,12 @@ fun QaidaReaderScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
             horizontalAlignment = Alignment.CenterHorizontally) {
             if (c == null) item {
-                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                    Image(painterResource(R.drawable.qaida_empty_art), null, Modifier.fillMaxWidth().height(170.dp))
-                    NimazBanner(maxTitleLines = Int.MAX_VALUE, title = stringResource(R.string.qaida_getting_ready),
-                        variant = NimazBannerVariant.INFO, isLoading = true)
-                }
+                NimazBanner(maxTitleLines = Int.MAX_VALUE, title = stringResource(R.string.qaida_getting_ready),
+                    variant = NimazBannerVariant.INFO, isLoading = true)
             }
             else when (page) {
                 0 -> item {
                     Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
-                        Image(painterResource(if (all.isEmpty()) R.drawable.qaida_empty_art else R.drawable.qaida_journey_book), null, Modifier.fillMaxWidth().height(190.dp))
                         Text(stringResource(R.string.qaida_lesson_intro), style = MaterialTheme.typography.headlineMedium.copy(fontFamily = AmiriFontFamily))
                         ArabicText(c.lesson.titleArabic, modifier = Modifier.fillMaxWidth(), size = ArabicTextSize.LARGE)
                         Text(c.lesson.description, style = MaterialTheme.typography.bodyLarge)
@@ -233,7 +227,6 @@ fun QaidaReaderScreen(
                 }
                 else -> item {
                     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                        Image(painterResource(R.drawable.qaida_reward_book), null, Modifier.fillMaxWidth().height(200.dp))
                         Text(stringResource(R.string.qaida_reward_title), style = MaterialTheme.typography.headlineMedium.copy(fontFamily = AmiriFontFamily))
                         Text(stringResource(R.string.qaida_session_count, (practised + sessionHeard).distinct().size), style = MaterialTheme.typography.titleMedium)
                         NimazCard(Modifier.fillMaxWidth()) {
