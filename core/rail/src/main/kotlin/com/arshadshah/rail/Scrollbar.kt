@@ -197,6 +197,12 @@ private fun Scrollbar(
 
     // --- dragging --------------------------------------------------------------
 
+    val dragEnabled = touchable && geometry.canScroll
+    // Removing `draggable` mid-gesture (content shrank, say) never calls onDragStopped.
+    LaunchedEffect(dragEnabled) {
+        if (!dragEnabled) { isDragged = false; dragOffset = null }
+    }
+
     val dragState = rememberDraggableState { delta ->
         val current = dragOffset ?: return@rememberDraggableState
         val next = (current + delta).coerceIn(0f, geometry.travel)
@@ -226,44 +232,48 @@ private fun Scrollbar(
             }
             .onSizeChanged { trackLength = if (vertical) it.height else it.width }
             .graphicsLayer { this.alpha = if (geometry.canScroll) alpha.value else 0f }
-            .draggable(
-                state = dragState,
-                orientation = orientation,
-                enabled = touchable && geometry.canScroll,
-                startDragImmediately = true,
-                reverseDirection = !vertical && rtl,
-                onDragStarted = { start: Offset ->
-                    val g = geometry
-                    val along = when {
-                        vertical -> start.y
-                        rtl -> trackLength - start.x
-                        else -> start.x
-                    }
-                    val thumbStart = pad + currentThumbOffset()
-                    val onThumb = along in thumbStart..(thumbStart + g.length)
-                    when {
-                        onThumb -> grab(currentThumbOffset())
-
-                        style.trackTap == TrackTapBehavior.JumpToPosition -> {
-                            val target = (along - pad - g.length / 2).coerceIn(0f, g.travel)
-                            grab(target)
-                            pendingScroll = ScrollRequest(scrollFor(target))
+            // Only in the chain while the bar can be used. A disabled `draggable` is still a
+            // pointer-input node, so it would win hit testing over the content *beside* it in
+            // [ScrollbarBox] and swallow taps on the end edge even while the bar is invisible.
+            .then(
+                if (!dragEnabled) Modifier else Modifier.draggable(
+                    state = dragState,
+                    orientation = orientation,
+                    startDragImmediately = true,
+                    reverseDirection = !vertical && rtl,
+                    onDragStarted = { start: Offset ->
+                        val g = geometry
+                        val along = when {
+                            vertical -> start.y
+                            rtl -> trackLength - start.x
+                            else -> start.x
                         }
+                        val thumbStart = pad + currentThumbOffset()
+                        val onThumb = along in thumbStart..(thumbStart + g.length)
+                        when {
+                            onThumb -> grab(currentThumbOffset())
 
-                        style.trackTap == TrackTapBehavior.PageStep -> {
-                            var dir = if (along < thumbStart) -1 else 1
-                            if (adapter.isReversed) dir = -dir
-                            val target = adapter.scrollOffset + dir * adapter.viewportSize
-                            pendingScroll = ScrollRequest(target.coerceIn(0.0, adapter.maxScrollOffset))
+                            style.trackTap == TrackTapBehavior.JumpToPosition -> {
+                                val target = (along - pad - g.length / 2).coerceIn(0f, g.travel)
+                                grab(target)
+                                pendingScroll = ScrollRequest(scrollFor(target))
+                            }
+
+                            style.trackTap == TrackTapBehavior.PageStep -> {
+                                var dir = if (along < thumbStart) -1 else 1
+                                if (adapter.isReversed) dir = -dir
+                                val target = adapter.scrollOffset + dir * adapter.viewportSize
+                                pendingScroll = ScrollRequest(target.coerceIn(0.0, adapter.maxScrollOffset))
+                            }
+
+                            else -> Unit
                         }
-
-                        else -> Unit
-                    }
-                },
-                onDragStopped = {
-                    isDragged = false
-                    dragOffset = null
-                },
+                    },
+                    onDragStopped = {
+                        isDragged = false
+                        dragOffset = null
+                    },
+                ),
             ),
     ) {
         // Track (only drawn if the style asks for it)
