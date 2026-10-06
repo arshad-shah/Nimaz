@@ -75,6 +75,7 @@ import com.arshadshah.nimaz.presentation.viewmodel.content.DuaEvent
 import com.arshadshah.nimaz.presentation.viewmodel.content.DuaReaderUiState
 import com.arshadshah.nimaz.presentation.viewmodel.content.DuaViewModel
 import kotlinx.coroutines.launch
+import com.arshadshah.nimaz.presentation.components.molecules.NimazScrollbarBox
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -201,77 +202,80 @@ private fun DuaPage(
 ) {
     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
         val minColumnHeight = maxHeight
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .widthIn(max = AdaptiveSpacing.maxReadableWidth())
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 24.dp, vertical = 16.dp)
-                .heightIn(min = minColumnHeight),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            dua.occasion?.let { occasion ->
-                NimazBadge(
-                    text = occasion.label(),
-                    tone = NimazTone.ACCENT,
-                    size = NimazBadgeSize.MEDIUM
-                )
-                Spacer(modifier = Modifier.height(22.dp))
-            }
+        val scrollState = rememberScrollState()
+        NimazScrollbarBox(state = scrollState, modifier = Modifier.fillMaxSize()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .widthIn(max = AdaptiveSpacing.maxReadableWidth())
+                    .verticalScroll(scrollState)
+                    .padding(horizontal = 24.dp, vertical = 16.dp)
+                    .heightIn(min = minColumnHeight),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                dua.occasion?.let { occasion ->
+                    NimazBadge(
+                        text = occasion.label(),
+                        tone = NimazTone.ACCENT,
+                        size = NimazBadgeSize.MEDIUM
+                    )
+                    Spacer(modifier = Modifier.height(22.dp))
+                }
 
-            if (state.showArabic) {
-                DuaArabicText(
-                    text = dua.textArabic,
-                    customFontSize = state.arabicFontSize,
-                    fontFamily = state.arabicFontFamily,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-            }
+                if (state.showArabic) {
+                    DuaArabicText(
+                        text = dua.textArabic,
+                        customFontSize = state.arabicFontSize,
+                        fontFamily = state.arabicFontFamily,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
 
-            val textTransliteration = dua.textTransliteration
-            if (state.showTransliteration && !textTransliteration.isNullOrEmpty()) {
-                Spacer(modifier = Modifier.height(20.dp))
-                HorizontalDivider(
-                    modifier = Modifier.fillMaxWidth(),
-                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
-                )
-                Spacer(modifier = Modifier.height(20.dp))
-                Text(
-                    text = textTransliteration,
-                    style = MaterialTheme.typography.bodyLarge.copy(
-                        fontSize = state.fontSize.sp,
-                        lineHeight = (state.fontSize * 1.6f).sp
-                    ),
-                    fontStyle = FontStyle.Italic,
-                    color = MaterialTheme.colorScheme.primary,
-                    textAlign = TextAlign.Center
-                )
-            }
+                val textTransliteration = dua.textTransliteration
+                if (state.showTransliteration && !textTransliteration.isNullOrEmpty()) {
+                    Spacer(modifier = Modifier.height(20.dp))
+                    HorizontalDivider(
+                        modifier = Modifier.fillMaxWidth(),
+                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
+                    )
+                    Spacer(modifier = Modifier.height(20.dp))
+                    Text(
+                        text = textTransliteration,
+                        style = MaterialTheme.typography.bodyLarge.copy(
+                            fontSize = state.fontSize.sp,
+                            lineHeight = (state.fontSize * 1.6f).sp
+                        ),
+                        fontStyle = FontStyle.Italic,
+                        color = MaterialTheme.colorScheme.primary,
+                        textAlign = TextAlign.Center
+                    )
+                }
 
-            if (state.showTranslation) {
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    text = dua.textEnglish,
-                    style = MaterialTheme.typography.bodyLarge.copy(
-                        fontSize = state.fontSize.sp,
-                        lineHeight = (state.fontSize * 1.6f).sp
-                    ),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.Center
-                )
-            }
+                if (state.showTranslation) {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = dua.textEnglish,
+                        style = MaterialTheme.typography.bodyLarge.copy(
+                            fontSize = state.fontSize.sp,
+                            lineHeight = (state.fontSize * 1.6f).sp
+                        ),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center
+                    )
+                }
 
-            val repeatCount = dua.repeatCount ?: 0
-            if (!dua.reference.isNullOrEmpty() || repeatCount > 0) {
-                Spacer(modifier = Modifier.height(22.dp))
-                DuaMetaChips(reference = dua.reference, repeatCount = repeatCount)
-            }
+                val repeatCount = dua.repeatCount ?: 0
+                if (!dua.reference.isNullOrEmpty() || repeatCount > 0) {
+                    Spacer(modifier = Modifier.height(22.dp))
+                    DuaMetaChips(reference = dua.reference, repeatCount = repeatCount)
+                }
 
-            val benefits = dua.benefits
-            if (!benefits.isNullOrEmpty()) {
-                Spacer(modifier = Modifier.height(22.dp))
-                VirtueCard(text = benefits)
+                val benefits = dua.benefits
+                if (!benefits.isNullOrEmpty()) {
+                    Spacer(modifier = Modifier.height(22.dp))
+                    VirtueCard(text = benefits)
+                }
             }
         }
     }

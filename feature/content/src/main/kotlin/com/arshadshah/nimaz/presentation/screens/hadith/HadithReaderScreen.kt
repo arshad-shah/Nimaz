@@ -95,6 +95,7 @@ import com.arshadshah.nimaz.presentation.viewmodel.content.HadithEvent
 import com.arshadshah.nimaz.presentation.viewmodel.content.HadithReaderUiState
 import com.arshadshah.nimaz.presentation.viewmodel.content.HadithViewModel
 import kotlinx.coroutines.launch
+import com.arshadshah.nimaz.presentation.components.molecules.NimazScrollbarBox
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -263,89 +264,92 @@ private fun HadithPage(
 
     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
         val minColumnHeight = maxHeight
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .widthIn(max = AdaptiveSpacing.maxReadableWidth())
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 24.dp, vertical = 16.dp)
-                .heightIn(min = minColumnHeight),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            if (grade != null || !hadith.narratorName.isNullOrEmpty()) {
-                FlowRow(
-                    horizontalArrangement = Arrangement.spacedBy(
-                        6.dp,
-                        Alignment.CenterHorizontally
-                    ),
-                    verticalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
-                    grade?.let { HadithGradeChip(label = it.label, color = it.color) }
-                    hadith.narratorName?.trim()?.takeIf { it.isNotBlank() }?.let { narrator ->
-                        // The dataset's narrator field already includes the
-                        // "Narrated by …" prefix; only add it when it's missing.
-                        val narratorText = if (narrator.startsWith("narrat", ignoreCase = true)) {
-                            narrator
-                        } else {
-                            stringResource(R.string.hadith_narrated_by_format, narrator)
+        val scrollState = rememberScrollState()
+        NimazScrollbarBox(state = scrollState, modifier = Modifier.fillMaxSize()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .widthIn(max = AdaptiveSpacing.maxReadableWidth())
+                    .verticalScroll(scrollState)
+                    .padding(horizontal = 24.dp, vertical = 16.dp)
+                    .heightIn(min = minColumnHeight),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                if (grade != null || !hadith.narratorName.isNullOrEmpty()) {
+                    FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(
+                            6.dp,
+                            Alignment.CenterHorizontally
+                        ),
+                        verticalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        grade?.let { HadithGradeChip(label = it.label, color = it.color) }
+                        hadith.narratorName?.trim()?.takeIf { it.isNotBlank() }?.let { narrator ->
+                            // The dataset's narrator field already includes the
+                            // "Narrated by …" prefix; only add it when it's missing.
+                            val narratorText = if (narrator.startsWith("narrat", ignoreCase = true)) {
+                                narrator
+                            } else {
+                                stringResource(R.string.hadith_narrated_by_format, narrator)
+                            }
+                            NimazBadge(
+                                text = narratorText,
+                                tone = NimazTone.ACCENT,
+                                size = NimazBadgeSize.MEDIUM
+                            )
                         }
-                        NimazBadge(
-                            text = narratorText,
-                            tone = NimazTone.ACCENT,
-                            size = NimazBadgeSize.MEDIUM
-                        )
                     }
+                    Spacer(modifier = Modifier.height(20.dp))
                 }
-                Spacer(modifier = Modifier.height(20.dp))
-            }
 
-            if (state.showArabic) {
-                HadithArabicText(
-                    text = hadith.textArabic,
-                    customFontSize = state.arabicFontSize,
-                    fontFamily = state.arabicFontFamily,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-            }
-
-            if (state.showTranslation) {
                 if (state.showArabic) {
-                    Spacer(modifier = Modifier.height(20.dp))
-                    HorizontalDivider(
-                        modifier = Modifier.fillMaxWidth(),
-                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
+                    HadithArabicText(
+                        text = hadith.textArabic,
+                        customFontSize = state.arabicFontSize,
+                        fontFamily = state.arabicFontFamily,
+                        color = MaterialTheme.colorScheme.onSurface
                     )
-                    Spacer(modifier = Modifier.height(20.dp))
                 }
-                Text(
-                    text = hadith.textEnglish,
-                    style = MaterialTheme.typography.bodyLarge.copy(
-                        fontSize = state.fontSize.sp,
-                        lineHeight = (state.fontSize * 1.6f).sp
-                    ),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.Center
-                )
-            }
 
-            val reference = hadith.reference
-            if (!reference.isNullOrEmpty()) {
-                Spacer(modifier = Modifier.height(20.dp))
-                NimazBadge(
-                    text = reference,
-                    icon = Icons.Default.Book,
-                    size = NimazBadgeSize.MEDIUM
-                )
-            }
+                if (state.showTranslation) {
+                    if (state.showArabic) {
+                        Spacer(modifier = Modifier.height(20.dp))
+                        HorizontalDivider(
+                            modifier = Modifier.fillMaxWidth(),
+                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
+                        )
+                        Spacer(modifier = Modifier.height(20.dp))
+                    }
+                    Text(
+                        text = hadith.textEnglish,
+                        style = MaterialTheme.typography.bodyLarge.copy(
+                            fontSize = state.fontSize.sp,
+                            lineHeight = (state.fontSize * 1.6f).sp
+                        ),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center
+                    )
+                }
 
-            val narratorChain = hadith.narratorChain
-            if (state.showChain && !narratorChain.isNullOrBlank()) {
-                Spacer(modifier = Modifier.height(20.dp))
-                ChainOfNarrationSection(
-                    chain = narratorChain,
-                    arabicFontFamily = state.arabicFontFamily
-                )
+                val reference = hadith.reference
+                if (!reference.isNullOrEmpty()) {
+                    Spacer(modifier = Modifier.height(20.dp))
+                    NimazBadge(
+                        text = reference,
+                        icon = Icons.Default.Book,
+                        size = NimazBadgeSize.MEDIUM
+                    )
+                }
+
+                val narratorChain = hadith.narratorChain
+                if (state.showChain && !narratorChain.isNullOrBlank()) {
+                    Spacer(modifier = Modifier.height(20.dp))
+                    ChainOfNarrationSection(
+                        chain = narratorChain,
+                        arabicFontFamily = state.arabicFontFamily
+                    )
+                }
             }
         }
     }

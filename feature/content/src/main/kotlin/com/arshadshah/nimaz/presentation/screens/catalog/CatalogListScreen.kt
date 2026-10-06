@@ -20,6 +20,8 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazLoadingState
 import com.arshadshah.nimaz.presentation.theme.NimazSpacing
 import com.arshadshah.nimaz.presentation.viewmodel.content.CatalogEvent
 import com.arshadshah.nimaz.presentation.viewmodel.content.CatalogListState
+import com.arshadshah.nimaz.presentation.components.molecules.NimazScrollbarBox
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 
 /**
  * A list of catalog items — one tab of the Names screen.
@@ -59,31 +61,38 @@ fun <T : Any> CatalogList(
     // One list type for both shapes. A `LazyVerticalGrid` of one column lays out the same as a
     // `LazyColumn`, so the row and grid catalogues share every other behaviour — padding,
     // spacing, keys — rather than being two lists that drift apart.
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(columns),
+    val gridState = rememberLazyGridState()
+    NimazScrollbarBox(
+        state = gridState,
         modifier = modifier.fillMaxSize(),
-        contentPadding = PaddingValues(
-            horizontal = NimazSpacing.Large,
-            vertical = NimazSpacing.Small,
-        ),
-        verticalArrangement = Arrangement.spacedBy(NimazSpacing.Small),
-        horizontalArrangement = Arrangement.spacedBy(NimazSpacing.Small),
     ) {
-        items(items = displayList, key = itemKey) { item -> card(item) }
+        LazyVerticalGrid(
+            state = gridState,
+            columns = GridCells.Fixed(columns),
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(
+                horizontal = NimazSpacing.Large,
+                vertical = NimazSpacing.Small,
+            ),
+            verticalArrangement = Arrangement.spacedBy(NimazSpacing.Small),
+            horizontalArrangement = Arrangement.spacedBy(NimazSpacing.Small),
+        ) {
+            items(items = displayList, key = itemKey) { item -> card(item) }
 
-        if (displayList.isEmpty()) {
-            // Spans every column: an empty state indented into one half of a two-column grid
-            // reads as a cell rather than as the answer to "there is nothing here".
-            item(span = { GridItemSpan(maxLineSpan) }) {
-                NimazEmptyState(
-                    title = emptyMessage,
-                    message = "",
-                    icon = Icons.Filled.Favorite,
-                    iconTint = accent.contentTint,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 48.dp),
-                )
+            if (displayList.isEmpty()) {
+                // Spans every column: an empty state indented into one half of a two-column grid
+                // reads as a cell rather than as the answer to "there is nothing here".
+                item(span = { GridItemSpan(maxLineSpan) }) {
+                    NimazEmptyState(
+                        title = emptyMessage,
+                        message = "",
+                        icon = Icons.Filled.Favorite,
+                        iconTint = accent.contentTint,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 48.dp),
+                    )
+                }
             }
         }
     }

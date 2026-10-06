@@ -85,6 +85,10 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
     api(project(":core:domain"))
     implementation(project(":core:common"))
+    // Scrollbars. `implementation`, not `api`: `NimazScrollbarBox` takes only Compose state types,
+    // so no Rail type reaches a consumer's compile classpath and no screen can bypass the theme
+    // by calling Rail directly.
+    implementation(project(":core:rail"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

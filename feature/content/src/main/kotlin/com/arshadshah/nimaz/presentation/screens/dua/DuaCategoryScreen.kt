@@ -57,6 +57,8 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazLoadingState
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.viewmodel.content.DuaEvent
 import com.arshadshah.nimaz.presentation.viewmodel.content.DuaViewModel
+import com.arshadshah.nimaz.presentation.components.molecules.NimazScrollbarBox
+import androidx.compose.foundation.lazy.rememberLazyListState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -103,38 +105,45 @@ fun DuaCategoryScreen(
                 modifier = Modifier.padding(paddingValues),
             )
         } else {
-            LazyColumn(
+            val listState = rememberLazyListState()
+            NimazScrollbarBox(
+                state = listState,
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues),
-                contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                // Category Header Card
-                state.category?.let { category ->
-                    item {
-                        CategoryHeaderCard(
-                            nameArabic = category.nameArabic,
-                            description = category.description
+                LazyColumn(
+                    state = listState,
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    // Category Header Card
+                    state.category?.let { category ->
+                        item {
+                            CategoryHeaderCard(
+                                nameArabic = category.nameArabic,
+                                description = category.description
+                            )
+                        }
+                    }
+
+                    // Duas List
+                    items(
+                        items = state.duas,
+                        key = { it.id }
+                    ) { dua ->
+                        DuaListItem(
+                            dua = dua,
+                            onClick = { onNavigateToDua(dua.id) },
+                            onOccasionClick = onNavigateToOccasion
                         )
                     }
-                }
 
-                // Duas List
-                items(
-                    items = state.duas,
-                    key = { it.id }
-                ) { dua ->
-                    DuaListItem(
-                        dua = dua,
-                        onClick = { onNavigateToDua(dua.id) },
-                        onOccasionClick = onNavigateToOccasion
-                    )
-                }
-
-                // Bottom spacing
-                item {
-                    Spacer(modifier = Modifier.height(16.dp))
+                    // Bottom spacing
+                    item {
+                        Spacer(modifier = Modifier.height(16.dp))
+                    }
                 }
             }
         }

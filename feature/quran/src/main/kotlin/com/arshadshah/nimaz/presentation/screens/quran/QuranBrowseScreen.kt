@@ -50,6 +50,11 @@ import com.arshadshah.nimaz.presentation.components.organisms.getJuzName
 import com.arshadshah.nimaz.presentation.viewmodel.quran.QuranBrowseEvent
 import com.arshadshah.nimaz.presentation.viewmodel.quran.QuranBrowseUiState
 import com.arshadshah.nimaz.presentation.viewmodel.quran.QuranBrowseViewModel
+import com.arshadshah.nimaz.presentation.components.molecules.NimazScrollbarBox
+import com.arshadshah.nimaz.presentation.components.molecules.NimazScrollbarVariant
+import com.arshadshah.nimaz.presentation.components.molecules.NimazScrollbarLabel
+import com.arshadshah.nimaz.presentation.components.molecules.scrollbarLabelIndex
+import androidx.compose.foundation.lazy.rememberLazyListState
 
 /**
  * One place to find a place in the Qur'an.
@@ -117,6 +122,7 @@ internal fun QuranBrowseContent(
     selectedSurahNumber: Int? = null,
 ) {
     var infoForSurah by rememberSaveable { mutableStateOf(initialInfoForSurah) }
+    val listState = rememberLazyListState()
 
     NimazScreenScaffold(
         modifier = modifier,
@@ -161,56 +167,67 @@ internal fun QuranBrowseContent(
                         .padding(20.dp)
                 )
 
-                else -> LazyColumn(
+                else -> NimazScrollbarBox(
+                    state = listState,
                     modifier = Modifier
-                        .fillMaxSize()
-                        .testTag(ScreenTags.QuranSurahList),
-                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-                    verticalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
-                    state.jumpTarget?.let { target ->
-                        item(key = "jump") {
-                            JumpToCard(
-                                target = target,
-                                onNavigateToJuz = onNavigateToJuz,
-                                onNavigateToPage = onNavigateToPage,
-                                onNavigateToSurah = onNavigateToSurah,
-                            )
+                        .fillMaxSize(),
+                    variant = NimazScrollbarVariant.FastScroll,
+                    label = { progress ->
+                        state.rows.getOrNull(scrollbarLabelIndex(progress, state.rows.size))?.let {
+                            NimazScrollbarLabel("${it.number}. ${it.nameTransliteration}")
                         }
-                    }
-
-                    // The juz header is printed by comparing each row with the one before it,
-                    // rather than by grouping the state into a nested list: the list is already
-                    // in mushaf order, so the boundary is a property of adjacency and the state
-                    // stays a flat list a test can assert on.
-                    state.rows.forEachIndexed { index, surah ->
-                        val span = state.juzSpans[surah.number] ?: 1..1
-                        val previousJuz = state.rows.getOrNull(index - 1)
-                            ?.let { state.juzSpans[it.number]?.first }
-                        if (previousJuz != span.first) {
-                            // Sticky: the header stays under the search field while its own
-                            // surahs scroll past, so "which juz am I looking at" is answered at
-                            // every scroll position and not only at the boundary.
-                            stickyHeader(key = "juz_${span.first}_${surah.number}") {
-                                JuzSectionHeader(juz = span.first)
+                    },
+                ) {
+                    LazyColumn(
+                        state = listState,
+                        modifier = Modifier.fillMaxSize().testTag(ScreenTags.QuranSurahList),
+                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                        verticalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        state.jumpTarget?.let { target ->
+                            item(key = "jump") {
+                                JumpToCard(
+                                    target = target,
+                                    onNavigateToJuz = onNavigateToJuz,
+                                    onNavigateToPage = onNavigateToPage,
+                                    onNavigateToSurah = onNavigateToSurah,
+                                )
                             }
                         }
-                        item(key = surah.number) {
-                            SurahListItem(
-                                surah = surah,
-                                onClick = { onNavigateToSurah(surah.number) },
-                                onInfoClick = { infoForSurah = surah.number },
-                                isSelected = selectedSurahNumber == surah.number,
-                                startPage = state.startPages[surah.number] ?: surah.startPage,
-                                // Only when the surah crosses a boundary. The sticky header
-                                // already names the juz it opens in, so repeating that on
-                                // every row bought nothing and cost the width that pushed
-                                // "165 Verses · p. 128 · Juz 7" past the ellipsis. A span is
-                                // the one thing the header genuinely cannot say.
-                                juzLabel = stringResource(
-                                    R.string.quran_browse_juz_span, span.first, span.last
-                                ).takeIf { span.first != span.last },
-                            )
+
+                        // The juz header is printed by comparing each row with the one before it,
+                        // rather than by grouping the state into a nested list: the list is already
+                        // in mushaf order, so the boundary is a property of adjacency and the state
+                        // stays a flat list a test can assert on.
+                        state.rows.forEachIndexed { index, surah ->
+                            val span = state.juzSpans[surah.number] ?: 1..1
+                            val previousJuz = state.rows.getOrNull(index - 1)
+                                ?.let { state.juzSpans[it.number]?.first }
+                            if (previousJuz != span.first) {
+                                // Sticky: the header stays under the search field while its own
+                                // surahs scroll past, so "which juz am I looking at" is answered at
+                                // every scroll position and not only at the boundary.
+                                stickyHeader(key = "juz_${span.first}_${surah.number}") {
+                                    JuzSectionHeader(juz = span.first)
+                                }
+                            }
+                            item(key = surah.number) {
+                                SurahListItem(
+                                    surah = surah,
+                                    onClick = { onNavigateToSurah(surah.number) },
+                                    onInfoClick = { infoForSurah = surah.number },
+                                    isSelected = selectedSurahNumber == surah.number,
+                                    startPage = state.startPages[surah.number] ?: surah.startPage,
+                                    // Only when the surah crosses a boundary. The sticky header
+                                    // already names the juz it opens in, so repeating that on
+                                    // every row bought nothing and cost the width that pushed
+                                    // "165 Verses · p. 128 · Juz 7" past the ellipsis. A span is
+                                    // the one thing the header genuinely cannot say.
+                                    juzLabel = stringResource(
+                                        R.string.quran_browse_juz_span, span.first, span.last
+                                    ).takeIf { span.first != span.last },
+                                )
+                            }
                         }
                     }
                 }

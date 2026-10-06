@@ -62,6 +62,8 @@ import com.arshadshah.nimaz.presentation.viewmodel.about.LicenseSection
 import com.arshadshah.nimaz.presentation.viewmodel.about.LicensesEvent
 import com.arshadshah.nimaz.presentation.viewmodel.about.LicensesListUiState
 import com.arshadshah.nimaz.presentation.viewmodel.about.LicensesViewModel
+import com.arshadshah.nimaz.presentation.components.molecules.NimazScrollbarBox
+import androidx.compose.foundation.lazy.rememberLazyListState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -136,93 +138,100 @@ private fun LicensesContent(
             modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
         )
 
-        LazyColumn(
+        val listState = rememberLazyListState()
+        NimazScrollbarBox(
+            state = listState,
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 4.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            item(key = "credit") { CreditCard(state) }
+            LazyColumn(
+                state = listState,
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(horizontal = 20.dp, vertical = 4.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                item(key = "credit") { CreditCard(state) }
 
-            if (state.familyCounts.size > 1) {
-                item(key = "filters") {
-                    FamilyFilters(state = state, onSelectFamily = onSelectFamily)
+                if (state.familyCounts.size > 1) {
+                    item(key = "filters") {
+                        FamilyFilters(state = state, onSelectFamily = onSelectFamily)
+                    }
                 }
-            }
 
-            item(key = "controls") {
-                NimazSectionHeader(
-                    title = stringResource(
-                        when (state.grouping) {
-                            LicenseGrouping.BY_LICENCE -> R.string.licenses_grouped_by_licence
-                            LicenseGrouping.ALPHABETICAL -> R.string.licenses_grouped_alphabetically
-                        }
-                    ),
-                    // The count and the toggle both have to appear, and the atom's own
-                    // `trailingText` / `showSeeAll` are mutually exclusive — its `when` picks
-                    // one. The slot takes both, and makes the toggle a real button rather
-                    // than the atom's clickable label.
-                    trailingContent = {
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(4.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = stringResource(
-                                    R.string.licenses_visible_count_format,
-                                    state.visibleCount,
-                                    state.totalCount,
-                                ),
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                            NimazButton(
-                                text = stringResource(
-                                    when (state.grouping) {
-                                        LicenseGrouping.BY_LICENCE ->
-                                            R.string.licenses_action_sort_alphabetically
+                item(key = "controls") {
+                    NimazSectionHeader(
+                        title = stringResource(
+                            when (state.grouping) {
+                                LicenseGrouping.BY_LICENCE -> R.string.licenses_grouped_by_licence
+                                LicenseGrouping.ALPHABETICAL -> R.string.licenses_grouped_alphabetically
+                            }
+                        ),
+                        // The count and the toggle both have to appear, and the atom's own
+                        // `trailingText` / `showSeeAll` are mutually exclusive — its `when` picks
+                        // one. The slot takes both, and makes the toggle a real button rather
+                        // than the atom's clickable label.
+                        trailingContent = {
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = stringResource(
+                                        R.string.licenses_visible_count_format,
+                                        state.visibleCount,
+                                        state.totalCount,
+                                    ),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                                NimazButton(
+                                    text = stringResource(
+                                        when (state.grouping) {
+                                            LicenseGrouping.BY_LICENCE ->
+                                                R.string.licenses_action_sort_alphabetically
 
-                                        LicenseGrouping.ALPHABETICAL ->
-                                            R.string.licenses_action_group_by_licence
-                                    }
-                                ),
-                                onClick = onToggleGrouping,
-                                variant = NimazButtonVariant.TEXT,
-                                size = NimazButtonSize.SMALL,
-                            )
-                        }
-                    },
-                )
-            }
-
-            if (state.isEmptyResult) {
-                item(key = "empty") {
-                    NimazEmptyState(
-                        title = stringResource(R.string.licenses_no_matches_title),
-                        message = stringResource(R.string.licenses_no_matches_body),
-                        icon = Icons.Default.SearchOff,
+                                            LicenseGrouping.ALPHABETICAL ->
+                                                R.string.licenses_action_group_by_licence
+                                        }
+                                    ),
+                                    onClick = onToggleGrouping,
+                                    variant = NimazButtonVariant.TEXT,
+                                    size = NimazButtonSize.SMALL,
+                                )
+                            }
+                        },
                     )
                 }
-            }
 
-            state.sections.forEach { section ->
-                item(key = "section-${section.key}") { SectionHeading(section) }
-                items(section.libraries, key = { it.id }) { library ->
-                    LibraryRow(
-                        library = library,
-                        query = state.query,
-                        onClick = { onLibraryClick(library.id) },
+                if (state.isEmptyResult) {
+                    item(key = "empty") {
+                        NimazEmptyState(
+                            title = stringResource(R.string.licenses_no_matches_title),
+                            message = stringResource(R.string.licenses_no_matches_body),
+                            icon = Icons.Default.SearchOff,
+                        )
+                    }
+                }
+
+                state.sections.forEach { section ->
+                    item(key = "section-${section.key}") { SectionHeading(section) }
+                    items(section.libraries, key = { it.id }) { library ->
+                        LibraryRow(
+                            library = library,
+                            query = state.query,
+                            onClick = { onLibraryClick(library.id) },
+                        )
+                    }
+                }
+
+                item(key = "note") {
+                    NimazBanner(
+                        title = stringResource(R.string.licenses_generated_note),
+                        variant = NimazBannerVariant.INFO,
+                        modifier = Modifier.padding(top = 8.dp),
                     )
                 }
+                item(key = "tail") { Spacer(modifier = Modifier.height(16.dp)) }
             }
-
-            item(key = "note") {
-                NimazBanner(
-                    title = stringResource(R.string.licenses_generated_note),
-                    variant = NimazBannerVariant.INFO,
-                    modifier = Modifier.padding(top = 8.dp),
-                )
-            }
-            item(key = "tail") { Spacer(modifier = Modifier.height(16.dp)) }
         }
     }
 }
