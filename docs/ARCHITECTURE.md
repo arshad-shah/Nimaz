@@ -1348,7 +1348,11 @@ with no label and a touch target under 48dp fail the lane we already run. It can
       (the surah list); `Standard` is for everything else. Its colours come from the theme, so a
       screen never passes one, and no screen imports `com.arshadshah.rail` directly.
       Every variant has a 48 dp touch strip, and TalkBack announces Rail's translated
-      "Vertical scrollbar" unless the screen passes `contentDescription`. To take a newer Rail,
+      "Vertical scrollbar" unless the screen passes `contentDescription`. On a lazy list the
+      thumb's length is an estimate: Rail remembers every item it has laid out and moves the
+      thumb by what the content actually moved. Sections of mixed heights and sticky headers
+      therefore refine it gradually instead of making it resize or jump, and it is exact at both
+      ends. To take a newer Rail,
       replace `core/rail/src/main` with upstream's `rail/src/main` and update `RAIL_VERSION`.
       **Every vertically scrolling screen wears one.** A new `LazyColumn`, uniform-span
       `LazyVerticalGrid` or `verticalScroll` column that fills a screen or pane goes inside a

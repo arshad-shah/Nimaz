@@ -3,7 +3,9 @@ package com.arshadshah.rail
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -90,6 +92,9 @@ fun HorizontalScrollbar(
 
 // ---------------------------------------------------------------------------
 
+/** How long the thumb takes to settle from the finger onto the content after a drag. */
+private const val RELEASE_MILLIS = 180
+
 /** A fresh object every time, so tapping the same spot twice still scrolls twice. */
 private class ScrollRequest(val offset: Double)
 
@@ -125,32 +130,53 @@ private fun Scrollbar(
     var pendingScroll by remember(adapter, orientation) { mutableStateOf<ScrollRequest?>(null) }
 
     // Thumb size. Only recomposes when the size actually changes, not every scroll frame.
-    val geometry by remember(adapter, orientation, pad, minThumb, maxThumb) {
+    val measured by remember(adapter, orientation, pad, minThumb, maxThumb) {
         derivedStateOf {
             thumbGeometry(trackLength.toFloat(), pad, minThumb, maxThumb, adapter.contentSize, adapter.viewportSize)
         }
     }
+    // A lazy list's length is an estimate that firms up as items are measured. Glide between
+    // lengths instead of stepping, so a refined estimate never reads as the thumb twitching.
+    val length = remember(adapter, orientation) { Animatable(measured.length) }
+    LaunchedEffect(length, measured.length) {
+        if (length.value == 0f || measured.length == 0f) length.snapTo(measured.length)
+        else length.animateTo(measured.length, spring(stiffness = Spring.StiffnessMediumLow))
+    }
+    // While held, the thumb keeps the size it was grabbed at, so it never slides out from under the finger.
+    var held by remember(adapter, orientation) { mutableStateOf<ThumbGeometry?>(null) }
+    fun geometry(): ThumbGeometry = held ?: measured.copy(
+        length = length.value,
+        travel = (measured.length + measured.travel - length.value).coerceAtLeast(0f),
+    )
+    // After a drag, the thumb eases from where the finger left it to where the content says it
+    // is, rather than snapping across whatever gap the size estimate left between the two.
+    var releasedAt by remember(adapter, orientation) { mutableStateOf<Float?>(null) }
+    val release = remember(adapter, orientation) { Animatable(1f) }
 
     // --- mapping between list position and thumb position ---------------------
 
     fun thumbOffsetFromScroll(): Float {
-        val g = geometry
+        val g = geometry()
         val max = adapter.maxScrollOffset
         if (!g.canScroll || max <= 0.0) return 0f
         return thumbPosition(adapter.scrollOffset, max, g.travel, adapter.isReversed)
     }
 
-    fun currentThumbOffset(): Float = dragOffset ?: thumbOffsetFromScroll()
+    fun currentThumbOffset(): Float = dragOffset
+        ?: releasedAt?.let { from -> from + (thumbOffsetFromScroll() - from) * release.value }
+        ?: thumbOffsetFromScroll()
 
     fun scrollFor(thumbOffset: Float): Double {
-        val g = geometry
+        val g = geometry()
         if (g.travel <= 0f) return 0.0
         return scrollPosition(thumbOffset, adapter.maxScrollOffset, g.travel, adapter.isReversed)
     }
 
     fun grab(at: Float) {
+        held = geometry()
         isDragged = true
         dragOffset = at
+        releasedAt = null
         if (style.hapticOnGrab) haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
     }
 
@@ -197,27 +223,27 @@ private fun Scrollbar(
 
     // --- dragging --------------------------------------------------------------
 
-    val dragEnabled = touchable && geometry.canScroll
+    val dragEnabled = touchable && measured.canScroll
     // Removing `draggable` mid-gesture (content shrank, say) never calls onDragStopped.
     LaunchedEffect(dragEnabled) {
-        if (!dragEnabled) { isDragged = false; dragOffset = null }
+        if (!dragEnabled) { isDragged = false; dragOffset = null; held = null; releasedAt = null }
     }
 
     val dragState = rememberDraggableState { delta ->
         val current = dragOffset ?: return@rememberDraggableState
-        val next = (current + delta).coerceIn(0f, geometry.travel)
+        val next = (current + delta).coerceIn(0f, geometry().travel)
         dragOffset = next
         pendingScroll = ScrollRequest(scrollFor(next))
     }
 
     val touch = style.touchTargetWidth
-    val thumbLengthDp = with(density) { geometry.length.toDp() }
+    val thumbLengthDp = with(density) { geometry().length.toDp() }
 
     Box(
         modifier
             .then(if (vertical) Modifier.fillMaxHeight().width(touch) else Modifier.fillMaxWidth().height(touch))
             .semantics {
-                if (geometry.canScroll) {
+                if (measured.canScroll) {
                     contentDescription = description
                     val maximum = adapter.maxScrollOffset
                     val progress = if (maximum > 0 && adapter.scrollOffset.isFinite()) (adapter.scrollOffset / maximum).toFloat().coerceIn(0f, 1f) else 0f
@@ -231,7 +257,7 @@ private fun Scrollbar(
                 }
             }
             .onSizeChanged { trackLength = if (vertical) it.height else it.width }
-            .graphicsLayer { this.alpha = if (geometry.canScroll) alpha.value else 0f }
+            .graphicsLayer { this.alpha = if (measured.canScroll) alpha.value else 0f }
             // Only in the chain while the bar can be used. A disabled `draggable` is still a
             // pointer-input node, so it would win hit testing over the content *beside* it in
             // [ScrollbarBox] and swallow taps on the end edge even while the bar is invisible.
@@ -242,7 +268,7 @@ private fun Scrollbar(
                     startDragImmediately = true,
                     reverseDirection = !vertical && rtl,
                     onDragStarted = { start: Offset ->
-                        val g = geometry
+                        val g = geometry()
                         val along = when {
                             vertical -> start.y
                             rtl -> trackLength - start.x
@@ -270,8 +296,19 @@ private fun Scrollbar(
                         }
                     },
                     onDragStopped = {
+                        val from = dragOffset
                         isDragged = false
                         dragOffset = null
+                        held = null
+                        if (from != null) {
+                            releasedAt = from
+                            try {
+                                release.snapTo(0f)
+                                release.animateTo(1f, tween(RELEASE_MILLIS))
+                            } finally {
+                                if (releasedAt == from) releasedAt = null
+                            }
+                        }
                     },
                 ),
             ),
@@ -303,7 +340,7 @@ private fun Scrollbar(
                     else Modifier.height(touch).width(thumbLengthDp),
                 )
                 // Stops Android's back-swipe from stealing the thumb at the screen edge.
-                .then(if (touchable && geometry.canScroll) Modifier.systemGestureExclusion() else Modifier),
+                .then(if (touchable && measured.canScroll) Modifier.systemGestureExclusion() else Modifier),
             contentAlignment = if (vertical) Alignment.CenterEnd else Alignment.BottomCenter,
         ) {
             val state = ThumbState(isDragged)
@@ -329,7 +366,7 @@ private fun Scrollbar(
                 modifier = Modifier.layout { measurable, _ ->
                     val p = measurable.measure(Constraints()) // free to be any size
                     layout(0, 0) { // takes no room, just floats next to the thumb
-                        val center = pad + currentThumbOffset() + geometry.length / 2
+                        val center = pad + currentThumbOffset() + geometry().length / 2
                         val gap = style.labelGap.roundToPx()
                         if (vertical) {
                             p.placeRelative(-p.width - gap, (center - p.height / 2f).roundToInt())
@@ -339,7 +376,7 @@ private fun Scrollbar(
                     }
                 },
             ) {
-                val g = geometry
+                val g = geometry()
                 label(if (g.travel > 0f) (currentThumbOffset() / g.travel).coerceIn(0f, 1f) else 0f)
             }
         }
