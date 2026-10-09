@@ -97,6 +97,11 @@ class KhatamDetailPortionTest {
         every { khatamUseCases.observeKhatamStats() } returns flowOf(KhatamStats(0, 0, 0, 0, 0))
         every { khatamUseCases.observeActiveKhatam() } returns flowOf(null)
         every { khatamUseCases.observeKhatamDetail(7) } returns detail
+        // Relaxed mocks answer a generic `Pair<Int, Int>?` with a mocked Pair whose erased `first`
+        // is not an Int, so resolveReading throws and launchSafely swallows it: the detail never
+        // fills. Tests that care about the next verse or the portion stub their own answers.
+        coEvery { khatamUseCases.getNextUnreadPosition(any()) } returns null
+        every { getTodaysPortion(any(), any()) } returns null
         every { quranUseCases.getSurahList() } returns flowOf(surahs)
         coEvery { quranUseCases.getSurahByNumber(any()) } answers {
             surahs.firstOrNull { it.number == firstArg<Int>() }

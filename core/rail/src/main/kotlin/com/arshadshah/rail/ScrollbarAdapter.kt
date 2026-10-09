@@ -8,7 +8,6 @@ import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.remember
-import kotlin.math.floor
 import kotlin.math.max
 
 /**
@@ -65,132 +64,112 @@ internal class ScrollStateAdapter(private val state: ScrollState, override val i
 }
 
 // ---------------------------------------------------------------------------
-// LazyColumn / LazyRow
+// LazyColumn / LazyRow / LazyVerticalGrid / LazyHorizontalGrid
 //
-// A lazy list only knows the size of the items on screen, so we take their
-// average size and pretend every item is that size. Good enough for a smooth
-// thumb, and we pin the thumb to the exact ends so it never looks "off".
+// A lazy layout only knows the size of what is on screen, so the total is a
+// guess. [LazyScrollEstimator] remembers every line it has measured and moves
+// the thumb by what the content really moved, so headers and tall cards trading
+// places do not make the thumb jump or resize. See that class for the details.
 // ---------------------------------------------------------------------------
 
-internal class LazyListAdapter(private val state: LazyListState) : ScrollbarAdapter {
-    private val info get() = state.layoutInfo
-    private val spacing get() = info.mainAxisItemSpacing.toDouble()
+/** Shared plumbing: turn each new layout into a [LazyFrame] once, then answer from the estimator. */
+internal abstract class LazyLayoutAdapter : ScrollbarAdapter {
+    private val estimator = LazyScrollEstimator()
+    private var seen: Any? = null
 
-    /** Average item size on screen, plus the gap after it. */
-    private val itemStep: Double
-        get() {
-            val items = info.visibleItemsInfo
-            if (items.isEmpty()) return 0.0
-            return items.sumOf { it.size }.toDouble() / items.size + spacing
+    /** The layout info object; a new one arrives with every layout pass. */
+    protected abstract val layout: Any
+    protected abstract fun frame(): LazyFrame
+    protected abstract suspend fun scrollToItem(index: Int, offset: Int)
+
+    // Reading `layout` here is what makes snapshot observers (the thumb's derived state)
+    // re-run when the list moves. Feeding the same frame twice is a no-op.
+    private fun synced(): LazyScrollEstimator {
+        val current = layout
+        if (current !== seen) {
+            seen = current
+            estimator.update(frame())
         }
+        return estimator
+    }
 
-    override val isReversed get() = info.reverseLayout
-    override val isScrollInProgress get() = state.isScrollInProgress
-    override val viewportSize get() = (info.viewportEndOffset - info.viewportStartOffset).toDouble()
-
-    override val contentSize: Double
-        get() {
-            val count = info.totalItemsCount
-            if (count == 0) return 0.0
-            return itemStep * count - spacing + info.beforeContentPadding + info.afterContentPadding
-        }
-
-    override val scrollOffset: Double
-        get() {
-            // Pin to the real ends so the guesswork never shows at the top or bottom.
-            if (!state.canScrollBackward) return 0.0
-            if (!state.canScrollForward) return maxScrollOffset
-            val first = info.visibleItemsInfo.firstOrNull() ?: return 0.0
-            return first.index * itemStep - first.offset
-        }
+    override val scrollOffset get() = synced().scrollOffset
+    override val contentSize get() = synced().contentSize
+    override val viewportSize get() = synced().viewportSize
 
     override suspend fun scrollTo(offset: Double) {
-        val step = itemStep
-        if (step <= 0.0) return
-        val target = if (offset.isNaN()) 0.0 else offset.coerceIn(0.0, maxScrollOffset)
-        if (target >= maxScrollOffset && maxScrollOffset > 0.0) {
-            state.scrollToItem((info.totalItemsCount - 1).coerceAtLeast(0), Int.MAX_VALUE)
-            return
-        }
-        val index = floor(target / step).toInt().coerceIn(0, max(0, info.totalItemsCount - 1))
-        state.scrollToItem(index, (target - index * step).toInt())
+        val seek = synced().seek(offset) ?: return
+        scrollToItem(seek.index, seek.offset)
     }
 }
 
-// ---------------------------------------------------------------------------
-// LazyVerticalGrid / LazyHorizontalGrid
-//
-// Same idea as lists, but we work in lines (rows for a vertical grid).
-// ---------------------------------------------------------------------------
-
-internal class LazyGridAdapter(private val state: LazyGridState) : ScrollbarAdapter {
-    private val info get() = state.layoutInfo
-    private val vertical get() = info.orientation == Orientation.Vertical
-    private val spacing get() = info.mainAxisItemSpacing.toDouble()
-
-    private fun lineOf(i: LazyGridItemInfo) = if (vertical) i.row else i.column
-    private fun sizeOf(i: LazyGridItemInfo) = if (vertical) i.size.height else i.size.width
-    private fun startOf(i: LazyGridItemInfo) = if (vertical) i.offset.y else i.offset.x
-
-    private val visibleLines: Map<Int, List<LazyGridItemInfo>>
-        get() = info.visibleItemsInfo.filter { lineOf(it) >= 0 }.groupBy(::lineOf)
-
-    /** How many items sit side by side, judged from the fullest line on screen. */
-    private val itemsPerLine: Int
-        get() {
-            val lines = visibleLines
-            val occupied = lines.values.maxOfOrNull { it.size } ?: 1
-            // A viewport can contain only a partial final line. Uniform spans let
-            // us recover the actual cross-axis count from logical coordinates.
-            val inferred = lines.values.flatten().mapNotNull { item ->
-                val line = lineOf(item)
-                val crossSlot = if (vertical) item.column else item.row
-                if (line > 0 && crossSlot >= 0) (item.index - crossSlot) / line else null
-            }.maxOrNull() ?: 1
-            return maxOf(occupied, inferred, 1)
-        }
-
-    /** Average line height (or width), plus the gap after it. */
-    private val lineStep: Double
-        get() {
-            val lines = visibleLines
-            if (lines.isEmpty()) return 0.0
-            val total = lines.values.sumOf { line -> line.maxOf(::sizeOf) }
-            return total.toDouble() / lines.size + spacing
-        }
-
-    private val lineCount get() = (info.totalItemsCount + itemsPerLine - 1) / itemsPerLine
-
-    override val isReversed get() = info.reverseLayout
+internal class LazyListAdapter(private val state: LazyListState) : LazyLayoutAdapter() {
+    override val layout get() = state.layoutInfo
+    override val isReversed get() = state.layoutInfo.reverseLayout
     override val isScrollInProgress get() = state.isScrollInProgress
-    override val viewportSize get() = (info.viewportEndOffset - info.viewportStartOffset).toDouble()
 
-    override val contentSize: Double
-        get() {
-            if (info.totalItemsCount == 0) return 0.0
-            return lineStep * lineCount - spacing + info.beforeContentPadding + info.afterContentPadding
-        }
-
-    override val scrollOffset: Double
-        get() {
-            if (!state.canScrollBackward) return 0.0
-            if (!state.canScrollForward) return maxScrollOffset
-            val (firstLine, items) = visibleLines.minByOrNull { it.key } ?: return 0.0
-            return firstLine * lineStep - items.minOf(::startOf)
-        }
-
-    override suspend fun scrollTo(offset: Double) {
-        val step = lineStep
-        if (step <= 0.0) return
-        val target = if (offset.isNaN()) 0.0 else offset.coerceIn(0.0, maxScrollOffset)
-        if (target >= maxScrollOffset && maxScrollOffset > 0.0) {
-            state.scrollToItem((info.totalItemsCount - 1).coerceAtLeast(0), Int.MAX_VALUE)
-            return
-        }
-        val line = floor(target / step).toInt()
-        val index = (line * itemsPerLine).coerceIn(0, max(0, info.totalItemsCount - 1))
-        state.scrollToItem(index, (target - line * step).toInt())
+    override fun frame(): LazyFrame {
+        val info = state.layoutInfo
+        // Each item is its own line. Sorted, because a pinned sticky header may be listed out of order.
+        val lines = info.visibleItemsInfo
+            .map { VisibleLine(it.index, it.index, it.index, it.offset, it.size) }
+            .sortedBy { it.line }
+            .distinctBy { it.line }
+        val cross = if (info.orientation == Orientation.Vertical) info.viewportSize.width else info.viewportSize.height
+        return LazyFrame(
+            totalItems = info.totalItemsCount,
+            lines = lines,
+            viewportStart = info.viewportStartOffset,
+            viewportEnd = info.viewportEndOffset,
+            beforePadding = info.beforeContentPadding,
+            afterPadding = info.afterContentPadding,
+            spacing = info.mainAxisItemSpacing,
+            crossAxisSize = cross,
+            canScrollBackward = state.canScrollBackward,
+            canScrollForward = state.canScrollForward,
+        )
     }
+
+    override suspend fun scrollToItem(index: Int, offset: Int) = state.scrollToItem(index, offset)
+}
+
+internal class LazyGridAdapter(private val state: LazyGridState) : LazyLayoutAdapter() {
+    override val layout get() = state.layoutInfo
+    override val isReversed get() = state.layoutInfo.reverseLayout
+    override val isScrollInProgress get() = state.isScrollInProgress
+
+    override fun frame(): LazyFrame {
+        val info = state.layoutInfo
+        val vertical = info.orientation == Orientation.Vertical
+        fun lineOf(i: LazyGridItemInfo) = if (vertical) i.row else i.column
+        val lines = info.visibleItemsInfo
+            .filter { lineOf(it) >= 0 }
+            .groupBy(::lineOf)
+            .map { (line, items) ->
+                VisibleLine(
+                    line = line,
+                    firstIndex = items.minOf { it.index },
+                    lastIndex = items.maxOf { it.index },
+                    start = items.minOf { if (vertical) it.offset.y else it.offset.x },
+                    extent = items.maxOf { if (vertical) it.size.height else it.size.width },
+                )
+            }
+            .sortedBy { it.line }
+        return LazyFrame(
+            totalItems = info.totalItemsCount,
+            lines = lines,
+            viewportStart = info.viewportStartOffset,
+            viewportEnd = info.viewportEndOffset,
+            beforePadding = info.beforeContentPadding,
+            afterPadding = info.afterContentPadding,
+            spacing = info.mainAxisItemSpacing,
+            crossAxisSize = if (vertical) info.viewportSize.width else info.viewportSize.height,
+            canScrollBackward = state.canScrollBackward,
+            canScrollForward = state.canScrollForward,
+        )
+    }
+
+    override suspend fun scrollToItem(index: Int, offset: Int) = state.scrollToItem(index, offset)
 }
 
 // ---------------------------------------------------------------------------
