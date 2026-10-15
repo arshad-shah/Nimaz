@@ -28,12 +28,14 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.core.ui.R
 import com.arshadshah.nimaz.domain.model.QuranTranslation
+import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeEmphasis
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
@@ -49,6 +51,7 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuItem
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.components.organisms.NimazSearchBar
 import com.arshadshah.nimaz.presentation.foundation.text.BISMILLAH_TEXT
+import com.arshadshah.nimaz.presentation.theme.ArabicTextStyles
 import com.arshadshah.nimaz.presentation.theme.QuranArabicFont
 import com.arshadshah.nimaz.presentation.theme.asLanguageLabel
 import com.arshadshah.nimaz.presentation.theme.asTranslationText
@@ -284,14 +287,18 @@ private fun SelectedTranslationCard(
 
             Spacer(modifier = Modifier.height(14.dp))
 
-            Text(
+            // The selected face rides in on the style; ArabicText supplies the RTL layout, so
+            // Start is the right-hand edge.
+            ArabicText(
                 text = BISMILLAH_TEXT,
-                style = MaterialTheme.typography.headlineSmall,
-                fontFamily = arabicFontFamily,
-                lineHeight = 52.sp,
-                textAlign = TextAlign.End,
                 color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                style = ArabicTextStyles.quranMedium.copy(
+                    fontFamily = arabicFontFamily,
+                    lineHeight = 52.sp,
+                    textAlign = TextAlign.Start,
+                    textDirection = TextDirection.Rtl
+                )
             )
 
             Spacer(modifier = Modifier.height(10.dp))

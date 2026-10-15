@@ -22,6 +22,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.core.ui.R
+import com.arshadshah.nimaz.domain.model.TranslationLanguage
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
@@ -32,6 +33,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcons
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
+import com.arshadshah.nimaz.presentation.theme.asTranslationText
 
 /**
  * "Verse of the Day" — a deterministic daily ayah, tappable to open in the reader.
@@ -40,6 +42,10 @@ import com.arshadshah.nimaz.presentation.theme.NimazTheme
  * standard elevated card treatment. The teal gradient on that screen is reserved for
  * continue-reading alone, so this card previews the ayah (Arabic clipped to two lines,
  * translation to two) and offers a read affordance rather than rendering the whole verse.
+ *
+ * @param translationLanguage the language [translation] is in. An Urdu translation set in the
+ *   body font falls back to a system Naskh, left-aligned; this resolves face, direction and
+ *   leading the way the reader does.
  */
 @Composable
 internal fun VerseOfTheDayCard(
@@ -47,7 +53,8 @@ internal fun VerseOfTheDayCard(
     translation: String?,
     reference: String,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    translationLanguage: TranslationLanguage = TranslationLanguage.ENGLISH,
 ) {
     NimazCard(
         style = NimazCardStyle.ELEVATED,
@@ -92,7 +99,11 @@ internal fun VerseOfTheDayCard(
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = translation,
-                    style = MaterialTheme.typography.bodySmall,
+                    // Only an RTL (Urdu) translation needs the treatment; a Latin one keeps the
+                    // card's own leading rather than the reader's paragraph leading.
+                    style = MaterialTheme.typography.bodySmall.let {
+                        if (translationLanguage.isRtl) it.asTranslationText(translationLanguage) else it
+                    },
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis

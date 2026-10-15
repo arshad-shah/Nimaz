@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
@@ -41,6 +42,7 @@ import com.arshadshah.nimaz.presentation.foundation.debug.NimazMarginRule
 import com.arshadshah.nimaz.presentation.foundation.debug.nimazMarginRules
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.theme.ThemeMode
+import com.arshadshah.nimaz.presentation.theme.asArabicLabel
 
 /**
  * One node of a tree that expands in place.
@@ -54,6 +56,10 @@ import com.arshadshah.nimaz.presentation.theme.ThemeMode
  *
  * [depth] draws the indent and its ruling. Cap it at the call site: past three levels a 390dp
  * screen has no text column left, which is what [trailingContent] ("Focus this branch") is for.
+ *
+ * @param secondaryLabelStyle overrides [secondaryLabel]'s style. Needed where it is not Latin
+ *   text — a subject's Arabic name set in the body font falls back to a system Naskh face (see
+ *   [com.arshadshah.nimaz.presentation.theme.asArabicLabel]).
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -69,6 +75,7 @@ fun NimazTreeRow(
     expanded: Boolean = false,
     onToggleExpanded: () -> Unit = {},
     trailingContent: (@Composable () -> Unit)? = null,
+    secondaryLabelStyle: TextStyle = MaterialTheme.typography.bodyMedium,
 ) {
     val step = NimazMarginRule.IndentStep
     val ruleColor = NimazMarginRule.color
@@ -151,7 +158,7 @@ fun NimazTreeRow(
                         if (secondaryLabel != null) {
                             Text(
                                 text = secondaryLabel,
-                                style = MaterialTheme.typography.bodyMedium,
+                                style = secondaryLabelStyle,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 maxLines = 1,
                             )
@@ -210,6 +217,7 @@ private fun TreeRowSample() {
         NimazTreeRow(
             label = "Doctrine",
             secondaryLabel = "العقيدة",
+            secondaryLabelStyle = MaterialTheme.typography.bodyMedium.asArabicLabel(),
             badgeText = "412",
             expandable = true,
             expanded = true,
@@ -218,6 +226,7 @@ private fun TreeRowSample() {
         NimazTreeRow(
             label = "God",
             secondaryLabel = "الله",
+            secondaryLabelStyle = MaterialTheme.typography.bodyMedium.asArabicLabel(),
             badgeText = "153",
             depth = 1,
             expandable = true,

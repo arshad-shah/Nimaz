@@ -1,6 +1,13 @@
 package com.arshadshah.nimaz.presentation.components.molecules
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.width
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.test.getUnclippedBoundsInRoot
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -144,5 +151,47 @@ class NimazNumberStepperVariantsTest {
         }
 
         composeRule.onNodeWithText("+7").assertExists()
+    }
+
+    @Test
+    fun `a label too long for one line drops the controls below it instead of clipping them`() {
+        // The INLINE row used to be a plain Row, which measured the label first: a long label
+        // took the width and the + button was pushed past the edge — drawn half off-screen and
+        // untappable. Both buttons must sit wholly inside the row, and below the label.
+        val long = "A very long setting label that will never fit beside the stepper controls"
+        composeRule.setThemedContent {
+            Box(Modifier.width(280.dp).testTag("row")) {
+                NimazNumberStepper(
+                    value = 5,
+                    onValueChange = {},
+                    label = long,
+                    formatValue = { "$it minutes" },
+                )
+            }
+        }
+
+        val root = composeRule.onNodeWithTag("row").getUnclippedBoundsInRoot()
+        val labelBounds = composeRule.onNodeWithText(long).getUnclippedBoundsInRoot()
+        listOf("Increase", "Decrease").forEach { cd ->
+            val button = composeRule.onNodeWithContentDescription(cd).getUnclippedBoundsInRoot()
+            assertThat(button.right.value).isAtMost(root.right.value + 0.5f)
+            assertThat(button.left.value).isAtLeast(root.left.value - 0.5f)
+            assertThat(button.top.value).isAtLeast(labelBounds.bottom.value)
+        }
+    }
+
+    @Test
+    fun `a short label keeps the controls on the same line`() {
+        composeRule.setThemedContent {
+            Box(Modifier.width(360.dp)) {
+                NimazNumberStepper(value = 5, onValueChange = {}, label = "Offset")
+            }
+        }
+
+        val labelBounds = composeRule.onNodeWithText("Offset").getUnclippedBoundsInRoot()
+        val plus = composeRule.onNodeWithContentDescription("Increase").getUnclippedBoundsInRoot()
+        // Same line: the button overlaps the label's vertical band rather than sitting under it.
+        assertThat(plus.top.value).isLessThan(labelBounds.bottom.value)
+        assertThat(plus.left.value).isGreaterThan(labelBounds.right.value)
     }
 }

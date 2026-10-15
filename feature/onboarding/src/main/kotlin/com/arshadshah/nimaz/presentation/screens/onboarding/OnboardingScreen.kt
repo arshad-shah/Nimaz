@@ -64,12 +64,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.core.ui.R
+import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazDivider
@@ -80,7 +82,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazPager
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.rememberNimazPagerState
 import com.arshadshah.nimaz.presentation.theme.AdaptiveSpacing
-import com.arshadshah.nimaz.presentation.theme.AmiriFontFamily
+import com.arshadshah.nimaz.presentation.theme.ArabicTextStyles
 import com.arshadshah.nimaz.presentation.theme.LightStatusBarIcons
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.OnboardingArtColors
@@ -304,7 +306,18 @@ private fun IntroPageContent(page: IntroPage, insets: PaddingValues, offset: () 
                 .padding(bottom = insets.calculateBottomPadding() + FooterHeight + 20.dp),
         ) {
             Reveal(revealed, 0) {
-                Text(stringResource(page.arabic), fontFamily = AmiriFontFamily, fontSize = 30.sp, color = Champagne)
+                // Through ArabicText for RTL shaping and Arabic leading. The 30sp size is this
+                // page's own, so it rides in on the style rather than a preset; the text wraps its
+                // content, so the column still places it at the start, above the title.
+                ArabicText(
+                    text = stringResource(page.arabic),
+                    color = Champagne,
+                    style = ArabicTextStyles.duaArabic.copy(
+                        fontSize = 30.sp,
+                        lineHeight = 54.sp,
+                        textDirection = TextDirection.Rtl,
+                    ),
+                )
             }
             Spacer(Modifier.height(10.dp))
             Reveal(revealed, 1) {

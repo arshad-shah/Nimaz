@@ -40,6 +40,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
@@ -137,9 +138,11 @@ enum class NimazNumberStepperType {
  * @param variant Layout shape — see [NimazNumberStepperVariant]
  * @param size Control + typography size preset
  * @param type Value colour emphasis
- * @param label Text label shown on the left in [NimazNumberStepperVariant.INLINE]
+ * @param label Text label shown on the left in [NimazNumberStepperVariant.INLINE]. When it
+ *   cannot fit beside the controls on one line, the controls move to the line below it instead of
+ *   being clipped.
  * @param labelContent Replaces [label] with composed content — a name and a supporting line, say.
- *   It takes the width the controls leave. INLINE only.
+ *   Same rule as [label]: beside the controls if it fits on one line, above them if not. INLINE only.
  * @param editable Whether tapping the value opens the keyboard for direct entry
  * @param formatValue Custom formatter for the displayed (resting) value. Defaults to a "+"
  *   prefix for positive values in INLINE, and the plain number in SPREAD.
@@ -198,23 +201,22 @@ fun NimazNumberStepper(
     }
 
     when (variant) {
-        NimazNumberStepperVariant.INLINE -> Row(
+        NimazNumberStepperVariant.INLINE -> InlineStepperLayout(
             modifier = modifier
                 .fillMaxWidth()
                 .padding(horizontal = 15.dp, vertical = 12.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+            label = {
+                if (labelContent != null) {
+                    labelContent()
+                } else if (label != null) {
+                    Text(
+                        text = label,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+            },
         ) {
-            if (labelContent != null) {
-                // Takes the space the controls leave, so a two-line label never gets squeezed.
-                Box(Modifier.weight(1f)) { labelContent() }
-            } else if (label != null) {
-                Text(
-                    text = label,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-            }
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
@@ -274,6 +276,82 @@ fun NimazNumberStepper(
         }
     }
 }
+
+/**
+ * The INLINE row: label on the left, controls on the right — **or, when that does not fit,
+ * the controls on their own line below the label.**
+ *
+ * This used to be a plain `Row`. A `Row` measures its children in order, so an unweighted label
+ * took all the width it wanted and the controls got whatever was left: a long label, a
+ * translated one (German and Turkish run long), a wide formatted value ("120 min") or a large
+ * font scale pushed the + button past the edge, where it was clipped and untappable.
+ *
+ * The rule here is simple on purpose: the controls are measured first, at their natural width.
+ * If the label fits beside them **on one line**, the row stays a row. If not, the label gets the
+ * full width and the controls drop to the next line, aligned to the end. The controls are never
+ * squeezed — they are the part the user has to hit.
+ */
+@Composable
+private fun InlineStepperLayout(
+    modifier: Modifier,
+    label: @Composable () -> Unit,
+    controls: @Composable () -> Unit,
+) {
+    Layout(
+        contents = listOf(label, controls),
+        modifier = modifier,
+    ) { (labelMeasurables, controlMeasurables), constraints ->
+        val maxWidth = constraints.maxWidth
+        val gap = InlineGap.roundToPx()
+        val loose = constraints.copy(minWidth = 0, minHeight = 0)
+
+        val controlsPlaceable = controlMeasurables.firstOrNull()?.measure(loose)
+        val controlsWidth = controlsPlaceable?.width ?: 0
+        val controlsHeight = controlsPlaceable?.height ?: 0
+
+        val labelMeasurable = labelMeasurables.firstOrNull()
+        val besideWidth = (maxWidth - controlsWidth - gap).coerceAtLeast(0)
+        // One-line width of the label. Unbounded width has no meaningful "fits" answer, so a
+        // row with no width limit always stays a row.
+        val labelNaturalWidth = labelMeasurable?.maxIntrinsicWidth(constraints.maxHeight) ?: 0
+        val stacked = labelMeasurable != null &&
+            constraints.hasBoundedWidth &&
+            labelNaturalWidth > besideWidth
+
+        if (!stacked) {
+            val labelPlaceable = labelMeasurable?.measure(
+                loose.copy(maxWidth = if (constraints.hasBoundedWidth) besideWidth else loose.maxWidth)
+            )
+            val labelHeight = labelPlaceable?.height ?: 0
+            val height = maxOf(labelHeight, controlsHeight)
+                .coerceIn(constraints.minHeight, constraints.maxHeight)
+            val width = if (constraints.hasBoundedWidth) maxWidth
+            else (labelPlaceable?.width ?: 0) + gap + controlsWidth
+            layout(width, height) {
+                labelPlaceable?.placeRelative(0, (height - labelHeight) / 2)
+                controlsPlaceable?.placeRelative(width - controlsWidth, (height - controlsHeight) / 2)
+            }
+        } else {
+            val labelPlaceable = labelMeasurable!!.measure(loose.copy(maxWidth = maxWidth))
+            val rowGap = StackedGap.roundToPx()
+            val height = (labelPlaceable.height + rowGap + controlsHeight)
+                .coerceIn(constraints.minHeight, constraints.maxHeight)
+            layout(maxWidth, height) {
+                labelPlaceable.placeRelative(0, 0)
+                controlsPlaceable?.placeRelative(
+                    maxWidth - controlsWidth,
+                    labelPlaceable.height + rowGap,
+                )
+            }
+        }
+    }
+}
+
+/** Minimum space between the label and the controls when they share a line. */
+private val InlineGap = 12.dp
+
+/** Space between the label and the controls once the controls have dropped below it. */
+private val StackedGap = 8.dp
 
 /**
  * The value display. When [editable], tapping focuses a numeric [BasicTextField]

@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.presentation.components.organisms
 
+import androidx.compose.ui.text.TextStyle
 import com.arshadshah.nimaz.presentation.components.molecules.NimazLoadingVariant
 import com.arshadshah.nimaz.presentation.components.molecules.NimazLoadingState
 import androidx.compose.foundation.BorderStroke
@@ -56,6 +57,9 @@ import com.arshadshah.nimaz.presentation.theme.NimazTheme
  * @param scrollBehavior accepted for source compatibility with the callers that pass
  *   a `pinnedScrollBehavior()`. The pill bar does not collapse or recolour on scroll
  *   (the pills carry their own surface), so it is intentionally not consumed here.
+ * @param subtitleStyle overrides the subtitle's style. Needed where the subtitle is not Latin
+ *   text: an Arabic name set in the body font falls back to a system Naskh face (see
+ *   [com.arshadshah.nimaz.presentation.theme.asArabicLabel]).
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -67,6 +71,7 @@ fun NimazTopAppBar(
     actions: (@Composable RowScope.() -> Unit)? = null,
     scrollBehavior: TopAppBarScrollBehavior? = null,
     titleLoading: Boolean = false,
+    subtitleStyle: TextStyle = MaterialTheme.typography.bodySmall,
 ) {
     Row(
         modifier = modifier
@@ -113,7 +118,7 @@ fun NimazTopAppBar(
                     if (subtitle != null) {
                         Text(
                             text = subtitle,
-                            style = MaterialTheme.typography.bodySmall,
+                            style = subtitleStyle,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
@@ -148,10 +153,12 @@ fun NimazBackTopAppBar(
     actions: (@Composable RowScope.() -> Unit)? = null,
     scrollBehavior: TopAppBarScrollBehavior? = null,
     titleLoading: Boolean = false,
+    subtitleStyle: TextStyle = MaterialTheme.typography.bodySmall,
 ) {
     NimazTopAppBar(
         title = title,
         subtitle = subtitle,
+        subtitleStyle = subtitleStyle,
         modifier = modifier,
         navigationIcon = {
             IconButton(onClick = onBackClick) {

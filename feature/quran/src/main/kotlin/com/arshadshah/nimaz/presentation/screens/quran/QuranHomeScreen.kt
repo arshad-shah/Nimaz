@@ -262,6 +262,7 @@ private fun HomeContent(
                     VerseOfTheDayCard(
                         arabicText = verse.textArabic,
                         translation = verse.translation,
+                        translationLanguage = state.verseOfTheDayLanguage,
                         reference = stringResource(
                             R.string.quran_home_verse_reference,
                             surahName,

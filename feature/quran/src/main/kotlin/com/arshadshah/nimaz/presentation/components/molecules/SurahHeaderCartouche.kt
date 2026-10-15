@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -45,6 +46,7 @@ import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.theme.QuranSurfaceColors
 import com.arshadshah.nimaz.presentation.theme.ThemeMode
+import com.arshadshah.nimaz.presentation.theme.asArabicLabel
 
 /* ------------------------------------------------------------------
  * Theme tokens — the cartouche is a fixed gold-on-teal "manuscript"
@@ -177,7 +179,18 @@ fun SurahHeaderCartouche(
                     .size(medR * 2),
                 contentAlignment = Alignment.Center,
             ) {
-                Text(label, color = teal, fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+                Text(
+                    label,
+                    color = teal,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    // Arabic-Indic digits are Arabic script, which the Latin faces cannot draw.
+                    style = if (useArabicIndicNumerals) {
+                        LocalTextStyle.current.copy(fontSize = 16.sp).asArabicLabel()
+                    } else {
+                        LocalTextStyle.current
+                    },
+                )
             }
 
             // name + revelation badge, Arabic name at the end

@@ -35,6 +35,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -44,6 +45,7 @@ import com.arshadshah.nimaz.domain.model.MushafScript
 import com.arshadshah.nimaz.domain.model.QuranReciter
 import com.arshadshah.nimaz.domain.model.QuranTranslation
 import com.arshadshah.nimaz.domain.model.TranslationLanguage
+import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
@@ -58,6 +60,7 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazSettingsSlide
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.components.organisms.TajweedLegendSheet
 import com.arshadshah.nimaz.presentation.foundation.text.BISMILLAH_TEXT
+import com.arshadshah.nimaz.presentation.theme.ArabicTextStyles
 import com.arshadshah.nimaz.presentation.theme.QuranArabicFont
 import com.arshadshah.nimaz.presentation.theme.asTranslationText
 import com.arshadshah.nimaz.presentation.viewmodel.settings.SettingsEvent
@@ -451,16 +454,19 @@ private fun PreviewCard(
 
             Spacer(modifier = Modifier.height(15.dp))
 
-            // Arabic text - matching reader style
-            Text(
+            // Arabic text - matching reader style. The selected face and size ride in on the
+            // style; ArabicText supplies the RTL layout, so Start is the right-hand edge.
+            ArabicText(
                 text = BISMILLAH_TEXT,
-                style = MaterialTheme.typography.headlineLarge,
-                fontFamily = arabicFontFamily,
-                fontSize = arabicFontSize.sp,
-                lineHeight = (arabicFontSize * 2.4f).sp,
-                textAlign = TextAlign.End,
                 color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                style = ArabicTextStyles.quranLarge.copy(
+                    fontFamily = arabicFontFamily,
+                    fontSize = arabicFontSize.sp,
+                    lineHeight = (arabicFontSize * 2.4f).sp,
+                    textAlign = TextAlign.Start,
+                    textDirection = TextDirection.Rtl
+                )
             )
 
             // Translation - styled like reader

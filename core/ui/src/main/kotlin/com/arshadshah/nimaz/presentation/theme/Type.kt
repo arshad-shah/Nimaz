@@ -165,6 +165,43 @@ fun TextStyle.asLanguageLabel(language: TranslationLanguage): TextStyle {
 }
 
 /**
+ * Leading for Amiri at label sizes — the 1.8× ratio the smallest `ArabicTextSize` preset
+ * (`SMALL`, 20sp over 36sp) already uses, so harakat above and below the line are not clipped.
+ */
+private const val ARABIC_LABEL_LEADING = 1.8f
+
+/**
+ * The treatment a short **Arabic** label needs where it sits inside Latin chrome at that
+ * chrome's own size — a top-bar subtitle, a tree row's secondary name, an Arabic-Indic number in
+ * a medallion.
+ *
+ * `ArabicText` is the tool when the Arabic is content in its own right; its presets start at
+ * 20sp/36sp, which is taller than a 12–14sp subtitle slot can take without growing the row it
+ * sits in. This keeps the caller's size, weight and alignment and supplies only what the body
+ * faces cannot:
+ * - **face** — Amiri, because Outfit and Plus Jakarta Sans carry no Arabic-script glyphs and a
+ *   plain body style falls back to whatever Naskh the device happens to have;
+ * - **direction** — resolved from the text (`TextDirection.Content`), so the label shapes and
+ *   orders right-to-left while its *position* stays wherever the LTR chrome puts it;
+ * - **leading** — see [ARABIC_LABEL_LEADING]. Like [asTranslationText], this has to live in the
+ *   style: a `lineHeight` argument on `Text` overrides the style's.
+ *
+ * Urdu is not Arabic for this purpose — an Urdu label goes through [asLanguageLabel] (Nastaliq).
+ */
+fun TextStyle.asArabicLabel(): TextStyle {
+    val size = fontSize
+    return copy(
+        fontFamily = AmiriFontFamily,
+        lineHeight = if (size != TextUnit.Unspecified) {
+            (size.value * ARABIC_LABEL_LEADING).sp
+        } else {
+            lineHeight
+        },
+        textDirection = TextDirection.Content
+    )
+}
+
+/**
  * Selectable Arabic fonts for Quran text.
  *
  * Single source of truth for the font picker: the [id] is what gets persisted

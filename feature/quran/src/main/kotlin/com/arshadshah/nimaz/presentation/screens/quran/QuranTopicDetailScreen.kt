@@ -45,6 +45,7 @@ import com.arshadshah.nimaz.core.common.ThematicLink
 import com.arshadshah.nimaz.core.ui.R
 import com.arshadshah.nimaz.domain.model.QuranTopic
 import com.arshadshah.nimaz.domain.model.TopicTree
+import com.arshadshah.nimaz.domain.model.TranslationLanguage
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
@@ -70,6 +71,7 @@ import com.arshadshah.nimaz.presentation.components.organisms.SurahDistribution
 import com.arshadshah.nimaz.presentation.components.organisms.TopicIcons
 import com.arshadshah.nimaz.presentation.components.organisms.formatCount
 import com.arshadshah.nimaz.presentation.components.organisms.verseCountLabel
+import com.arshadshah.nimaz.presentation.theme.asTranslationText
 import com.arshadshah.nimaz.presentation.viewmodel.quran.CitationGroup
 import com.arshadshah.nimaz.presentation.viewmodel.quran.QuranTopicsEvent
 import com.arshadshah.nimaz.presentation.viewmodel.quran.QuranTopicsViewModel
@@ -294,6 +296,7 @@ private fun SubjectBody(
                         expanded = open,
                         showAll = all,
                         previews = state.previews,
+                        previewLanguage = state.previewLanguage,
                         onExpandedChange = {
                             toggled = if (group.surahNumber in toggled) toggled - group.surahNumber
                             else toggled + group.surahNumber
@@ -386,6 +389,7 @@ private fun SurahVerses(
     expanded: Boolean,
     showAll: Boolean,
     previews: Map<Int, String>,
+    previewLanguage: TranslationLanguage,
     onExpandedChange: (Boolean) -> Unit,
     onShowAll: () -> Unit,
     onOpenAyah: (surah: Int, ayah: Int) -> Unit,
@@ -413,6 +417,11 @@ private fun SurahVerses(
             CitationRow(
                 reference = citation.reference,
                 preview = previews[citation.ayahId],
+                // Only an RTL (Urdu) translation needs the treatment; a Latin one keeps the
+                // row's own leading rather than the reader's paragraph leading.
+                previewStyle = MaterialTheme.typography.bodyMedium.let {
+                    if (previewLanguage.isRtl) it.asTranslationText(previewLanguage) else it
+                },
                 onClick = { onOpenAyah(citation.surahNumber, citation.ayahNumber) },
             )
         }
