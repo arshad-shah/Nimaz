@@ -22,10 +22,15 @@ import androidx.sqlite.db.SimpleSQLiteQuery
 interface SearchIndexDao {
 
     @RawQuery
-    suspend fun rawRefs(query: SimpleSQLiteQuery): List<SearchIndexRefRow>
-
-    @RawQuery
     suspend fun rawMeta(query: SimpleSQLiteQuery): List<SearchIndexMetaRow>
+
+    /** Matching docids with their `matchinfo` blob, for ranking. See [ContentSearchIndex.hits]. */
+    @RawQuery
+    suspend fun rawMatches(query: SimpleSQLiteQuery): List<SearchIndexMatchRow>
+
+    /** `search_docs` rows by docid. */
+    @RawQuery
+    suspend fun rawDocs(query: SimpleSQLiteQuery): List<SearchIndexDocRow>
 }
 
 /** One hit: what kind of thing matched, and the key its own DAO looks it up by. */
@@ -38,4 +43,18 @@ data class SearchIndexRefRow(
 data class SearchIndexMetaRow(
     val key: String,
     val value: String,
+)
+
+/** One match before ranking: its docid, and FTS4's `matchinfo(…, 'pcx')` for it. */
+class SearchIndexMatchRow(
+    val docid: Long,
+    val info: ByteArray,
+)
+
+/** A `search_docs` row with its docid, so ranked docids can be mapped back to keys. */
+data class SearchIndexDocRow(
+    val docid: Long,
+    val kind: String,
+    val ref: String,
+    val source: String?,
 )

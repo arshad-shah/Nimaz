@@ -23,11 +23,14 @@ class ContentSearchIndexTest {
     /** A stand-in for the artifact's `search_meta` table. */
     private class FakeDao(
         private var meta: List<SearchIndexMetaRow>?,
-        private val refs: List<SearchIndexRefRow> = emptyList(),
     ) : SearchIndexDao {
         val metaReads = AtomicInteger(0)
 
-        override suspend fun rawRefs(query: SimpleSQLiteQuery): List<SearchIndexRefRow> = refs
+        override suspend fun rawMatches(query: SimpleSQLiteQuery): List<SearchIndexMatchRow> =
+            emptyList()
+
+        override suspend fun rawDocs(query: SimpleSQLiteQuery): List<SearchIndexDocRow> =
+            emptyList()
 
         override suspend fun rawMeta(query: SimpleSQLiteQuery): List<SearchIndexMetaRow> {
             metaReads.incrementAndGet()

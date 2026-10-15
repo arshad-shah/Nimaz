@@ -13,6 +13,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -33,6 +34,11 @@ import com.arshadshah.nimaz.presentation.theme.ThemeMode
  *
  * Degrades to the reference alone when there is no [preview]: a reader whose translation has no
  * text for these verses gets a shorter row, not an empty space where a sentence should be.
+ *
+ * @param previewStyle overrides [preview]'s style. The preview is the reader's chosen
+ *   translation, so an Urdu one needs
+ *   [com.arshadshah.nimaz.presentation.theme.asTranslationText] — in the body font it falls back
+ *   to a system Naskh, left-aligned.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -41,6 +47,7 @@ fun CitationRow(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     preview: String? = null,
+    previewStyle: TextStyle = MaterialTheme.typography.bodyMedium,
 ) {
     NimazCard(
         style = NimazCardStyle.FILLED,
@@ -69,7 +76,7 @@ fun CitationRow(
                 if (preview != null) {
                     Text(
                         text = preview,
-                        style = MaterialTheme.typography.bodyMedium,
+                        style = previewStyle,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis,

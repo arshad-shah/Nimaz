@@ -11,6 +11,7 @@ import com.arshadshah.nimaz.data.local.user.BookmarkEntity
 import com.arshadshah.nimaz.data.local.user.BookmarkKind
 import com.arshadshah.nimaz.domain.model.HadithBookmark
 import com.arshadshah.nimaz.domain.model.HadithGrade
+import com.arshadshah.nimaz.domain.search.SearchMatch
 import com.google.common.truth.Truth.assertThat
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -306,6 +307,46 @@ class HadithRepositoryImplIdsTest {
         // `text_arabic LIKE '%…%'` scans 36 MB and matches nothing for a vocalised matn.
         verifyNoScan()
     }
+
+    @Test
+    fun `results keep the order the index ranked them in, not book order`() = runTest {
+        // The DAO sorts by book. Before, that threw the ranking away and every common-word
+        // search read Bukhari first, whatever matched best.
+        coEvery { searchIndex.isAvailable() } returns true
+        coEvery { searchIndex.refs("patience", SearchKind.HADITH, null, any()) } returns
+            listOf("30", "2", "17")
+        coEvery { hadithDao.getHadithsByIds(listOf(30, 2, 17)) } returns
+            listOf(hadith(2, bookId = 1), hadith(17, bookId = 3), hadith(30, bookId = 6))
+
+        val ids = repository.searchHadiths("patience").first().map { it.hadith.id }
+
+        assertThat(ids).containsExactly("30", "2", "17").inOrder()
+    }
+
+    @Test
+    fun `an Arabic query is shown against the Arabic matn`() = runTest {
+        // It matched the Arabic; highlighting it in the English translation would show a
+        // result with nothing highlighted, which reads as a wrong result.
+        coEvery { searchIndex.isAvailable() } returns true
+        coEvery { searchIndex.refs("النية", SearchKind.HADITH, null, any()) } returns listOf("1")
+        coEvery { hadithDao.getHadithsByIds(listOf(1)) } returns listOf(hadith(1))
+
+        assertThat(repository.searchHadiths("النية").first().single().matchedText)
+            .isEqualTo("إنما الأعمال بالنيات")
+    }
+
+    @Test
+    fun `without an index the every-word pass answers nothing rather than scanning again`() =
+        runTest {
+            // A substring scan can only ask for the phrase, which the phrase pass already did;
+            // answering it twice would hand every phrase hit a second score.
+            coEvery { searchIndex.isAvailable() } returns false
+
+            assertThat(
+                repository.searchHadiths("patience hardship", SearchMatch.ALL_WORDS).first()
+            ).isEmpty()
+            verifyNoScan()
+        }
 
     @Test
     fun `a hadith whose book is not in the catalogue is labelled by its id`() = runTest {

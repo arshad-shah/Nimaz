@@ -4,6 +4,7 @@ import com.arshadshah.nimaz.domain.model.QuranTopic
 import com.arshadshah.nimaz.domain.model.SurahTopic
 import com.arshadshah.nimaz.domain.model.TopicDetail
 import com.arshadshah.nimaz.domain.model.TopicTree
+import com.arshadshah.nimaz.domain.model.TranslationLanguage
 
 /**
  * Browsing and searching the Qur'an's subject hierarchies.
@@ -183,6 +184,12 @@ data class TopicDetailState(
      * than a gap where a sentence should be.
      */
     val previews: Map<Int, String> = emptyMap(),
+
+    /**
+     * Language of the translation [previews] were read from, so each line is drawn in the
+     * right face and direction — an Urdu preview in the body font falls back to a system Naskh.
+     */
+    val previewLanguage: TranslationLanguage = TranslationLanguage.ENGLISH,
 
     /**
      * The surah this subject was opened from, when it was opened from one.

@@ -7,6 +7,7 @@ import com.arshadshah.nimaz.domain.model.HadithChapter
 import com.arshadshah.nimaz.domain.model.HadithGrade
 import com.arshadshah.nimaz.domain.model.HadithSearchResult
 import com.arshadshah.nimaz.domain.repository.HadithRepository
+import com.arshadshah.nimaz.domain.search.SearchMatch
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
@@ -84,8 +85,10 @@ class GetHadithOfTheDayUseCase @Inject constructor(private val repository: Hadit
 }
 
 class SearchHadithsUseCase @Inject constructor(private val repository: HadithRepository) {
-    operator fun invoke(query: String): Flow<List<HadithSearchResult>> =
-        repository.searchHadiths(query)
+    operator fun invoke(
+        query: String,
+        match: SearchMatch = SearchMatch.AUTO,
+    ): Flow<List<HadithSearchResult>> = repository.searchHadiths(query, match)
 }
 
 class SearchHadithsInBookUseCase @Inject constructor(private val repository: HadithRepository) {

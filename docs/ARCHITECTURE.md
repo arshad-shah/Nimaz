@@ -1034,10 +1034,27 @@ with no label and a touch target under 48dp fail the lane we already run. It can
 - **Arabic-script text never uses a body style.** `OutfitFontFamily` and
   `PlusJakartaSansFontFamily` carry **no Arabic-script glyphs at all**, so a plain
   `Text(arabicString, style = MaterialTheme.typography.bodyLarge)` silently falls back to whatever
-  face the device happens to have. Two rules:
-    - **Arabic content** (ayah, hadith, dua, surah/juz name, prayer name, Qaida letter) is
-      `ArabicText(...)` / `QuranVerseText` / `HadithArabicText` / `DuaArabicText`
-      (`components/atoms/ArabicText.kt`), which supply an Arabic face + RTL.
+  face the device happens to have — wrong size, Latin leading that clips the harakat, and LTR
+  shaping. **The rule: Arabic-script content always goes through `ArabicText` /
+  `asTranslationText` / `asLanguageLabel`** (or `asArabicLabel`, below) — never a bare `Text` with
+  a body style, and never an ad-hoc `fontFamily = AmiriFontFamily` on one. The Quran reader's own
+  renderers (`QuranAyahItem`, the Mushaf pages) are the one exception: they draw in the
+  user-selected `QuranArabicFont` and own their own metrics. In detail:
+    - **Arabic content** (ayah, hadith, dua, surah/juz name, prayer name, Qaida letter, Asma and
+      prophet names, Hijri month and event names, tasbih phrases) is
+      `ArabicText(...)` / `QuranVerseText` / `HadithArabicText` / `DuaArabicText` /
+      `HarakatArabicText` (`components/atoms/`), which supply an Arabic face, leading and RTL.
+      `ArabicText` centres by default — pass `textAlign` where the text sits in LTR chrome, and
+      remember it lays out RTL, so `TextAlign.Start` is the *right-hand* edge. A screen that has
+      to show a user-selected face (a font-picker preview) passes it on `style`
+      (`ArabicTextStyles.quranLarge.copy(fontFamily = …)`) rather than dropping to `Text`.
+    - **A short Arabic label inside Latin chrome, at that chrome's size** — a top-bar subtitle, a
+      tree row's secondary name, Arabic-Indic digits in a medallion — is
+      `TextStyle.asArabicLabel()` (`theme/Type.kt`): Amiri, `TextDirection.Content` and 1.8×
+      leading on the caller's own size, weight and alignment. `ArabicText`'s smallest preset is
+      20sp/36sp, which would grow a 12–14sp slot. Components that can carry one take the style as
+      a parameter: `NimazTopAppBar` / `NimazBackTopAppBar(subtitleStyle = …)`,
+      `NimazTreeRow(secondaryLabelStyle = …)`, `NimazMenuItem(subtitleStyle = …)`.
     - **Translation prose** is styled through `TextStyle.asTranslationText(language, fontSize = …)`
       and a short **endonym label** ("اردو") through `TextStyle.asLanguageLabel(language)`, both in
       `theme/Type.kt`. These resolve three things together that call sites kept getting partly
@@ -1048,7 +1065,13 @@ with no label and a touch target under 48dp fail the lane we already run. It can
       collide at Latin leading; the multipliers live in `Type.kt`). This must live in the **style**:
       a `lineHeight` argument on `Text` overrides the style's. The reader, the Mushaf pages, the
       ayah sheet, the Quran-settings preview and the translation picker all route through the same
-      helper, so a preview cannot promise a rendering the reader then fails to deliver.
+      helper, so a preview cannot promise a rendering the reader then fails to deliver — and so do
+      the surfaces that show a line of the reader's translation *outside* the reader (the Verse of
+      the Day card, `CitationRow(previewStyle = …)` on a subject's verse list), which is why their
+      UI state carries the `TranslationLanguage` the text was fetched in.
+    - **Glance widgets** cannot load the app's bundled fonts (Glance `TextStyle` has no custom
+      `FontFamily`), so none of them draws Arabic-script text today; the Hijri widgets show the
+      Latin month name. A widget that adds Arabic must accept the system face and say so.
 - **Theme entry:** `NimazTheme { ... }` wraps the app in `MainActivity`; it supplies the
   Material 3 color scheme, `NimazTypography`, and shapes, and honors `ThemeMode`. It also
   provides the appearance CompositionLocals (`LocalIsDarkTheme`, `LocalHapticEnabled`,
@@ -1233,7 +1256,10 @@ with no label and a touch target under 48dp fail the lane we already run. It can
     - a minus/value/plus number control is `NimazNumberStepper(value, onValueChange, variant = …,
       size = …, type = …)` (`components/molecules/NimazNumberStepper.kt`), **not** a hand-rolled
       row of `IconButton`s around a `Text`. `variant` is the layout: `INLINE` (a `label` on the
-      left + compact grouped controls — the settings-row look) or `SPREAD` (full-width tonal card,
+      left + compact grouped controls — the settings-row look; when the label will not fit beside
+      the controls on one line, the controls drop to the line below it, aligned to the end, rather
+      than being clipped — so do not wrap an `INLINE` stepper in your own `Row` with a label) or
+      `SPREAD` (full-width tonal card,
       edge buttons, large centred value — the tasbih target-dial look; `label` is ignored).
       `size` (`SMALL`/`MEDIUM`/`LARGE`) scales the buttons and value typography; `type`
       (`DEFAULT`/`ACCENT`) sets the value colour (`ACCENT` = `NimazColors.TasbihColors.Milestone`).
@@ -1776,7 +1802,8 @@ Two Latin faces, split by what the text *does* — not by size:
 | `body*` | **Plus Jakarta Sans** | Wider apertures, easier in continuous prose. |
 
 Arabic keeps its own families (`AmiriFontFamily`, `ScheherazadeFontFamily`, `IndoPakFontFamily`,
-`NotoNastaliqUrduFontFamily`) — see `ArabicTextStyles`.
+`NotoNastaliqUrduFontFamily`) — see `ArabicTextStyles`, and the Arabic-script rule in §8 for which
+component or style helper each kind of Arabic or Urdu text goes through.
 
 **Both Latin faces are variable fonts, and a variable font does not respond to `FontWeight` on its
 own.** Declaring the same file once per weight registers entries that all resolve to the file's

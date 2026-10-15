@@ -6,6 +6,7 @@ import com.arshadshah.nimaz.core.monitoring.Telemetry
 import com.arshadshah.nimaz.core.monitoring.launchSafely
 import com.arshadshah.nimaz.core.common.DefaultDispatcher
 import com.arshadshah.nimaz.domain.model.QuranTopic
+import com.arshadshah.nimaz.domain.model.QuranTranslation
 import com.arshadshah.nimaz.domain.model.TopicCatalog
 import com.arshadshah.nimaz.domain.model.TopicCitation
 import com.arshadshah.nimaz.domain.model.TopicTree
@@ -379,21 +380,24 @@ class QuranTopicsViewModel @Inject constructor(
                 }
             }
 
-            val previews = previewsFor(detail.citations.map { it.ayahId })
+            val translatorId = quranSettings.quranTranslatorId.first()
+            val previews = previewsFor(detail.citations.map { it.ayahId }, translatorId)
             if (previews.isNotEmpty()) {
                 _detailState.update { state ->
                     // The reader may have opened a different topic while this was in flight;
                     // previews keyed to the previous one must not land on top of it.
                     if (state.detail?.topic?.id != topicId) state
-                    else state.copy(previews = previews)
+                    else state.copy(
+                        previews = previews,
+                        previewLanguage = QuranTranslation.fromId(translatorId).language,
+                    )
                 }
             }
         }
     }
 
-    private suspend fun previewsFor(ayahIds: List<Int>): Map<Int, String> {
+    private suspend fun previewsFor(ayahIds: List<Int>, translatorId: String): Map<Int, String> {
         if (ayahIds.isEmpty()) return emptyMap()
-        val translatorId = quranSettings.quranTranslatorId.first()
         return runCatching {
             quranUseCases.getAyahTranslation.forAyahs(ayahIds, translatorId)
         }.getOrDefault(emptyMap())

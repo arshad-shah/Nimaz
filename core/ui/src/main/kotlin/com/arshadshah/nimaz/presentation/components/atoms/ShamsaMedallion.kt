@@ -26,6 +26,7 @@ import com.arshadshah.nimaz.presentation.foundation.geometry.diamondPath
 import com.arshadshah.nimaz.presentation.foundation.geometry.scallopPath
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
+import com.arshadshah.nimaz.presentation.theme.asArabicLabel
 
 /**
  * A 12-lobe shamsa medallion with a number at its centre — the same ornament
@@ -67,7 +68,8 @@ fun ShamsaMedallion(
         Text(
             text = label,
             color = numberColor,
-            style = numberStyle,
+            // Arabic-Indic digits are Arabic script, which the Latin faces cannot draw.
+            style = if (useArabicIndicNumerals) numberStyle.asArabicLabel() else numberStyle,
             fontWeight = FontWeight.SemiBold,
         )
     }

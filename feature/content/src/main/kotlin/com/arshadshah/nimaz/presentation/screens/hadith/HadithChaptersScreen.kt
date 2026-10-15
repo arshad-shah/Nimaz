@@ -50,6 +50,7 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazErrorDefaults
 import com.arshadshah.nimaz.presentation.components.molecules.NimazErrorState
 import com.arshadshah.nimaz.presentation.components.molecules.NimazLoadingState
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
+import com.arshadshah.nimaz.presentation.theme.asArabicLabel
 import com.arshadshah.nimaz.presentation.viewmodel.content.HadithEvent
 import com.arshadshah.nimaz.presentation.viewmodel.content.HadithViewModel
 import com.arshadshah.nimaz.presentation.components.molecules.NimazScrollbarBox
@@ -76,6 +77,7 @@ fun HadithChaptersScreen(
             NimazBackTopAppBar(
                 title = state.book?.nameEnglish ?: stringResource(R.string.hadith_chapters_title),
                 subtitle = state.book?.nameArabic,
+                subtitleStyle = MaterialTheme.typography.bodySmall.asArabicLabel(),
                 onBackClick = onNavigateBack,
                 scrollBehavior = scrollBehavior
             )

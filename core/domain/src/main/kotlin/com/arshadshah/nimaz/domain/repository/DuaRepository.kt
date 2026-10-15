@@ -6,6 +6,7 @@ import com.arshadshah.nimaz.domain.model.DuaCategory
 import com.arshadshah.nimaz.domain.model.DuaOccasion
 import com.arshadshah.nimaz.domain.model.DuaProgress
 import com.arshadshah.nimaz.domain.model.DuaSearchResult
+import com.arshadshah.nimaz.domain.search.SearchMatch
 import kotlinx.coroutines.flow.Flow
 
 interface DuaRepository {
@@ -23,7 +24,10 @@ interface DuaRepository {
     fun getDuasByOccasion(occasion: DuaOccasion): Flow<List<Dua>>
 
     // Search operations
-    fun searchDuas(query: String): Flow<List<DuaSearchResult>>
+    fun searchDuas(
+        query: String,
+        match: SearchMatch = SearchMatch.AUTO,
+    ): Flow<List<DuaSearchResult>>
 
     // Bookmark operations
     fun getAllBookmarks(): Flow<List<DuaBookmark>>

@@ -11,6 +11,7 @@ import androidx.compose.material.icons.filled.AccountTree
 import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.SearchOff
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -35,6 +36,7 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuItem
 import com.arshadshah.nimaz.presentation.components.molecules.NimazTreeRow
 import com.arshadshah.nimaz.presentation.components.organisms.NimazSearchBar
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
+import com.arshadshah.nimaz.presentation.theme.asArabicLabel
 import com.arshadshah.nimaz.presentation.viewmodel.quran.QuranTopicsEvent
 import com.arshadshah.nimaz.presentation.viewmodel.quran.QuranTopicsViewModel
 import com.arshadshah.nimaz.presentation.components.molecules.NimazScrollbarBox
@@ -188,6 +190,7 @@ private fun SubjectList(
                 NimazTreeRow(
                     label = subject.topic.name,
                     secondaryLabel = subject.topic.arabicName.takeIf { it.isNotBlank() },
+                    secondaryLabelStyle = MaterialTheme.typography.bodyMedium.asArabicLabel(),
                     supportingText = reachLabel(subject),
                     badgeText = subject.versesInSurah.toString(),
                     // The tree the subject actually sits in, not the tab that happened to be

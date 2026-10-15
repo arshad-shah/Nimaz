@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.presentation.screens.hadith
 
+import androidx.compose.runtime.remember
 import com.arshadshah.nimaz.presentation.components.molecules.hadithGradeDisplay
 import com.arshadshah.nimaz.presentation.components.molecules.HadithGradeChip
 import android.annotation.SuppressLint
@@ -48,7 +49,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -440,9 +440,12 @@ private fun ChainOfNarrationSection(
                                 )
                                 Text(
                                     text = narrator,
+                                    // Same leading as the single-line chain below: bodySmall's
+                                    // 16sp line box clips Arabic harakat at this size.
                                     style = MaterialTheme.typography.bodySmall.copy(
                                         fontFamily = arabicFontFamily,
-                                        textDirection = TextDirection.Rtl
+                                        textDirection = TextDirection.Rtl,
+                                        lineHeight = 26.sp
                                     ),
                                     fontWeight = FontWeight.Medium,
                                     color = MaterialTheme.colorScheme.onSurface,

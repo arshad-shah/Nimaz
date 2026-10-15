@@ -55,6 +55,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -68,7 +69,11 @@ import com.arshadshah.nimaz.domain.model.ContentTarget
 import com.arshadshah.nimaz.domain.model.NameCatalog
 import com.arshadshah.nimaz.domain.model.Proof
 import com.arshadshah.nimaz.domain.model.ProofSource
+import com.arshadshah.nimaz.domain.model.TranslationLanguage
 import com.arshadshah.nimaz.domain.model.UnifiedSearchResult
+import com.arshadshah.nimaz.domain.search.ArabicSearchNormaliser
+import com.arshadshah.nimaz.domain.search.isArabicScript
+import com.arshadshah.nimaz.domain.search.looksLikeUrdu
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
@@ -97,6 +102,8 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazLoadingState
 import com.arshadshah.nimaz.presentation.components.molecules.NimazLoadingVariant
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.components.organisms.NimazSearchBar
+import com.arshadshah.nimaz.presentation.theme.asArabicLabel
+import com.arshadshah.nimaz.presentation.theme.asTranslationText
 import com.arshadshah.nimaz.presentation.viewmodel.ai.AskEvent
 import com.arshadshah.nimaz.presentation.viewmodel.ai.AskPhase
 import com.arshadshah.nimaz.presentation.viewmodel.ai.AskViewModel
@@ -712,6 +719,8 @@ private fun UnifiedResultCard(
             type = stringResource(nameCatalogLabel(result.result.catalog)),
             title = result.result.transliteration.ifBlank { result.result.english },
             subtitle = result.result.arabic,
+            // The Arabic name, in a face that has the glyphs for it.
+            subtitleStyle = MaterialTheme.typography.labelSmall.asArabicLabel(),
             highlightedText = result.result.meaning,
             query = query,
             onClick = { onNavigateToName(result.result.catalog, result.result.id) },
@@ -857,7 +866,8 @@ private fun SearchResultCard(
     query: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    cited: Boolean = false
+    cited: Boolean = false,
+    subtitleStyle: TextStyle = MaterialTheme.typography.labelSmall,
 ) {
     NimazCard(
         style = NimazCardStyle.FILLED,
@@ -935,7 +945,7 @@ private fun SearchResultCard(
                     if (subtitle != null) {
                         Text(
                             text = subtitle,
-                            style = MaterialTheme.typography.labelSmall,
+                            style = subtitleStyle,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
@@ -954,55 +964,78 @@ private fun SearchResultCard(
     }
 }
 
+/**
+ * A result's matched text with every query word highlighted — and starting near the first one.
+ *
+ * Three things the old version got wrong, each of which made a correct result look like a
+ * wrong one:
+ *  - **It only found the whole query, as typed.** "patience hardship" highlighted nothing in a
+ *    verse with both words apart, and a plain-typed الله never matches the vowelled ٱللَّهُ in
+ *    the text. Matching now goes through the same folding and word forms as the index
+ *    ([ArabicSearchNormaliser.highlightRanges]), so what is highlighted is what matched.
+ *  - **It always showed the start.** With two lines visible, a match in the third sentence of
+ *    a long hadith was never on screen. The snippet now opens a little before the first hit.
+ *  - **It drew Arabic and Urdu in the Latin body face**, which has none of their glyphs. The
+ *    face now follows the script of the text.
+ */
 @Composable
 private fun HighlightedText(
     text: String,
     query: String,
-    style: androidx.compose.ui.text.TextStyle,
+    style: TextStyle,
     maxLines: Int = Int.MAX_VALUE
 ) {
-    // Nothing to highlight (and indexOf("") would loop forever) — plain text.
-    if (query.isBlank()) {
-        Text(
-            text = text,
-            style = style,
-            maxLines = maxLines,
-            overflow = TextOverflow.Ellipsis,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        return
+    val scriptStyle = when {
+        text.none { it.isArabicScript() } -> style
+        looksLikeUrdu(text) -> style.asTranslationText(TranslationLanguage.URDU)
+        else -> style.asArabicLabel()
     }
-
-    val annotatedString = buildAnnotatedString {
-        val lowerText = text.lowercase()
-        val lowerQuery = query.lowercase()
-        var startIndex = 0
-
-        while (true) {
-            val index = lowerText.indexOf(lowerQuery, startIndex)
-            if (index < 0) {
-                append(text.substring(startIndex))
-                break
+    val highlight = SpanStyle(
+        fontWeight = FontWeight.Bold,
+        background = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
+    )
+    val annotated = remember(text, query, highlight) {
+        val ranges = ArabicSearchNormaliser.highlightRanges(text, query)
+        val from = snippetStart(text, ranges.firstOrNull()?.first ?: 0, maxLines)
+        buildAnnotatedString {
+            if (from > 0) append("… ")
+            var cursor = from
+            for (range in ranges) {
+                if (range.last < from) continue
+                val start = maxOf(range.first, from)
+                append(text.substring(cursor, start))
+                withStyle(highlight) { append(text.substring(start, range.last + 1)) }
+                cursor = range.last + 1
             }
-
-            append(text.substring(startIndex, index))
-            withStyle(
-                SpanStyle(
-                    fontWeight = FontWeight.Bold,
-                    background = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
-                )
-            ) {
-                append(text.substring(index, index + query.length))
-            }
-            startIndex = index + query.length
+            append(text.substring(cursor))
         }
     }
 
     Text(
-        text = annotatedString,
-        style = style,
+        text = annotated,
+        style = scriptStyle,
         maxLines = maxLines,
         overflow = TextOverflow.Ellipsis,
         color = MaterialTheme.colorScheme.onSurfaceVariant
     )
 }
+
+/**
+ * Where to start showing [text] so that a hit at [firstHit] is on screen in [maxLines] lines.
+ *
+ * Only moves when the hit would otherwise be past roughly what two lines hold, and then backs
+ * up to a word start about [SNIPPET_LEAD] characters before it, so the hit reads with its
+ * context rather than as the first word of a fragment.
+ */
+private fun snippetStart(text: String, firstHit: Int, maxLines: Int): Int {
+    if (maxLines == Int.MAX_VALUE || firstHit <= maxLines * CHARS_PER_LINE - SNIPPET_LEAD) return 0
+    var start = (firstHit - SNIPPET_LEAD).coerceAtLeast(0)
+    while (start > 0 && !text[start - 1].isWhitespace()) start--
+    return start
+}
+
+/** A conservative count of characters in one line of a result card's snippet. */
+private const val CHARS_PER_LINE = 45
+
+/** How much context to keep in front of the first highlighted word. */
+private const val SNIPPET_LEAD = 30

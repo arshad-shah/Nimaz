@@ -1104,9 +1104,28 @@ The index is **compiled into the content artifact** by `nimaz-data`'s build, nev
   sync`). `search_meta.fold_version` is checked at runtime; a mismatch makes the app refuse the
   index rather than under-match silently.
 - **Reading it.** `data/local/search/ContentSearchIndex` is the only reader, via `@RawQuery`. The
-  query shape matters: `WHERE d.docid IN (SELECT docid FROM search_index WHERE … MATCH ?)` takes
-  0.6 ms where the equivalent `JOIN` takes 595 ms, because the join lets SQLite drive from
-  `search_docs` and interrogate a contentless index one docid at a time.
+  query shape matters: never a `JOIN` between `search_index` and `search_docs`, because the join
+  lets SQLite drive from `search_docs` and interrogate a contentless index one docid at a time
+  (1.8 s for a 76-hit word, measured on data-v10). The kind filter is a `docid IN (SELECT …
+  FROM search_docs …)` subquery instead.
+- **Ranked, then capped.** `hits()` asks for every match (up to `MAX_CANDIDATES`, 6,000) with its
+  `matchinfo(search_index, 'pcx')` blob, scores each one in `MatchScore` — BM25's saturating term
+  frequency times inverse document frequency — and only then keeps the best `limit`, looking their
+  keys up in `search_docs` by docid. It used to keep the *first* 400 in index order, which for a
+  common word meant book order: "prayer" has 4,817 hadith hits and every one shown was Bukhari.
+  The artifact is built with `matchinfo=fts3`, which stores no document lengths, so this is not
+  full BM25 and a long text is not penalised for its length; dropping that option in nimaz-data
+  is the next step. Measured on data-v10 (desktop): 3–47 ms per query, against 2–18 ms for the
+  old capped one. The by-ids DAO lookups that follow sort by book or id, so the repositories put
+  the ranking back with `inOrderOf`.
+- **Word forms and synonyms are query-side.** FTS4 on Android has no stemmer, so
+  `domain/search/SearchTermExpander` widens each query word into prefixes instead: a trimmed
+  ending (`prayers` → `prayer*`, `fasting` → `fast*`) and a small hand-kept list of Islamic terms
+  (`salah`/`salat`/`namaz`/`prayer`, …), OR-ed into the MATCH expression. It only ever widens.
+  `SearchMatch.ALL_WORDS` asks for every word in any order, which `SearchLibraryUseCase` uses as
+  the tier between the exact phrase and single words. Highlighting in the results
+  (`ArabicSearchNormaliser.highlightRanges`) goes through the same folding and prefixes, so what
+  is highlighted is what matched — including a plain-typed word inside vowelled Arabic.
 - **The `LIKE` queries stay, and are not dead code.** `createFromAsset` copies the artifact
   **once**, so an install made before the index shipped has no index and cannot get one without a
   reinstall. `QuranRepositoryImpl`, `HadithRepositoryImpl` and `DuaRepositoryImpl` ask

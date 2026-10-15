@@ -19,6 +19,7 @@ import com.arshadshah.nimaz.domain.model.SurahWithAyahs
 import com.arshadshah.nimaz.domain.model.TopicDetail
 import com.arshadshah.nimaz.domain.model.TopicTree
 import com.arshadshah.nimaz.domain.model.Translator
+import com.arshadshah.nimaz.domain.search.SearchMatch
 import kotlinx.coroutines.flow.Flow
 
 interface QuranRepository {
@@ -26,7 +27,7 @@ interface QuranRepository {
     fun getAllSurahs(): Flow<List<Surah>>
     suspend fun getSurahByNumber(surahNumber: Int): Surah?
     fun getSurahsByRevelationType(type: RevelationType): Flow<List<Surah>>
-    fun searchSurahs(query: String): Flow<List<Surah>>
+    fun searchSurahs(query: String, match: SearchMatch = SearchMatch.AUTO): Flow<List<Surah>>
 
     // Ayah operations
     fun getAyahsBySurah(surahNumber: Int): Flow<List<Ayah>>
@@ -71,7 +72,11 @@ interface QuranRepository {
     fun getTranslationsForAyahs(ayahIds: List<Int>, translatorId: String): Flow<Map<Int, String>>
 
     // Search operations
-    fun searchQuran(query: String, translatorId: String?): Flow<List<QuranSearchResult>>
+    fun searchQuran(
+        query: String,
+        translatorId: String?,
+        match: SearchMatch = SearchMatch.AUTO,
+    ): Flow<List<QuranSearchResult>>
 
     // Bookmark operations
     fun getAllBookmarks(): Flow<List<QuranBookmark>>

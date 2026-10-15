@@ -20,6 +20,7 @@ import com.arshadshah.nimaz.domain.model.KhatamStatus
 import com.arshadshah.nimaz.domain.model.MushafPagination
 import com.arshadshah.nimaz.domain.model.MushafScript
 import com.arshadshah.nimaz.domain.model.QuranBookmark
+import com.arshadshah.nimaz.domain.model.QuranTranslation
 import com.arshadshah.nimaz.domain.model.SurahInfo
 import com.arshadshah.nimaz.domain.repository.settings.QuranPreferences
 import com.arshadshah.nimaz.domain.usecase.KhatamUseCases
@@ -656,7 +657,12 @@ class QuranViewModel @Inject constructor(
             val translatorId = translatorId()
             val epochDay = todayProvider.today().toEpochDay()
             val verse = quranUseCases.getVerseOfTheDay(epochDay, translatorId)
-            _homeState.update { it.copy(verseOfTheDay = verse) }
+            _homeState.update {
+                it.copy(
+                    verseOfTheDay = verse,
+                    verseOfTheDayLanguage = QuranTranslation.fromId(translatorId).language,
+                )
+            }
         }
     }
 

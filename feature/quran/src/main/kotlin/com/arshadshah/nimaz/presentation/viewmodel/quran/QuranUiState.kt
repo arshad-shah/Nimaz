@@ -25,6 +25,12 @@ data class QuranHomeUiState(
     val khatamReadAyahIds: Set<Int> = emptySet(),
     val completedKhatamCount: Int = 0,
     val verseOfTheDay: Ayah? = null,
+    /**
+     * Language of the translation [verseOfTheDay] was fetched with, so its line is drawn in the
+     * right face and direction (Urdu is Nastaliq, RTL; see
+     * [com.arshadshah.nimaz.presentation.theme.asTranslationText]).
+     */
+    val verseOfTheDayLanguage: TranslationLanguage = TranslationLanguage.ENGLISH,
     // The active Mushaf edition, so the Page tab's jump-to-page validates against the right
     // page count (604 Uthmani vs 548 IndoPak-16, #270).
     val mushafScript: MushafScript = MushafScript.DEFAULT,

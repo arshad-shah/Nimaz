@@ -22,6 +22,7 @@ import com.arshadshah.nimaz.domain.model.TopicTree
 import com.arshadshah.nimaz.domain.model.SurahWithAyahs
 import com.arshadshah.nimaz.domain.model.Translator
 import com.arshadshah.nimaz.domain.repository.QuranRepository
+import com.arshadshah.nimaz.domain.search.SearchMatch
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import javax.inject.Inject
@@ -34,7 +35,8 @@ class GetSurahListUseCase @Inject constructor(
     fun byRevelationType(type: RevelationType): Flow<List<Surah>> =
         repository.getSurahsByRevelationType(type)
 
-    fun search(query: String): Flow<List<Surah>> = repository.searchSurahs(query)
+    fun search(query: String, match: SearchMatch = SearchMatch.AUTO): Flow<List<Surah>> =
+        repository.searchSurahs(query, match)
 }
 
 class GetSurahWithAyahsUseCase @Inject constructor(
@@ -82,9 +84,10 @@ class SearchQuranUseCase @Inject constructor(
 ) {
     operator fun invoke(
         query: String,
-        translatorId: String? = null
+        translatorId: String? = null,
+        match: SearchMatch = SearchMatch.AUTO,
     ): Flow<List<QuranSearchResult>> =
-        repository.searchQuran(query, translatorId)
+        repository.searchQuran(query, translatorId, match)
 }
 
 class GetAvailableTranslatorsUseCase @Inject constructor(

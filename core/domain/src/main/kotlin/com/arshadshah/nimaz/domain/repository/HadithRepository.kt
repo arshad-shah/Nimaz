@@ -6,6 +6,7 @@ import com.arshadshah.nimaz.domain.model.HadithBookmark
 import com.arshadshah.nimaz.domain.model.HadithChapter
 import com.arshadshah.nimaz.domain.model.HadithGrade
 import com.arshadshah.nimaz.domain.model.HadithSearchResult
+import com.arshadshah.nimaz.domain.search.SearchMatch
 import kotlinx.coroutines.flow.Flow
 
 interface HadithRepository {
@@ -39,7 +40,10 @@ interface HadithRepository {
     fun getHadithsByGrade(grade: HadithGrade): Flow<List<Hadith>>
 
     // Search operations
-    fun searchHadiths(query: String): Flow<List<HadithSearchResult>>
+    fun searchHadiths(
+        query: String,
+        match: SearchMatch = SearchMatch.AUTO,
+    ): Flow<List<HadithSearchResult>>
     fun searchHadithsInBook(bookId: String, query: String): Flow<List<HadithSearchResult>>
 
     // Bookmark operations

@@ -16,6 +16,8 @@ import com.arshadshah.nimaz.domain.model.HadithChapter
 import com.arshadshah.nimaz.domain.model.HadithGrade
 import com.arshadshah.nimaz.domain.model.HadithSearchResult
 import com.arshadshah.nimaz.domain.repository.HadithRepository
+import com.arshadshah.nimaz.domain.search.SearchMatch
+import com.arshadshah.nimaz.domain.search.isArabicScript
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.emitAll
@@ -159,14 +161,21 @@ class HadithRepositoryImpl @Inject constructor(
      * the index shipped keep the scan; everyone else gets 34,532 hadith folded into an
      * index that answers in under a millisecond.
      */
-    override fun searchHadiths(query: String): Flow<List<HadithSearchResult>> {
+    override fun searchHadiths(query: String, match: SearchMatch): Flow<List<HadithSearchResult>> {
+        // An Arabic query matched the Arabic matn, so that is the text to show it against.
+        val arabicQuery = query.any { it.isArabicScript() }
         return combine(
             hadithDao.getAllBooks(),
             flow {
                 if (searchIndex.isAvailable()) {
-                    val ids = searchIndex.refs(query, SearchKind.HADITH)
+                    val ids = searchIndex.refs(query, SearchKind.HADITH, match = match)
                         .mapNotNull(String::toIntOrNull)
-                    emit(hadithDao.getHadithsByIds(ids))
+                    // `getHadithsByIds` sorts by book; the index ranked across all six.
+                    emit(hadithDao.getHadithsByIds(ids).inOrderOf(ids) { it.id })
+                } else if (match == SearchMatch.ALL_WORDS) {
+                    // A substring scan has no every-word question to answer; the phrase pass
+                    // already asked the one it can.
+                    emit(emptyList())
                 } else {
                     emitAll(hadithDao.searchHadiths(query))
                 }
@@ -180,7 +189,11 @@ class HadithRepositoryImpl @Inject constructor(
                     hadith = hadith.toDomain(),
                     bookName = bookMap[hadith.bookId] ?: "Book ${hadith.bookId}",
                     chapterName = "Chapter ${hadith.chapterId}",
-                    matchedText = hadith.textEnglish
+                    matchedText = if (arabicQuery && hadith.textArabic.isNotBlank()) {
+                        hadith.textArabic
+                    } else {
+                        hadith.textEnglish
+                    }
                 )
             }
         }
