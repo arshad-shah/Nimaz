@@ -43,6 +43,7 @@ import com.arshadshah.nimaz.domain.model.TopicDetail
 import com.arshadshah.nimaz.domain.model.TopicTree
 import com.arshadshah.nimaz.domain.model.Translator
 import com.arshadshah.nimaz.domain.repository.QuranRepository
+import com.arshadshah.nimaz.domain.search.SearchMatch
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.emitAll
@@ -105,15 +106,20 @@ class QuranRepositoryImpl @Inject constructor(
         return quranDao.getSurahsByRevelationType(typeString).mapItems { it.toDomain() }
     }
 
-    override fun searchSurahs(query: String): Flow<List<Surah>> {
+    override fun searchSurahs(query: String, match: SearchMatch): Flow<List<Surah>> {
         // The index carries the Arabic name too, which the `LIKE` below never could reach:
         // سورة الفاتحة is stored with its marks and nobody types them.
         return flow {
             if (searchIndex.isAvailable()) {
-                val numbers = searchIndex.refs(query, SearchKind.SURAH)
+                val numbers = searchIndex.refs(query, SearchKind.SURAH, match = match)
                     .mapNotNull(String::toIntOrNull)
                     .distinct()
-                emit(quranDao.getSurahsByNumbers(numbers).map { it.toDomain() })
+                // The index ranks; `getSurahsByNumbers` sorts by number. Put the rank back.
+                emit(quranDao.getSurahsByNumbers(numbers).map { it.toDomain() }.inOrderOf(numbers) { it.number })
+            } else if (match == SearchMatch.ALL_WORDS) {
+                // The scan can only ask for a contiguous substring, which is the phrase pass's
+                // question; answering it again here would only double-count the phrase hits.
+                emit(emptyList())
             } else {
                 emitAll(quranDao.searchSurahs(query).mapItems { it.toDomain() })
             }
@@ -312,14 +318,23 @@ class QuranRepositoryImpl @Inject constructor(
         )
     }
 
-    override fun searchQuran(query: String, translatorId: String?): Flow<List<QuranSearchResult>> {
+    override fun searchQuran(
+        query: String,
+        translatorId: String?,
+        match: SearchMatch,
+    ): Flow<List<QuranSearchResult>> {
         return flow {
             // Get all surahs for name lookup
             val surahs = quranDao.getAllSurahs().first()
             val surahMap = surahs.associate { it.id to it.nameEnglish }
 
             if (searchIndex.isAvailable()) {
-                emit(searchQuranByIndex(query, translatorId, surahMap))
+                emit(searchQuranByIndex(query, translatorId, surahMap, match))
+                return@flow
+            }
+            // See searchSurahs: the scan has no every-word question to answer.
+            if (match == SearchMatch.ALL_WORDS) {
+                emit(emptyList())
                 return@flow
             }
 
@@ -366,9 +381,14 @@ class QuranRepositoryImpl @Inject constructor(
         query: String,
         translatorId: String?,
         surahMap: Map<Int, String>,
+        match: SearchMatch,
     ): List<QuranSearchResult> {
-        val arabicIds = searchIndex.refs(query, SearchKind.QURAN).mapNotNull(String::toIntOrNull)
-        val arabicResults = quranDao.getAyahsWithTextByIds(arabicIds).map { ayah ->
+        // Two scripts (Uthmani and simple) index the same ayah, so an id can come back twice.
+        val arabicIds = searchIndex.refs(query, SearchKind.QURAN, match = match)
+            .mapNotNull(String::toIntOrNull)
+            .distinct()
+        // Every lookup below sorts by id; `inOrderOf` puts the index's ranking back.
+        val arabicResults = quranDao.getAyahsWithTextByIds(arabicIds).inOrderOf(arabicIds) { it.ayah.id }.map { ayah ->
             QuranSearchResult(
                 ayah = ayah.toDomain(),
                 surahName = surahMap[ayah.ayah.surahId] ?: "Surah ${ayah.ayah.surahId}",
@@ -382,10 +402,10 @@ class QuranRepositoryImpl @Inject constructor(
             // Narrowed by `source`, so a hit in the Bengali translation cannot surface
             // for a reader who has Sahih International selected. All fifteen are indexed.
             val ids = searchIndex
-                .refs(query, SearchKind.TRANSLATION, source = translatorKey)
+                .refs(query, SearchKind.TRANSLATION, source = translatorKey, match = match)
                 .mapNotNull(String::toIntOrNull)
             val ayahs = quranDao.getAyahsWithTextByIds(ids).associateBy { it.ayah.id }
-            quranDao.getTranslationsByAyahIds(ids, translatorKey).mapNotNull { translation ->
+            quranDao.getTranslationsByAyahIds(ids, translatorKey).inOrderOf(ids) { it.ayahId }.mapNotNull { translation ->
                 ayahs[translation.ayahId]?.let { ayah ->
                     QuranSearchResult(
                         ayah = ayah.toDomain(),

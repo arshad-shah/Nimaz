@@ -105,24 +105,99 @@ object ArabicSearchNormaliser {
      * outranks one that matched two of its words. That only works if the two passes ask
      * different questions, which is what this does:
      *
-     *  - **one word** → `word*`, a prefix term. There is no stemmer here, and the prefix
-     *    is what lets `rahman` reach the transliterated `ar-rahmani` and what makes a
-     *    half-typed word behave the way a search box is expected to.
+     *  - **one word** → `word*`, a prefix term, widened by [SearchTermExpander] to the
+     *    word's base and its synonyms: `prayers` → `prayer*`, `salah` →
+     *    `salah* OR salat* OR …`. There is no stemmer in the index, and the prefix is what
+     *    lets `rahman` reach the transliterated `ar-rahmani` and what makes a half-typed
+     *    word behave the way a search box is expected to.
      *  - **several words** → `"a b c"`, an FTS phrase: those words, adjacent, in that
      *    order. This is the same question `LIKE '%a b c%'` asked and the reason the
      *    phrase bonus means anything. OR-ing the terms here instead would give every
      *    single-word hit the phrase score and flatten the ranking to noise.
+     *  - **[SearchMatch.ALL_WORDS]** → every word, each widened as above, ANDed:
+     *    `patience* OR sabr* hardship*`. FTS binds `OR` tighter than the implicit AND, so
+     *    that reads as "(patience or sabr) and hardship" with no parentheses — which
+     *    matters, because Android's FTS uses the standard query syntax, where parentheses
+     *    are not available.
      *
      * Returns "" when the query has no searchable content; callers must treat that as
      * "no query" rather than passing it to `MATCH`, which throws on an empty expression.
      */
-    fun matchExpression(query: String?): String {
+    fun matchExpression(query: String?, match: SearchMatch = SearchMatch.AUTO): String {
         val terms = tokens(query)
-        return when (terms.size) {
-            0 -> ""
-            1 -> "${terms[0]}*"
+        if (terms.isEmpty()) return ""
+        return when {
+            match == SearchMatch.ALL_WORDS -> terms.distinct().joinToString(" ") { anyForm(it) }
+            terms.size == 1 -> anyForm(terms[0])
             else -> terms.joinToString(separator = " ", prefix = "\"", postfix = "\"")
         }
+    }
+
+    /** One folded word as `a* OR b* OR …` — every prefix [SearchTermExpander] allows. */
+    private fun anyForm(term: String): String =
+        SearchTermExpander.prefixes(term).joinToString(" OR ") { "$it*" }
+
+    /**
+     * Where the words of [query] occur in [text], as ranges of [text] itself — for
+     * highlighting a result.
+     *
+     * Matching is done on the *folded* text, so a plain-typed الله highlights the fully
+     * vowelled ٱللَّهُ, and `prayers` highlights "prayer" and "Salat" the same way the index
+     * matched them. Each hit starts at a word start and runs to the end of that word, which
+     * is what a prefix match means. Ranges are sorted and do not overlap.
+     */
+    fun highlightRanges(text: String, query: String?): List<IntRange> {
+        if (text.isEmpty()) return emptyList()
+        val words = tokens(query)
+        // In a multi-word query, "in" and "the" are glue, not what was searched for.
+        val significant = if (words.size < 2) words else words.filter {
+            it.length > 2 && it !in SearchTermExpander.STOPWORDS
+        }
+        val prefixes = significant.flatMap { SearchTermExpander.prefixes(it) }.distinct()
+        if (prefixes.isEmpty()) return emptyList()
+
+        val (folded, origin) = foldWithOrigins(text)
+        val hits = mutableListOf<IntRange>()
+        var i = 0
+        while (i < folded.length) {
+            val atWordStart = folded[i].isLetterOrDigit() &&
+                (i == 0 || !folded[i - 1].isLetterOrDigit())
+            if (atWordStart && prefixes.any { folded.startsWith(it, i) }) {
+                var end = i
+                while (end < folded.length && folded[end].isLetterOrDigit()) end++
+                val start = origin[i]
+                // Run to just before whatever folded character follows the word, so the
+                // marks riding on its last letter (dropped by the fold) stay inside it.
+                val last = if (end < folded.length) origin[end] - 1 else text.lastIndex
+                hits += start..last.coerceAtLeast(start)
+                i = end
+            } else {
+                i++
+            }
+        }
+        return hits
+    }
+
+    /**
+     * [fold] without the whitespace collapse, remembering for every folded character the
+     * index in [text] it came from. Kept beside [fold] so the two share one folding table;
+     * it is not used to build or query the index, only to map a match back onto the text.
+     */
+    private fun foldWithOrigins(text: String): Pair<String, IntArray> {
+        val out = StringBuilder(text.length)
+        val origins = ArrayList<Int>(text.length)
+        for ((index, original) in text.withIndex()) {
+            val decomposed = Normalizer.normalize(original.toString(), Normalizer.Form.NFD)
+            for (char in decomposed) {
+                if (isDropped(char)) continue
+                val mapped = (LETTERS[char] ?: DIGITS[char] ?: char).toString().lowercase()
+                for (c in mapped) {
+                    out.append(c)
+                    origins += index
+                }
+            }
+        }
+        return out.toString() to origins.toIntArray()
     }
 
     // --- the folding table ----------------------------------------------------------

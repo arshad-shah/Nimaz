@@ -3,6 +3,7 @@ package com.arshadshah.nimaz.data.local.search
 import android.util.Log
 import androidx.sqlite.db.SimpleSQLiteQuery
 import com.arshadshah.nimaz.domain.search.ArabicSearchNormaliser
+import com.arshadshah.nimaz.domain.search.SearchMatch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import javax.inject.Inject
@@ -66,7 +67,7 @@ class ContentSearchIndex @Inject constructor(
     suspend fun isAvailable(): Boolean = status() is Status.Ready
 
     /**
-     * The keys of everything matching [query], for one [kind].
+     * The keys of everything matching [query], for one [kind], **best match first**.
      *
      * Returns an empty list when there is no index, when the query has no searchable
      * content, or when nothing matched — the caller cannot distinguish those and must
@@ -77,16 +78,52 @@ class ContentSearchIndex @Inject constructor(
         kind: SearchKind,
         source: String? = null,
         limit: Int = DEFAULT_LIMIT,
-    ): List<String> = hits(query, kind, source, limit).map { it.ref }
+        match: SearchMatch = SearchMatch.AUTO,
+    ): List<String> = hits(query, kind, source, limit, match).map { it.ref }
 
+    /**
+     * Every match for [query] in one [kind], ranked, and the top [limit] of them.
+     *
+     * ## Why rank here
+     *
+     * This used to return the first [limit] matches in **index order** — book order. For a
+     * common word that was the whole problem: "prayer" has 4,817 hadith hits, the first 400
+     * are all Bukhari, and the other five books never reached the screen however relevant
+     * they were. Everything above this ranked those 400 by how many query words they held,
+     * which for a one-word search is a tie, so the list *was* book order.
+     *
+     * Now every match is scored first and capped after. The score is TF-IDF from FTS4's
+     * `matchinfo(…, 'pcx')`: for each phrase in the expression, how often it occurs in
+     * this document (dampened, so ten mentions are not ten times one) times how rare it is
+     * across the whole index. A verse that says "patience" three times outranks one that
+     * says it once, and a match on a rare word outranks a match on a common one. The
+     * artifact is built with `matchinfo=fts3`, which keeps no document lengths, so this is
+     * not BM25 — a long hadith is not penalised for its length. That would need the
+     * nimaz-data build to drop the option, and is the obvious next step.
+     *
+     * ## Why two queries, and why this shape
+     *
+     * The first query asks the FTS table directly, filtering by kind through
+     * `docid IN (SELECT … FROM search_docs …)`. Measured on the data-v10 artifact, that
+     * costs 3–47 ms for the common-word worst case on a desktop, against 2–18 ms for the old
+     * capped query. A `JOIN` on `search_docs` instead is the shape to avoid: SQLite drives
+     * it from the documents side and asks the contentless index about one docid at a time,
+     * which took 1.8 s for "patience" in hadith — 76 hits — in the same measurement.
+     * The second query looks the top [limit]
+     * docids up in `search_docs` by primary key.
+     *
+     * [MAX_CANDIDATES] bounds the first query for words so common that ranking them is
+     * not worth the time; past it, the extra matches are dropped in index order, as before.
+     */
     suspend fun hits(
         query: String,
         kind: SearchKind,
         source: String? = null,
         limit: Int = DEFAULT_LIMIT,
+        match: SearchMatch = SearchMatch.AUTO,
     ): List<SearchIndexRefRow> {
-        if (status() !is Status.Ready) return emptyList()
-        val expression = ArabicSearchNormaliser.matchExpression(query)
+        val ready = status() as? Status.Ready ?: return emptyList()
+        val expression = ArabicSearchNormaliser.matchExpression(query, match)
         // MATCH throws on an empty expression rather than matching nothing, and a query
         // of nothing but punctuation is a perfectly ordinary thing for a search box to
         // be holding halfway through being typed.
@@ -95,34 +132,47 @@ class ContentSearchIndex @Inject constructor(
         val args = mutableListOf<Any>(expression)
         val filters = StringBuilder()
         args += kind.wire
-        filters.append(" AND d.kind = ?")
+        filters.append("d.kind = ?")
         if (source != null) {
             args += source
             filters.append(" AND d.source = ?")
         }
-        args += limit
+        args += MAX_CANDIDATES
 
         return runCatching {
-            dao.rawRefs(
+            val matches = dao.rawMatches(
                 SimpleSQLiteQuery(
-                    // The subquery is not a style choice. Measured on the real artifact,
-                    // the equivalent `JOIN search_index i ON d.docid = i.docid … MATCH`
-                    // takes 595 ms where this takes 0.6 ms, for the same rows: the join
-                    // lets SQLite drive from `search_docs` and ask the index about one
-                    // docid at a time, which a contentless index cannot answer without
-                    // walking it. Materialising the match list first is the only order
-                    // that works here.
                     """
-                    SELECT d.kind AS kind, d.ref AS ref, d.source AS source
-                    FROM search_docs d
-                    WHERE d.docid IN (
-                        SELECT docid FROM search_index WHERE search_index MATCH ?
-                    )$filters
+                    SELECT docid AS docid, matchinfo(search_index, 'pcx') AS info
+                    FROM search_index
+                    WHERE search_index MATCH ?
+                    AND docid IN (SELECT d.docid FROM search_docs d WHERE $filters)
                     LIMIT ?
                     """.trimIndent(),
                     args.toTypedArray(),
                 )
             )
+            if (matches.isEmpty()) return@runCatching emptyList<SearchIndexRefRow>()
+
+            val documents = ready.documents.coerceAtLeast(1)
+            val top = matches
+                .map { it.docid to MatchScore.of(it.info, documents) }
+                // Ties by docid, so the order is stable from one search to the next.
+                .sortedWith(compareByDescending<Pair<Long, Double>> { it.second }.thenBy { it.first })
+                .take(limit)
+                .map { it.first }
+
+            val placeholders = top.joinToString(",") { "?" }
+            val byDocid = dao.rawDocs(
+                SimpleSQLiteQuery(
+                    "SELECT docid AS docid, kind AS kind, ref AS ref, source AS source " +
+                        "FROM search_docs WHERE docid IN ($placeholders)",
+                    top.toTypedArray(),
+                )
+            ).associateBy { it.docid }
+            top.mapNotNull { docid ->
+                byDocid[docid]?.let { SearchIndexRefRow(kind = it.kind, ref = it.ref, source = it.source) }
+            }
         }.getOrElse { error ->
             // A malformed MATCH expression is the realistic failure — a user typing a
             // quote, say — and it must not take the search screen down with it.
@@ -157,10 +207,18 @@ class ContentSearchIndex @Inject constructor(
         private const val TAG = "ContentSearchIndex"
 
         /**
-         * Bounded because the caller ranks in memory. 400 candidates per kind per term is
-         * far more than any result list shows and still a single index walk.
+         * How many ranked hits a caller gets. The caller merges several passes in memory, and
+         * 400 per kind per pass is far more than any result list shows.
          */
         const val DEFAULT_LIMIT = 400
+
+        /**
+         * How many matches are scored before the best [DEFAULT_LIMIT] are kept. Every word
+         * but the very commonest stays under it ("prayer" in hadith: 4,817; "الله" in the
+         * Qur'an: 3,146); "allah" in the translations (16,626) does not, and is too common
+         * to rank usefully on its own — the phrase and every-word passes do that work.
+         */
+        const val MAX_CANDIDATES = 6000
     }
 }
 

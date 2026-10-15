@@ -7,6 +7,8 @@ import com.arshadshah.nimaz.data.local.user.BookmarkKind
 import com.arshadshah.nimaz.data.local.user.ProgressDao
 import com.arshadshah.nimaz.data.local.user.ProgressEntity
 import com.arshadshah.nimaz.data.local.user.ProgressKind
+import com.arshadshah.nimaz.domain.search.SearchMatch
+import com.arshadshah.nimaz.domain.search.isArabicScript
 import kotlinx.coroutines.flow.map
 import com.arshadshah.nimaz.data.local.database.dao.DuaDao
 import com.arshadshah.nimaz.data.local.database.entity.DuaCategoryEntity
@@ -86,14 +88,19 @@ class DuaRepositoryImpl @Inject constructor(
      * `LIKE`: the Arabic is vocalised and the transliteration is full of macrons and
      * dots. Both are folded into the shipped index.
      */
-    override fun searchDuas(query: String): Flow<List<DuaSearchResult>> = deferredFlow {
+    override fun searchDuas(query: String, match: SearchMatch): Flow<List<DuaSearchResult>> = deferredFlow {
+        // An Arabic query matched the Arabic text, so that is the text to show it against.
+        val arabicQuery = query.any { it.isArabicScript() }
         combine(
             duaDao.getAllCategories(),
             flow {
                 if (searchIndex.isAvailable()) {
-                    val ids = searchIndex.refs(query, SearchKind.DUA)
+                    val ids = searchIndex.refs(query, SearchKind.DUA, match = match)
                         .mapNotNull(String::toIntOrNull)
-                    emit(duaDao.getDuasByIds(ids))
+                    // `getDuasByIds` sorts by id; the index ranked them.
+                    emit(duaDao.getDuasByIds(ids).inOrderOf(ids) { it.id })
+                } else if (match == SearchMatch.ALL_WORDS) {
+                    emit(emptyList())
                 } else {
                     emitAll(duaDao.searchDuas(query))
                 }
@@ -106,7 +113,11 @@ class DuaRepositoryImpl @Inject constructor(
                 DuaSearchResult(
                     dua = dua.toDomain(),
                     categoryName = categoryMap[dua.categoryId] ?: "",
-                    matchedText = dua.translation
+                    matchedText = if (arabicQuery && dua.textArabic.isNotBlank()) {
+                        dua.textArabic
+                    } else {
+                        dua.translation
+                    }
                 )
             }
         }

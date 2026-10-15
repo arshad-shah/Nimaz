@@ -269,12 +269,25 @@ The non-AI search got better too. The DAO queries match one contiguous
 substring (`LIKE '%q%'`), so multi-word queries used to return nothing. The
 use case now:
 
-- always searches the whole phrase (exact hits score highest),
+- always searches the whole phrase (exact hits score highest, 100),
+- for multi-word queries, searches for **every word in any order**
+  (`SearchMatch.ALL_WORDS`, 10) — "patience hardship" finds "be patient in times of
+  hardship", which the phrase cannot reach,
 - additionally tokenizes multi-word queries into significant words (stopwords
-  dropped) and searches each word, ranking records by how many words they
-  match,
-- exposes `byTerms(terms)` — the same union+rank over the AI's related terms,
+  dropped) and searches each word (1 each),
+- breaks ties by the position the index ranked a record at — every list arrives
+  **best match first** (see `SUBSYSTEMS.md` §5, "Ranked, then capped"), not in book order,
+- widens every word to its other endings and synonyms on the way to the index
+  (`SearchTermExpander`: `prayers` → `prayer`, `salah` ↔ `salat` ↔ `prayer`),
+- exposes `byTerms(terms)` — the same union+rank over the AI's related terms (no
+  every-word pass: the AI's terms are alternatives, not one query),
 - dedupes per source, caps results, and keeps the UI responsive.
+
+The results list highlights every matched word through the same folding the index uses,
+so a plain-typed الله highlights inside vowelled text; a long result's snippet starts just
+before its first match; and Arabic or Urdu result text is drawn in a face that has its
+glyphs. An Arabic query is shown against a hadith's or dua's Arabic text rather than its
+translation.
 
 `SearchViewModel` uses it for search-as-you-type, submits, and `ApplyAiTerms`.
 

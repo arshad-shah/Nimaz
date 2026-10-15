@@ -424,7 +424,7 @@ nothing to the merged coverage report (see [above](#two-things-that-silently-do-
 | The content-artifact record | `content/SharedPreferencesContentArtifactStoreTest` | the defaults a fresh install reads, and that all three values survive a new store over the same file |
 | The same release sequence, as logic | `ContentReleaseIntegrationTest` | which component runs when, and what the flag between them means — the ordering that decides whether the installer deletes rows the migrator has not copied yet |
 | Swapping a content collection | `dao/ContentReplacementTest` | delete-children-first / insert-parents-first across the foreign keys; `is_custom` being the only thing that separates a shipped preset from a user's |
-| FTS query assembly | `search/ContentSearchIndexQueryTest` | placeholders and bound arguments staying in step when the optional `source` filter is present; the two paths that must never reach a `MATCH` |
+| FTS query assembly and ranking | `search/ContentSearchIndexQueryTest` | placeholders and bound arguments staying in step when the optional `source` filter is present; the kind filter staying a subquery, never a `JOIN`; matches coming back best first (more hits, rarer words) rather than in index order, and only the kept few looked up; the paths that must never reach a `MATCH` |
 
 ### The reader, on the JVM (`:feature:quran/src/test` and `src/testDebug`)
 

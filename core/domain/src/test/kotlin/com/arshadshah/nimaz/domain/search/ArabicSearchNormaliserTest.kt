@@ -120,8 +120,54 @@ class ArabicSearchNormaliserTest {
         // hand all of them the phrase score, which is a ranking of nothing.
         assertThat(ArabicSearchNormaliser.matchExpression("patience during hardship"))
             .isEqualTo("\"patience during hardship\"")
-        assertThat(ArabicSearchNormaliser.matchExpression("patience"))
-            .isEqualTo("patience*")
+        assertThat(ArabicSearchNormaliser.matchExpression("light"))
+            .isEqualTo("light*")
+    }
+
+    @Test
+    fun `one word reaches its other endings and its synonyms`() {
+        // "prayers*" finds no singular "prayer", which is most of the corpus; the trimmed base
+        // covers both. The synonyms are OR-ed into the same expression.
+        assertThat(ArabicSearchNormaliser.matchExpression("prayers"))
+            .isEqualTo("salah* OR salat* OR namaz* OR prayer* OR salaat*")
+        assertThat(ArabicSearchNormaliser.matchExpression("fasting"))
+            .isEqualTo("fast* OR sawm* OR siyam*")
+    }
+
+    @Test
+    fun `every-word mode ANDs the words, each with its forms`() {
+        // FTS binds OR tighter than the implicit AND, so this is
+        // "(patience or patient or sabr) and hardship" with no parentheses — which Android's
+        // standard query syntax could not parse.
+        assertThat(
+            ArabicSearchNormaliser.matchExpression("patience hardship", SearchMatch.ALL_WORDS)
+        ).isEqualTo("sabr* OR patient* OR patience* hardship*")
+        assertThat(ArabicSearchNormaliser.matchExpression("  ", SearchMatch.ALL_WORDS)).isEmpty()
+    }
+
+    @Test
+    fun `highlighting finds a plain-typed word inside vowelled text`() {
+        val text = "قُلْ هُوَ ٱللَّهُ أَحَدٌ"
+        val ranges = ArabicSearchNormaliser.highlightRanges(text, "الله")
+
+        assertThat(ranges).hasSize(1)
+        // The whole word, marks included, and nothing either side of it.
+        assertThat(text.substring(ranges.single())).isEqualTo("ٱللَّهُ")
+    }
+
+    @Test
+    fun `highlighting marks whole words, every form, and skips glue words`() {
+        val text = "Establish the Salat and be patient in times of hardship."
+        val ranges = ArabicSearchNormaliser.highlightRanges(text, "prayers in hardship")
+
+        assertThat(ranges.map { text.substring(it) })
+            .containsExactly("Salat", "hardship").inOrder()
+    }
+
+    @Test
+    fun `highlighting a query with nothing in it marks nothing`() {
+        assertThat(ArabicSearchNormaliser.highlightRanges("text", "")).isEmpty()
+        assertThat(ArabicSearchNormaliser.highlightRanges("", "word")).isEmpty()
     }
 
     @Test

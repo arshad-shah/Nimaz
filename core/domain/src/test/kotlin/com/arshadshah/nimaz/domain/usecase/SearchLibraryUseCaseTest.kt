@@ -8,6 +8,7 @@ import com.arshadshah.nimaz.domain.model.NameSearchResult
 import com.arshadshah.nimaz.domain.model.QuranSearchResult
 import com.arshadshah.nimaz.domain.model.SearchType
 import com.arshadshah.nimaz.domain.repository.settings.FakeSearchSettings
+import com.arshadshah.nimaz.domain.search.SearchMatch
 import com.google.common.truth.Truth.assertThat
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -42,11 +43,13 @@ class SearchLibraryUseCaseTest {
         every { hadithUseCases.searchHadiths } returns searchHadithsUC
         every { duaUseCases.searchDuas } returns searchDuasUC
 
-        // Default: nothing matches anywhere.
-        every { searchQuranUC.invoke(any(), any()) } returns flowOf(emptyList())
-        every { getSurahListUC.search(any()) } returns flowOf(emptyList())
-        every { searchHadithsUC.invoke(any()) } returns flowOf(emptyList())
-        every { searchDuasUC.invoke(any()) } returns flowOf(emptyList())
+        // Default: nothing matches anywhere, under any match mode. The two-argument stubs in
+        // the tests below fill in the default `SearchMatch.AUTO`, so they answer the phrase
+        // and per-word passes and leave the every-word pass on this empty default.
+        every { searchQuranUC.invoke(any(), any(), any()) } returns flowOf(emptyList())
+        every { getSurahListUC.search(any(), any()) } returns flowOf(emptyList())
+        every { searchHadithsUC.invoke(any(), any()) } returns flowOf(emptyList())
+        every { searchDuasUC.invoke(any(), any()) } returns flowOf(emptyList())
         coEvery { searchNamesUC.invoke(any()) } returns emptyList()
 
         useCase = searchingUnder(FakeSearchSettings())
@@ -103,6 +106,50 @@ class SearchLibraryUseCaseTest {
     }
 
     @Test
+    fun `a record holding every word outranks records holding one, below the exact phrase`() =
+        runTest {
+            val phrase = quranResult(1, 1)
+            val everyWord = quranResult(2, 153) // "patient ... hardship", not adjacent
+            val oneWord = quranResult(3, 200)
+            every { searchQuranUC.invoke("patience hardship", any()) } returns
+                flowOf(listOf(phrase))
+            every {
+                searchQuranUC.invoke("patience hardship", any(), SearchMatch.ALL_WORDS)
+            } returns flowOf(listOf(phrase, everyWord))
+            every { searchQuranUC.invoke("patience", any()) } returns
+                flowOf(listOf(oneWord, everyWord, phrase))
+            every { searchQuranUC.invoke("hardship", any()) } returns flowOf(listOf(oneWord))
+
+            val results = useCase("patience hardship")
+
+            // oneWord collects 2 single-word points; everyWord collects 10 + 1.
+            assertThat(results.quran.map { it.ayah.surahNumber })
+                .containsExactly(1, 2, 3).inOrder()
+        }
+
+    @Test
+    fun `equal scores keep the order the index ranked them in`() = runTest {
+        // Each list arrives best match first. Two records with the same score are ordered by
+        // where the index put them, not by which happened to be seen first.
+        val better = quranResult(9, 1)
+        val worse = quranResult(1, 1)
+        every { searchQuranUC.invoke("patience", any()) } returns flowOf(listOf(better, worse))
+
+        val results = useCase("patience")
+
+        assertThat(results.quran.map { it.ayah.surahNumber }).containsExactly(9, 1).inOrder()
+    }
+
+    @Test
+    fun `byTerms never asks for every term at once`() = runTest {
+        // The AI's related keywords are alternatives, not one query; ANDing them would ask a
+        // question nobody asked.
+        useCase.byTerms(listOf("patience", "sabr", "hardship"))
+
+        verify(exactly = 0) { searchQuranUC.invoke(any(), any(), SearchMatch.ALL_WORDS) }
+    }
+
+    @Test
     fun `single-word query searches only the phrase`() = runTest {
         useCase("patience")
 
@@ -116,7 +163,7 @@ class SearchLibraryUseCaseTest {
         val results = useCase("   ")
 
         assertThat(results.isEmpty).isTrue()
-        verify(exactly = 0) { searchQuranUC.invoke(any(), any()) }
+        verify(exactly = 0) { searchQuranUC.invoke(any(), any(), any()) }
     }
 
     @Test
@@ -164,8 +211,8 @@ class SearchLibraryUseCaseTest {
         // Surah names are part of the Qur'an source, not a source of their own — "search the
         // Qur'an but not its surah names" is not a distinction worth a switch.
         verify(exactly = 1) { getSurahListUC.search("patience") }
-        verify(exactly = 0) { searchHadithsUC.invoke(any()) }
-        verify(exactly = 0) { searchDuasUC.invoke(any()) }
+        verify(exactly = 0) { searchHadithsUC.invoke(any(), any()) }
+        verify(exactly = 0) { searchDuasUC.invoke(any(), any()) }
         coVerify(exactly = 0) { searchNamesUC.invoke(any()) }
     }
 

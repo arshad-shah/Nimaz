@@ -8,6 +8,7 @@ import com.arshadshah.nimaz.domain.model.DuaOccasion
 import com.arshadshah.nimaz.domain.model.DuaProgress
 import com.arshadshah.nimaz.domain.model.DuaSearchResult
 import com.arshadshah.nimaz.domain.repository.DuaRepository
+import com.arshadshah.nimaz.domain.search.SearchMatch
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
@@ -69,7 +70,10 @@ class IsDuaFavoriteUseCase @Inject constructor(private val repository: DuaReposi
 }
 
 class SearchDuasUseCase @Inject constructor(private val repository: DuaRepository) {
-    operator fun invoke(query: String): Flow<List<DuaSearchResult>> = repository.searchDuas(query)
+    operator fun invoke(
+        query: String,
+        match: SearchMatch = SearchMatch.AUTO,
+    ): Flow<List<DuaSearchResult>> = repository.searchDuas(query, match)
 }
 
 class ToggleDuaFavoriteUseCase @Inject constructor(private val repository: DuaRepository) {
